@@ -4,7 +4,6 @@
   "mode": "webworker",
   "version": "0.1.0",
   "api_version": "0.1.0",
-  "createdAt": "Mon Jun 18 2018 21:46:36",
   "url": "/tifFileImporter.html",
   "description": "A plugin for loading tif images.",
   "ui": null,
@@ -168,6 +167,10 @@ class TifFilePlugin {
   }
   async run(my){
     console.log('running in the plugin', my)
+    if(!my.data.file&& !my.data.files){
+        api.showStatus('Error: you need to select your tif file first.')
+        return
+    }
     const file = my.data.file || my.data.files[0]
     const brightness = 0
     const current_frame = 0
@@ -176,20 +179,7 @@ class TifFilePlugin {
       const frame_num = fileObj.frame_num
       const [canvas_data, w, h, max, min, sticky_max, sticky_min] = fileObj.read(current_frame)
       const image = {type: 'image/grayscale', array: canvas_data, height: h, width: w}
-      api.createWindow({name: file.name, type: 'image/zoomable_2d', data: {image: image}, config: {}})
-      // const canvas = fileObj.render(imageData)
-      // const current_image = canvas.toDataURL()
-      // const context = canvas.getContext('2d')
-      // const input_image_data = context.getImageData(0, 0, canvas.width, canvas.height);
-      // try {
-      //   const outputTensor = this.model.pixel2Tensor(input_image_data, true)
-      //   console.log(outputTensor.shape)
-      //   resolve(outputTensor)
-      // } catch (e) {
-      //   alert(e.toString())
-      //   console.error(e)
-      //   return null
-      // }
+      api.createWindow({name: file.name, type: 'Image Window', data: {image: image}, config: {}})
     })
   }
 }
