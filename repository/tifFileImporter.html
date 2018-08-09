@@ -178,7 +178,7 @@ class TifFilePlugin {
       const frame_num = fileObj.frame_num
       const [canvas_data, w, h, max, min, sticky_max, sticky_min] = fileObj.read(current_frame)
       const image = {type: 'image/grayscale', array: canvas_data, height: h, width: w}
-      api.createWindow({name: file.name, type: 'Image Window', data: {image: image}, config: {}})
+      api.createWindow({name: file.name, type: 'Image Window', w:7, h:6, data: {image: image}, config: {}})
     })
   }
 }
