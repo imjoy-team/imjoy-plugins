@@ -52,7 +52,7 @@ class Histogram2dPlugin {
           canvas_data[s] = canvas_data[s]+1
       }
       const image = {type: 'image/grayscale', array: canvas_data, height: height, width: width}
-      api.createWindow({name: 'Histogram', type: 'image/zoomable_2d', data: {image: image}, config: {}})
+      api.createWindow({name: 'Histogram', type: 'Image Window', data: {image: image}, config: {}})
     } catch (e) {
       console.error(e)
       throw e
