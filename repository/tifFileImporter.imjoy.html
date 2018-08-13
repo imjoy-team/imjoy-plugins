@@ -153,7 +153,7 @@ class TifFile {
       console.log('min, max',sticky_min, sticky_max)
     }
     else{
-      alert('unsupported bitdepth.')
+      api.showStatus(`Error: unsupported bitdepth: ${ifd.t258}`)
       ret = null
     }
     return ret
