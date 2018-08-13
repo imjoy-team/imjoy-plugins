@@ -35,15 +35,13 @@ class PythonPlugin():
     print('initialized from python')
 
   def run(self, my):
+    # print(my['variables'])
     if my['op']['name'] == 'op with option':
       print('run python_op: ' + my['config']['op_option'])
     else:
       print('hello world: ' + str(self.count))
-
-    print(my['variables'])
-
     self.count += 1
-    my['data']['array'] = np.zeros(10) * self.count
+    my['data']['array'] = np.zeros(10) + self.count
     return my
 
 api.export(PythonPlugin())
