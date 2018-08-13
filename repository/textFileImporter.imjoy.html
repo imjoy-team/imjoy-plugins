@@ -9,8 +9,8 @@
   "tags": ["localization", "op", "file_loader"],
   "ui": "Load a table from the file: add {id:'append_header', type:'string', placeholder:''} to the first line (optional) {id:'header_row', type:'choose', options:['read headers from the first line','use index as the header'], placeholder:'read headers from the first line'} and use {id:'delimiter', type:'string', placeholder:','} to seperate columns.",
   "extensions": [".csv"],
-  "inputs": {"file": ["file/*.csv"]},
-  "outputs": {"table":"localization/table"},
+  "inputs": {"properties": {"type": {"enum": ["text/csv"], "required": true}}, "type": "object"},
+  "outputs":{"properties": {"type": {"enum": ["localization/table"], "required": true},"table": {"type":"object", "required": true}},"type": "object"},
   "icon": null,
   "dependencies": []
 }
@@ -245,15 +245,19 @@ class TextFilePlugin {
   }
   async run(my){
     console.log('running in the plugin', my)
+    if(!my.data.type || !my.data.name){
+        api.showStatus('Error: please select a csv file')
+        return
+    }
     const format = {
       header_row: my.config.header_row.startsWith('read headers')? 0 : -1,
       delimiter: my.config.delimiter,
       append_header: my.config.append_header,
       header_transform: {'x [nm]': 'x', 'y [nm]':'y', 'sigma [nm]': 'sigma'}
     }
-    const table = await _loadFile(my.data.files&&my.data.files[0]||my.data.file, format)
+    const table = await _loadFile(my.data, format)
     my.type = 'imjoy/generic'
-    my.data = {table: table}
+    my.data = {table: table, type: 'localization/table'}
     return my
   }
 }

@@ -8,8 +8,8 @@
   "description": "A plugin for render 2D histogram from a localization table.",
   "tags": ["localization", "op", "render"],
   "ui": "Render a 2D histogram with: <br>pixel size={id:'pixel_size', type:'number', placeholder: 20}nm<br> width={id:'width', type:'number', placeholder: 2560} <br> height={id:'height', type:'number', placeholder: 2560}",
-  "inputs": {"table": "localization/table"},
-  "outputs": {"image": "image/grayscale"},
+  "inputs": {"properties": {"type": {"enum": ["localization/table"], "required": true},"table": {"type":"object", "required": true}},"type": "object"},
+  "outputs": {"properties": {"type": {"enum": ["image/grayscale"], "required": true},"array": {"type":"object", "required": true},"height": {"type":"integer", "required": true},"width": {"type":"integer", "required": true}},"type": "object"},
   "icon": null,
   "dependencies": ["Lookup Table"]
 }
@@ -52,7 +52,8 @@ class Histogram2dPlugin {
           canvas_data[s] = canvas_data[s]+1
       }
       const image = {type: 'image/grayscale', array: canvas_data, height: height, width: width}
-      api.createWindow({name: 'Histogram', type: 'Image Window', data: {image: image}, config: {}})
+      // api.createWindow({name: 'Histogram', type: 'Image Window', data: {image: image}, config: {}})
+      return image
     } catch (e) {
       console.error(e)
       throw e

@@ -8,8 +8,8 @@ This plugin is for dispalying 2d image.
   "name": "Image Window",
   "mode": "iframe",
   "tags": ["2d", "op", "window"],
-  "inputs": {"image":"image/grayscale"},
-  "outputs": {"image":"image/grayscale"},
+  "inputs": {"properties": {"type": {"enum": ["image/grayscale"], "required": true},"array": {"type":"object", "required": true},"height": {"type":"integer", "required": true},"width": {"type":"integer", "required": true}},"type": "object"},
+  "outputs": {"properties": {"type": {"enum": ["image/grayscale"], "required": true},"array": {"type":"object", "required": true},"height": {"type":"integer", "required": true},"width": {"type":"integer", "required": true}},"type": "object"},
   "show_panel": true,
   "version": "0.1.0",
   "api_version": "0.1.0",
@@ -98,7 +98,7 @@ class ImageWindowPlugin {
     const map = this._map
     const range = this._slider.noUiSlider.get()
     console.log('pixel range: ', range)
-    const [imageUrl, min, max, low, high] = array2url(my.data.image.array, my.data.image.width, my.data.image.height, parseInt(range[0]), parseInt(range[1]))
+    const [imageUrl, min, max, low, high] = array2url(my.data.array, my.data.width, my.data.height, parseInt(range[0]), parseInt(range[1]))
     this._slider.noUiSlider.updateOptions(
     	{range: {
     		'min': min,
@@ -107,7 +107,7 @@ class ImageWindowPlugin {
     	true // Boolean 'fireSetEvent'
     );
     this._slider.noUiSlider.set([low, high])
-    const w = my.data.image.width, h = my.data.image.height
+    const w = my.data.width, h = my.data.height
 
     map.eachLayer(function(layer) {
       map.removeLayer(layer);
@@ -138,7 +138,7 @@ class ImageWindowPlugin {
         position: 'topleft',
         collapsed: this.screenWidth < 600
       })
-      //this.layerControl.addTo(map);
+      this.layerControl.addTo(map);
       //add zoom control with your options
       L.control.zoom({
         position: 'topleft'

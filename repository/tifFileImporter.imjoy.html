@@ -8,8 +8,8 @@
   "ui": null,
   "tags": ["image", "op", "file_loader"],
   "extensions": [".tif", ".tiff"],
-  "inputs": {"file": ["file/*.tif", "file/*.tiff"]},
-  "outputs": {"image":"image/grayscale"},
+  "inputs": {"properties": {"type": {"enum": ["image/tiff"], "required": true}}, "type": "object"},
+  "outputs": {"properties": {"type": {"enum": ["image/grayscale"], "required": true}}, "type": "object"},
   "icon": null,
   "dependencies": []
 }
@@ -153,7 +153,7 @@ class TifFile {
       console.log('min, max',sticky_min, sticky_max)
     }
     else{
-      api.showStatus(`Error: unsupported bitdepth: ${ifd.t258}`)
+      alert('unsupported bitdepth.')
       ret = null
     }
     return ret
@@ -166,11 +166,11 @@ class TifFilePlugin {
   }
   async run(my){
     console.log('running in the plugin', my)
-    if(!my.data.file&& !my.data.files){
+    if(!my.data.type || !my.data.size){
         api.showStatus('Error: you need to select your tif file first.')
         return
     }
-    const file = my.data.file || my.data.files[0]
+    const file = my.data
     const brightness = 0
     const current_frame = 0
     const fileObj = new TifFile(file)
@@ -178,7 +178,7 @@ class TifFilePlugin {
       const frame_num = fileObj.frame_num
       const [canvas_data, w, h, max, min, sticky_max, sticky_min] = fileObj.read(current_frame)
       const image = {type: 'image/grayscale', array: canvas_data, height: h, width: w}
-      api.createWindow({name: file.name, type: 'Image Window', w:7, h:6, data: {image: image}, config: {}})
+      api.createWindow({name: file.name, type: 'Image Window', data: {image: image}, config: {}})
     })
   }
 }
