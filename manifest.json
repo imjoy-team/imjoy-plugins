@@ -96,7 +96,7 @@
     "inputs": {"file": ["file/*.tif", "file/*.tiff"]},
     "outputs": {"image":"image/grayscale"},
     "icon": null,
-    "dependencies": []
+    "dependencies": ["Image Window"]
   }
 ]
 }
