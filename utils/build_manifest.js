@@ -50,7 +50,7 @@ fs.readdir(repository_dir, function(err, files) {
     var repo_manifest = {version: repo_version, uri_root: uri_root, plugins: plugin_configs}
     var stream = fs.createWriteStream(manifest_path);
     stream.once('open', function(fd) {
-      stream.write(JSON.stringify(repo_manifest,null,'\t'));
+      stream.write(JSON.stringify(repo_manifest,null,' '));
       stream.end();
     });
     console.log("manifest file updated!");

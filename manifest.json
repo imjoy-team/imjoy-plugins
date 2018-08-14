@@ -1,316 +1,316 @@
 {
-	"version": "0.2.0",
-	"uri_root": "https://raw.githubusercontent.com/oeway/ImJoy-Plugins/master/repository",
-	"plugins": [
-		{
-			"name": "2D Histogram",
-			"mode": "webworker",
-			"version": "0.1.0",
-			"api_version": "0.1.0",
-			"createdAt": "Mon Jun 19 2018 15:45:30",
-			"description": "A plugin for render 2D histogram from a localization table.",
-			"tags": [
-				"localization",
-				"op",
-				"render"
-			],
-			"ui": "Render a 2D histogram with: <br>pixel size={id:'pixel_size', type:'number', placeholder: 20}nm<br> width={id:'width', type:'number', placeholder: 2560} <br> height={id:'height', type:'number', placeholder: 2560}",
-			"inputs": {
-				"properties": {
-					"type": {
-						"enum": [
-							"localization/table"
-						],
-						"required": true
-					},
-					"table": {
-						"type": "object",
-						"required": true
-					}
-				},
-				"type": "object"
-			},
-			"outputs": {
-				"properties": {
-					"type": {
-						"enum": [
-							"image/grayscale"
-						],
-						"required": true
-					},
-					"array": {
-						"type": "object",
-						"required": true
-					},
-					"height": {
-						"type": "integer",
-						"required": true
-					},
-					"width": {
-						"type": "integer",
-						"required": true
-					}
-				},
-				"type": "object"
-			},
-			"icon": null,
-			"dependencies": [
-				"Lookup Table"
-			],
-			"uri": "histogram2D.imjoy.html"
-		},
-		{
-			"name": "Image Window",
-			"mode": "iframe",
-			"tags": [
-				"2d",
-				"op",
-				"window"
-			],
-			"inputs": {
-				"properties": {
-					"type": {
-						"enum": [
-							"image/grayscale"
-						],
-						"required": true
-					},
-					"array": {
-						"type": "object",
-						"required": true
-					},
-					"height": {
-						"type": "integer",
-						"required": true
-					},
-					"width": {
-						"type": "integer",
-						"required": true
-					}
-				},
-				"type": "object"
-			},
-			"outputs": {
-				"properties": {
-					"type": {
-						"enum": [
-							"image/grayscale"
-						],
-						"required": true
-					},
-					"array": {
-						"type": "object",
-						"required": true
-					},
-					"height": {
-						"type": "integer",
-						"required": true
-					},
-					"width": {
-						"type": "integer",
-						"required": true
-					}
-				},
-				"type": "object"
-			},
-			"show_panel": true,
-			"version": "0.1.0",
-			"api_version": "0.1.0",
-			"createdAt": "Mon Jun 19 2018 15:45:30",
-			"description": "A plugin for display simple image.",
-			"icon": "image",
-			"dependencies": [],
-			"uri": "imageWindow.imjoy.html"
-		},
-		{
-			"name": "Lookup Table",
-			"mode": "webworker",
-			"version": "0.1.0",
-			"api_version": "0.1.0",
-			"createdAt": "Mon Jun 19 2018 16:33:11",
-			"description": "A plugin for applying lookup table to a single-channel image.",
-			"tags": [
-				"image",
-				"LUT"
-			],
-			"inputs": {
-				"image": "image/grayscale"
-			},
-			"outputs": {
-				"image": "image/color"
-			},
-			"icon": "color_lens",
-			"dependencies": [],
-			"uri": "lookupTable.imjoy.html"
-		},
-		{
-			"name": "Python Demo Plugin",
-			"mode": "pyworker",
-			"version": "0.1.0",
-			"api_version": "0.1.1",
-			"createdAt": "Mon Jun 26 2018 15:45:30",
-			"description": "A plugin for demonstrate python plugin.",
-			"tags": [
-				"demo",
-				"op"
-			],
-			"ui": "run python plugin",
-			"inputs": null,
-			"outputs": null,
-			"icon": "local_florist",
-			"env": null,
-			"requirements": [
-				"numpy"
-			],
-			"cmd": "python",
-			"dependencies": [],
-			"uri": "pythonDemoPlugin.imjoy.html"
-		},
-		{
-			"name": "tSNE",
-			"mode": "iframe",
-			"version": "0.1.0",
-			"api_version": "0.1.0",
-			"tags": [
-				"op",
-				"window"
-			],
-			"ui": "show tSNE plot",
-			"inputs": null,
-			"outputs": null,
-			"show_panel": true,
-			"description": "A plugin for doing tSNE visualization, using a library from https://cs.stanford.edu/people/karpathy/tsnejs/.",
-			"icon": null,
-			"dependencies": [],
-			"uri": "tSNE.imjoy.html"
-		},
-		{
-			"name": "tensorTest",
-			"mode": "iframe",
-			"version": "0.1.0",
-			"api_version": "0.1.0",
-			"tags": [
-				"op",
-				"window"
-			],
-			"ui": null,
-			"inputs": null,
-			"outputs": null,
-			"show_panel": true,
-			"description": "A plugin for testing tensorflow.js.",
-			"icon": null,
-			"dependencies": [],
-			"uri": "tensorTest.imjoy.html"
-		},
-		{
-			"name": "Text File Importer",
-			"mode": "webworker",
-			"version": "0.1.0",
-			"api_version": "0.1.0",
-			"createdAt": "Mon Jun 18 2018 21:46:36",
-			"description": "A plugin for loading localization table from text files.",
-			"tags": [
-				"localization",
-				"op",
-				"file_loader"
-			],
-			"ui": "Load a table from the file: add {id:'append_header', type:'string', placeholder:''} to the first line (optional) {id:'header_row', type:'choose', options:['read headers from the first line','use index as the header'], placeholder:'read headers from the first line'} and use {id:'delimiter', type:'string', placeholder:','} to seperate columns.",
-			"extensions": [
-				".csv"
-			],
-			"inputs": {
-				"properties": {
-					"type": {
-						"enum": [
-							"text/csv"
-						],
-						"required": true
-					}
-				},
-				"type": "object"
-			},
-			"outputs": {
-				"properties": {
-					"type": {
-						"enum": [
-							"localization/table"
-						],
-						"required": true
-					},
-					"table": {
-						"type": "object",
-						"required": true
-					}
-				},
-				"type": "object"
-			},
-			"icon": null,
-			"dependencies": [],
-			"uri": "textFileImporter.imjoy.html"
-		},
-		{
-			"name": "Three.js Demo",
-			"mode": "iframe",
-			"tags": [
-				"3d",
-				"op",
-				"window"
-			],
-			"ui": null,
-			"inputs": null,
-			"outputs": null,
-			"show_panel": true,
-			"version": "0.1.0",
-			"api_version": "0.1.0",
-			"createdAt": "Mon Jun 19 2018 15:45:30",
-			"description": "A plugin for demonstrate that one can use Three.js in a plugin.",
-			"icon": null,
-			"dependencies": [],
-			"uri": "threejsDemo.imjoy.html"
-		},
-		{
-			"name": "Tif File Importer",
-			"mode": "webworker",
-			"version": "0.1.1",
-			"api_version": "0.1.0",
-			"description": "A plugin for loading tif images.",
-			"ui": null,
-			"tags": [
-				"image",
-				"op",
-				"file_loader"
-			],
-			"extensions": [
-				".tif",
-				".tiff"
-			],
-			"inputs": {
-				"properties": {
-					"type": {
-						"enum": [
-							"image/tiff"
-						],
-						"required": true
-					}
-				},
-				"type": "object"
-			},
-			"outputs": {
-				"properties": {
-					"type": {
-						"enum": [
-							"image/grayscale"
-						],
-						"required": true
-					}
-				},
-				"type": "object"
-			},
-			"icon": null,
-			"dependencies": [
-				"Image Window"
-			],
-			"uri": "tifFileImporter.imjoy.html"
-		}
-	]
+ "version": "0.2.0",
+ "uri_root": "https://raw.githubusercontent.com/oeway/ImJoy-Plugins/master/repository",
+ "plugins": [
+  {
+   "name": "2D Histogram",
+   "mode": "webworker",
+   "version": "0.1.0",
+   "api_version": "0.1.0",
+   "createdAt": "Mon Jun 19 2018 15:45:30",
+   "description": "A plugin for render 2D histogram from a localization table.",
+   "tags": [
+    "localization",
+    "op",
+    "render"
+   ],
+   "ui": "Render a 2D histogram with: <br>pixel size={id:'pixel_size', type:'number', placeholder: 20}nm<br> width={id:'width', type:'number', placeholder: 2560} <br> height={id:'height', type:'number', placeholder: 2560}",
+   "inputs": {
+    "properties": {
+     "type": {
+      "enum": [
+       "localization/table"
+      ],
+      "required": true
+     },
+     "table": {
+      "type": "object",
+      "required": true
+     }
+    },
+    "type": "object"
+   },
+   "outputs": {
+    "properties": {
+     "type": {
+      "enum": [
+       "image/grayscale"
+      ],
+      "required": true
+     },
+     "array": {
+      "type": "object",
+      "required": true
+     },
+     "height": {
+      "type": "integer",
+      "required": true
+     },
+     "width": {
+      "type": "integer",
+      "required": true
+     }
+    },
+    "type": "object"
+   },
+   "icon": null,
+   "dependencies": [
+    "Lookup Table"
+   ],
+   "uri": "histogram2D.imjoy.html"
+  },
+  {
+   "name": "Image Window",
+   "mode": "iframe",
+   "tags": [
+    "2d",
+    "op",
+    "window"
+   ],
+   "inputs": {
+    "properties": {
+     "type": {
+      "enum": [
+       "image/grayscale"
+      ],
+      "required": true
+     },
+     "array": {
+      "type": "object",
+      "required": true
+     },
+     "height": {
+      "type": "integer",
+      "required": true
+     },
+     "width": {
+      "type": "integer",
+      "required": true
+     }
+    },
+    "type": "object"
+   },
+   "outputs": {
+    "properties": {
+     "type": {
+      "enum": [
+       "image/grayscale"
+      ],
+      "required": true
+     },
+     "array": {
+      "type": "object",
+      "required": true
+     },
+     "height": {
+      "type": "integer",
+      "required": true
+     },
+     "width": {
+      "type": "integer",
+      "required": true
+     }
+    },
+    "type": "object"
+   },
+   "show_panel": true,
+   "version": "0.1.0",
+   "api_version": "0.1.0",
+   "createdAt": "Mon Jun 19 2018 15:45:30",
+   "description": "A plugin for display simple image.",
+   "icon": "image",
+   "dependencies": [],
+   "uri": "imageWindow.imjoy.html"
+  },
+  {
+   "name": "Lookup Table",
+   "mode": "webworker",
+   "version": "0.1.0",
+   "api_version": "0.1.0",
+   "createdAt": "Mon Jun 19 2018 16:33:11",
+   "description": "A plugin for applying lookup table to a single-channel image.",
+   "tags": [
+    "image",
+    "LUT"
+   ],
+   "inputs": {
+    "image": "image/grayscale"
+   },
+   "outputs": {
+    "image": "image/color"
+   },
+   "icon": "color_lens",
+   "dependencies": [],
+   "uri": "lookupTable.imjoy.html"
+  },
+  {
+   "name": "Python Demo Plugin",
+   "mode": "pyworker",
+   "version": "0.1.0",
+   "api_version": "0.1.1",
+   "createdAt": "Mon Jun 26 2018 15:45:30",
+   "description": "A plugin for demonstrate python plugin.",
+   "tags": [
+    "demo",
+    "op"
+   ],
+   "ui": "run python plugin",
+   "inputs": null,
+   "outputs": null,
+   "icon": "local_florist",
+   "env": null,
+   "requirements": [
+    "numpy"
+   ],
+   "cmd": "python",
+   "dependencies": [],
+   "uri": "pythonDemoPlugin.imjoy.html"
+  },
+  {
+   "name": "tSNE",
+   "mode": "iframe",
+   "version": "0.1.0",
+   "api_version": "0.1.0",
+   "tags": [
+    "op",
+    "window"
+   ],
+   "ui": "show tSNE plot",
+   "inputs": null,
+   "outputs": null,
+   "show_panel": true,
+   "description": "A plugin for doing tSNE visualization, using a library from https://cs.stanford.edu/people/karpathy/tsnejs/.",
+   "icon": null,
+   "dependencies": [],
+   "uri": "tSNE.imjoy.html"
+  },
+  {
+   "name": "tensorTest",
+   "mode": "iframe",
+   "version": "0.1.0",
+   "api_version": "0.1.0",
+   "tags": [
+    "op",
+    "window"
+   ],
+   "ui": null,
+   "inputs": null,
+   "outputs": null,
+   "show_panel": true,
+   "description": "A plugin for testing tensorflow.js.",
+   "icon": null,
+   "dependencies": [],
+   "uri": "tensorTest.imjoy.html"
+  },
+  {
+   "name": "Text File Importer",
+   "mode": "webworker",
+   "version": "0.1.0",
+   "api_version": "0.1.0",
+   "createdAt": "Mon Jun 18 2018 21:46:36",
+   "description": "A plugin for loading localization table from text files.",
+   "tags": [
+    "localization",
+    "op",
+    "file_loader"
+   ],
+   "ui": "Load a table from the file: add {id:'append_header', type:'string', placeholder:''} to the first line (optional) {id:'header_row', type:'choose', options:['read headers from the first line','use index as the header'], placeholder:'read headers from the first line'} and use {id:'delimiter', type:'string', placeholder:','} to seperate columns.",
+   "extensions": [
+    ".csv"
+   ],
+   "inputs": {
+    "properties": {
+     "type": {
+      "enum": [
+       "text/csv"
+      ],
+      "required": true
+     }
+    },
+    "type": "object"
+   },
+   "outputs": {
+    "properties": {
+     "type": {
+      "enum": [
+       "localization/table"
+      ],
+      "required": true
+     },
+     "table": {
+      "type": "object",
+      "required": true
+     }
+    },
+    "type": "object"
+   },
+   "icon": null,
+   "dependencies": [],
+   "uri": "textFileImporter.imjoy.html"
+  },
+  {
+   "name": "Three.js Demo",
+   "mode": "iframe",
+   "tags": [
+    "3d",
+    "op",
+    "window"
+   ],
+   "ui": null,
+   "inputs": null,
+   "outputs": null,
+   "show_panel": true,
+   "version": "0.1.0",
+   "api_version": "0.1.0",
+   "createdAt": "Mon Jun 19 2018 15:45:30",
+   "description": "A plugin for demonstrate that one can use Three.js in a plugin.",
+   "icon": null,
+   "dependencies": [],
+   "uri": "threejsDemo.imjoy.html"
+  },
+  {
+   "name": "Tif File Importer",
+   "mode": "webworker",
+   "version": "0.1.1",
+   "api_version": "0.1.0",
+   "description": "A plugin for loading tif images.",
+   "ui": null,
+   "tags": [
+    "image",
+    "op",
+    "file_loader"
+   ],
+   "extensions": [
+    ".tif",
+    ".tiff"
+   ],
+   "inputs": {
+    "properties": {
+     "type": {
+      "enum": [
+       "image/tiff"
+      ],
+      "required": true
+     }
+    },
+    "type": "object"
+   },
+   "outputs": {
+    "properties": {
+     "type": {
+      "enum": [
+       "image/grayscale"
+      ],
+      "required": true
+     }
+    },
+    "type": "object"
+   },
+   "icon": null,
+   "dependencies": [
+    "Image Window"
+   ],
+   "uri": "tifFileImporter.imjoy.html"
+  }
+ ]
 }
