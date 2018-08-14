@@ -82,7 +82,7 @@ class TifFile {
     let min=Number.POSITIVE_INFINITY, max=Number.NEGATIVE_INFINITY, sticky_min=Number.POSITIVE_INFINITY, sticky_max = Number.NEGATIVE_INFINITY
     const sticky_factor = 0.1
     api.showStatus( ifd.t262)
-    if(ifd.t258 == 16){
+    if(ifd.t258 == 16 && ifd.t262 == 1){
       const raw = new Uint16Array(ifd.data.buffer)
       const data = new Uint16Array(ifd.data.buffer)
       console.assert(raw.length == w*h, 'data length mismatch')
@@ -117,7 +117,7 @@ class TifFile {
       ret = [data, w, h, max, min, sticky_max, sticky_min]
       console.log('min, max',sticky_min, sticky_max)
     }
-    else if(ifd.t258 == 32){
+    else if(ifd.t258 == 32 && ifd.t262 == 1){
       const raw = new Uint32Array(ifd.data.buffer)
       const data = new Float32Array(ifd.data.buffer)
       console.log(raw.length)
@@ -159,7 +159,7 @@ class TifFile {
       ret = [data, w, h, max, min, sticky_max, sticky_min]
     }
     else{
-      api.showStatus('unsupported bitdepth: ' + ifd.t258 + ' bits')
+      api.showStatus('unsupported bitdepth: ' + ifd.t258 + ' bits ' + ifd.t262 )
       ret = null
     }
     return ret
