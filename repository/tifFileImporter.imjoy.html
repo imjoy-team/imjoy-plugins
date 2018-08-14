@@ -8,7 +8,7 @@
   "ui": null,
   "tags": ["image", "op", "file_loader"],
   "extensions": [".tif", ".tiff"],
-  "inputs": {"properties": {"type": {"enum": ["image/tiff"], "required": true}}, "type": "object"},
+  "inputs": {"properties": {"name": {"type": "string", "pattern":".*\\.tif|\\.tiff|\\.TIFF|\\.TIF", "required": true }}, "type": "object"},
   "outputs": {"properties": {"type": {"enum": ["image/grayscale"], "required": true}}, "type": "object"},
   "icon": null,
   "dependencies": ["Image Window"]

@@ -220,10 +220,9 @@
    ],
    "inputs": {
     "properties": {
-     "type": {
-      "enum": [
-       "text/csv"
-      ],
+     "name": {
+      "type": "string",
+      "pattern": ".*\\.csv|\\.xls",
       "required": true
      }
     },
@@ -286,10 +285,9 @@
    ],
    "inputs": {
     "properties": {
-     "type": {
-      "enum": [
-       "image/tiff"
-      ],
+     "name": {
+      "type": "string",
+      "pattern": ".*\\.tif|\\.tiff|\\.TIFF|\\.TIF",
       "required": true
      }
     },
