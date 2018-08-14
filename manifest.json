@@ -56,7 +56,8 @@
 			"icon": null,
 			"dependencies": [
 				"Lookup Table"
-			]
+			],
+			"uri": "histogram2D.imjoy.html"
 		},
 		{
 			"name": "Image Window",
@@ -118,7 +119,8 @@
 			"createdAt": "Mon Jun 19 2018 15:45:30",
 			"description": "A plugin for display simple image.",
 			"icon": "image",
-			"dependencies": []
+			"dependencies": [],
+			"uri": "imageWindow.imjoy.html"
 		},
 		{
 			"name": "Lookup Table",
@@ -138,7 +140,8 @@
 				"image": "image/color"
 			},
 			"icon": "color_lens",
-			"dependencies": []
+			"dependencies": [],
+			"uri": "lookupTable.imjoy.html"
 		},
 		{
 			"name": "Python Demo Plugin",
@@ -160,7 +163,8 @@
 				"numpy"
 			],
 			"cmd": "python",
-			"dependencies": []
+			"dependencies": [],
+			"uri": "pythonDemoPlugin.imjoy.html"
 		},
 		{
 			"name": "tSNE",
@@ -177,7 +181,8 @@
 			"show_panel": true,
 			"description": "A plugin for doing tSNE visualization, using a library from https://cs.stanford.edu/people/karpathy/tsnejs/.",
 			"icon": null,
-			"dependencies": []
+			"dependencies": [],
+			"uri": "tSNE.imjoy.html"
 		},
 		{
 			"name": "tensorTest",
@@ -194,7 +199,8 @@
 			"show_panel": true,
 			"description": "A plugin for testing tensorflow.js.",
 			"icon": null,
-			"dependencies": []
+			"dependencies": [],
+			"uri": "tensorTest.imjoy.html"
 		},
 		{
 			"name": "Text File Importer",
@@ -239,7 +245,8 @@
 				"type": "object"
 			},
 			"icon": null,
-			"dependencies": []
+			"dependencies": [],
+			"uri": "textFileImporter.imjoy.html"
 		},
 		{
 			"name": "Three.js Demo",
@@ -258,7 +265,8 @@
 			"createdAt": "Mon Jun 19 2018 15:45:30",
 			"description": "A plugin for demonstrate that one can use Three.js in a plugin.",
 			"icon": null,
-			"dependencies": []
+			"dependencies": [],
+			"uri": "threejsDemo.imjoy.html"
 		},
 		{
 			"name": "Tif File Importer",
@@ -301,7 +309,8 @@
 			"icon": null,
 			"dependencies": [
 				"Image Window"
-			]
+			],
+			"uri": "tifFileImporter.imjoy.html"
 		}
 	]
 }

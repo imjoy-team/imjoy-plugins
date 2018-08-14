@@ -38,8 +38,9 @@ fs.readdir(repository_dir, function(err, files) {
         // console.log("reading '%s'...", plugin_path);
         var code = fs.readFileSync(plugin_path, "utf8");
         var config = parsePlugin(code);
-        plugin_configs.push(config)
-        console.log('Adding plugin ====>', config.name)
+        config.uri = file;
+        plugin_configs.push(config);
+        console.log('Adding plugin ====>', config.name);
     }
 
   });
