@@ -81,7 +81,6 @@ class TifFile {
     let ret = null
     let min=Number.POSITIVE_INFINITY, max=Number.NEGATIVE_INFINITY, sticky_min=Number.POSITIVE_INFINITY, sticky_max = Number.NEGATIVE_INFINITY
     const sticky_factor = 0.1
-    api.showStatus( ifd.t262)
     if(ifd.t258 == 16 && ifd.t262 == 1){
       const raw = new Uint16Array(ifd.data.buffer)
       const data = new Uint16Array(ifd.data.buffer)
@@ -184,7 +183,7 @@ class TifFilePlugin {
       const frame_num = fileObj.frame_num
       const [canvas_data, w, h, max, min, sticky_max, sticky_min] = fileObj.read(current_frame)
       const image = {type: 'image/grayscale', array: canvas_data, height: h, width: w}
-      api.createWindow({name: file.name, type: 'Image Window', data: image, config: {}})
+      api.createWindow({name: file.name, type: 'Image Window', w:7, h:7, data: image, config: {}})
     })
   }
 }
