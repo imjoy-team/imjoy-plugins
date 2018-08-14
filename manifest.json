@@ -263,7 +263,7 @@
 		{
 			"name": "Tif File Importer",
 			"mode": "webworker",
-			"version": "0.1.0",
+			"version": "0.1.1",
 			"api_version": "0.1.0",
 			"description": "A plugin for loading tif images.",
 			"ui": null,
@@ -299,7 +299,9 @@
 				"type": "object"
 			},
 			"icon": null,
-			"dependencies": []
+			"dependencies": [
+				"Image Window"
+			]
 		}
 	]
 }
