@@ -2,7 +2,7 @@
 {
   "name": "Tif File Importer",
   "mode": "webworker",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "api_version": "0.1.0",
   "description": "A plugin for loading tif images.",
   "ui": null,
@@ -11,7 +11,7 @@
   "inputs": {"properties": {"type": {"enum": ["image/tiff"], "required": true}}, "type": "object"},
   "outputs": {"properties": {"type": {"enum": ["image/grayscale"], "required": true}}, "type": "object"},
   "icon": null,
-  "dependencies": []
+  "dependencies": ["Image Window"]
 }
 </config>
 <script>
@@ -178,7 +178,7 @@ class TifFilePlugin {
       const frame_num = fileObj.frame_num
       const [canvas_data, w, h, max, min, sticky_max, sticky_min] = fileObj.read(current_frame)
       const image = {type: 'image/grayscale', array: canvas_data, height: h, width: w}
-      api.createWindow({name: file.name, type: 'Image Window', data: {image: image}, config: {}})
+      api.createWindow({name: file.name, type: 'Image Window', data: image, config: {}})
     })
   }
 }
