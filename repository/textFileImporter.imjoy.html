@@ -259,6 +259,8 @@ class TextFilePlugin {
     const table = await _loadFile(my.data, format)
     my.type = 'imjoy/generic'
     my.data = {table: table, type: 'localization/table'}
+    api.showStatus('File loaded.')
+    api.showProgress(100)
     return my
   }
 }
