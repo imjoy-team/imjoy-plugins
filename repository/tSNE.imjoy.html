@@ -26,12 +26,7 @@ This plugin shows a demo for tSNE visualization.
       </div>
   </div>
 </window>
-<python>
-def hello():
-  print('hellow world.')
-</python>
-
-<javascript>
+<script type="text/javascript">
 class TSNEPlugin {
   async setup() {
     await importScripts("https://cdn.rawgit.com/karpathy/tsnejs/13ece5d7/tsne.js"
@@ -61,4 +56,4 @@ class TSNEPlugin {
 }
 
 api.export(new TSNEPlugin())
-</javascript>
+</script>
