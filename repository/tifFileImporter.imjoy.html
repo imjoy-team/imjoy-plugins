@@ -8,8 +8,8 @@
   "ui": null,
   "tags": ["image", "op", "file_loader"],
   "extensions": [".tif", ".tiff"],
-  "inputs": {"properties": {"name": {"type": "string", "pattern":".*\\.tif|\\.tiff|\\.TIFF|\\.TIF", "required": true }}, "type": "object"},
-  "outputs": {"properties": {"type": {"enum": ["image/grayscale"], "required": true}}, "type": "object"},
+  "inputs": {"name": {"type": "string", "pattern":".*\\.tif|\\.tiff|\\.TIFF|\\.TIF", "required": true }},
+  "outputs": {"type": {"enum": ["image/grayscale"], "required": true}},
   "icon": null,
   "dependencies": ["Image Window"]
 }
