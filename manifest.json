@@ -16,42 +16,36 @@
    ],
    "ui": "Render a 2D histogram with: <br>pixel size={id:'pixel_size', type:'number', placeholder: 20}nm<br> width={id:'width', type:'number', placeholder: 2560} <br> height={id:'height', type:'number', placeholder: 2560}",
    "inputs": {
-    "properties": {
-     "type": {
-      "enum": [
-       "localization/table"
-      ],
-      "required": true
-     },
-     "table": {
-      "type": "object",
-      "required": true
-     }
+    "type": {
+     "enum": [
+      "localization/table"
+     ],
+     "required": true
     },
-    "type": "object"
+    "table": {
+     "type": "object",
+     "required": true
+    }
    },
    "outputs": {
-    "properties": {
-     "type": {
-      "enum": [
-       "image/grayscale"
-      ],
-      "required": true
-     },
-     "array": {
-      "type": "object",
-      "required": true
-     },
-     "height": {
-      "type": "integer",
-      "required": true
-     },
-     "width": {
-      "type": "integer",
-      "required": true
-     }
+    "type": {
+     "enum": [
+      "image/grayscale"
+     ],
+     "required": true
     },
-    "type": "object"
+    "array": {
+     "type": "object",
+     "required": true
+    },
+    "height": {
+     "type": "integer",
+     "required": true
+    },
+    "width": {
+     "type": "integer",
+     "required": true
+    }
    },
    "icon": null,
    "dependencies": [
@@ -68,50 +62,44 @@
     "window"
    ],
    "inputs": {
-    "properties": {
-     "type": {
-      "enum": [
-       "image/grayscale"
-      ],
-      "required": true
-     },
-     "array": {
-      "type": "object",
-      "required": true
-     },
-     "height": {
-      "type": "integer",
-      "required": true
-     },
-     "width": {
-      "type": "integer",
-      "required": true
-     }
+    "type": {
+     "enum": [
+      "image/grayscale"
+     ],
+     "required": true
     },
-    "type": "object"
+    "array": {
+     "type": "object",
+     "required": true
+    },
+    "height": {
+     "type": "integer",
+     "required": true
+    },
+    "width": {
+     "type": "integer",
+     "required": true
+    }
    },
    "outputs": {
-    "properties": {
-     "type": {
-      "enum": [
-       "image/grayscale"
-      ],
-      "required": true
-     },
-     "array": {
-      "type": "object",
-      "required": true
-     },
-     "height": {
-      "type": "integer",
-      "required": true
-     },
-     "width": {
-      "type": "integer",
-      "required": true
-     }
+    "type": {
+     "enum": [
+      "image/grayscale"
+     ],
+     "required": true
     },
-    "type": "object"
+    "array": {
+     "type": "object",
+     "required": true
+    },
+    "height": {
+     "type": "integer",
+     "required": true
+    },
+    "width": {
+     "type": "integer",
+     "required": true
+    }
    },
    "show_panel": true,
    "version": "0.1.0",
@@ -167,6 +155,40 @@
    "uri": "pythonDemoPlugin.imjoy.html"
   },
   {
+   "name": "SMLM File IO",
+   "mode": "webworker",
+   "version": "0.1.0",
+   "api_version": "0.1.0",
+   "description": "A plugin for loading and exporting SMLM images.",
+   "ui": null,
+   "tags": [
+    "image",
+    "op",
+    "file_loader"
+   ],
+   "inputs": {
+    "name": {
+     "type": "string",
+     "pattern": ".*\\.smlm|\\.SMLM",
+     "required": true
+    }
+   },
+   "outputs": {
+    "type": {
+     "enum": [
+      "image/grayscale"
+     ],
+     "required": true
+    }
+   },
+   "icon": null,
+   "dependencies": [
+    "Image Window",
+    "2D Histogram"
+   ],
+   "uri": "smlmFileIO.imjoy.html"
+  },
+  {
    "name": "tSNE",
    "mode": "iframe",
    "version": "0.1.0",
@@ -219,29 +241,23 @@
     ".csv"
    ],
    "inputs": {
-    "properties": {
-     "name": {
-      "type": "string",
-      "pattern": ".*\\.csv|\\.xls",
-      "required": true
-     }
-    },
-    "type": "object"
+    "name": {
+     "type": "string",
+     "pattern": ".*\\.csv|\\.xls",
+     "required": true
+    }
    },
    "outputs": {
-    "properties": {
-     "type": {
-      "enum": [
-       "localization/table"
-      ],
-      "required": true
-     },
-     "table": {
-      "type": "object",
-      "required": true
-     }
+    "type": {
+     "enum": [
+      "localization/table"
+     ],
+     "required": true
     },
-    "type": "object"
+    "table": {
+     "type": "object",
+     "required": true
+    }
    },
    "icon": null,
    "dependencies": [],
@@ -279,30 +295,20 @@
     "op",
     "file_loader"
    ],
-   "extensions": [
-    ".tif",
-    ".tiff"
-   ],
    "inputs": {
-    "properties": {
-     "name": {
-      "type": "string",
-      "pattern": ".*\\.tif|\\.tiff|\\.TIFF|\\.TIF",
-      "required": true
-     }
-    },
-    "type": "object"
+    "name": {
+     "type": "string",
+     "pattern": ".*\\.tif|\\.tiff|\\.TIFF|\\.TIF",
+     "required": true
+    }
    },
    "outputs": {
-    "properties": {
-     "type": {
-      "enum": [
-       "image/grayscale"
-      ],
-      "required": true
-     }
-    },
-    "type": "object"
+    "type": {
+     "enum": [
+      "image/grayscale"
+     ],
+     "required": true
+    }
    },
    "icon": null,
    "dependencies": [
