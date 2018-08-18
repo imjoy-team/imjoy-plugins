@@ -5,7 +5,8 @@
   "version": "0.1.0",
   "api_version": "0.1.0",
   "description": "A plugin for loading and exporting SMLM images.",
-  "ui": null,
+   "ui": "Render a 2D histogram with: <br>pixel size={id:'pixel_size', type:'number', placeholder: 20}nm<br> width={id:'width', type:'number', placeholder: 2560} <br> height={id:'height', type:'number', placeholder: 2560}",
+
   "tags": ["image", "op", "file_loader"],
   "inputs": {"name": {"type": "string", "pattern":".*\\.smlm|\\.SMLM", "required": true }},
   "outputs": {"type": {"enum": ["image/grayscale"], "required": true}},
@@ -283,23 +284,23 @@ class smlmFile {
                           file_info.max = {}
                           file_info.avg = {}
                           rows = tableArrays[0].length
-                          for(let c=0;c<columns;c++){
-                            const cn = format.headers[c]
-                            file_info.min[cn] = Number.POSITIVE_INFINITY;
-                            file_info.max[cn] = Number.NEGATIVE_INFINITY;
-                            file_info.avg[cn] = 0;
-                            for(let r=0;r<rows;r++){
-                                if(file_info.min[cn]>tableArrays[c][r]){
-                                  file_info.min[cn] = tableArrays[c][r]
-                                  if(tableArrays[c][r] == 0){
-                                    console.log(cn, c, r)
-                                  }
-                                }
-                                if(file_info.max[cn]<tableArrays[c][r])
-                                file_info.max[cn] = tableArrays[c][r]
-                                file_info.avg[cn] +=tableArrays[c][r]/rows
-                            }
-                          }
+                        //   for(let c=0;c<columns;c++){
+                        //     const cn = format.headers[c]
+                        //     file_info.min[cn] = Number.POSITIVE_INFINITY;
+                        //     file_info.max[cn] = Number.NEGATIVE_INFINITY;
+                        //     file_info.avg[cn] = 0;
+                        //     for(let r=0;r<rows;r++){
+                        //         if(file_info.min[cn]>tableArrays[c][r]){
+                        //           file_info.min[cn] = tableArrays[c][r]
+                        //           if(tableArrays[c][r] == 0){
+                        //             console.log(cn, c, r)
+                        //           }
+                        //         }
+                        //         if(file_info.max[cn]<tableArrays[c][r])
+                        //         file_info.max[cn] = tableArrays[c][r]
+                        //         file_info.avg[cn] +=tableArrays[c][r]/rows
+                        //     }
+                        //   }
                           data.headers = format.headers
                           for(let h=0;h<data.headers.length;h++){
                             data.headers[h] = data.headers[h].replace(/[^a-zA-Z0-9]+/g,'_').trim()
@@ -727,24 +728,60 @@ class SMLMFilePlugin {
     }
     const selected_file = my.data
     const smlm = new smlmFile();
-    const files = await smlm.import_smlm(selected_file, false, console.log)
+    console.time('import smlm')
+    const files = await smlm.import_smlm(selected_file, false, (status)=>{
+        status.running_prgress && api.showProgress(status.running_prgress)
+        status.running_status && api.showStatus(status.running_status)
+    })
+    console.timeEnd('import smlm')
+    console.time('plot histogram')
     console.log('smlm file loaded: ', files)
     console.log('manifest: ', smlm.manifest)
-    const tables = {}
+    // const tables = {}
     // for(let f of files){
     //     tables[f.name] = {type:'localization/table', table: f.data}
     // }
-    return {type:'localization/table', table: files[0].data}
-    // api.createWindow({name: file.name, type: 'Image Window', w:7, h:7, data: image, config: {}})
-    // const brightness = 0
-    // const current_frame = 0
-    // const fileObj = new TifFile(file)
-    // fileObj.load().then(() => {
-    //   const frame_num = fileObj.frame_num
-    //   const [canvas_data, w, h, max, min, sticky_max, sticky_min] = fileObj.read(current_frame)
-    //   const image = {type: 'image/grayscale', array: canvas_data, height: h, width: w}
-    //   api.createWindow({name: file.name, type: 'Image Window', w:7, h:7, data: image, config: {}})
-    // })
+    // return {type:'localization/table', table: files[0].data}
+    
+    my.data = {type:'localization/table', table: files[0].data}
+   try {
+      var width = my.config.width
+      var height = my.config.height
+      var canvas_data = new Uint16Array(new ArrayBuffer(width*height*2)); //uint16
+      var pixel_size = my.config.pixel_size
+      var data = my.data.table
+      var xx = data.tableDict.x
+      var yy = data.tableDict.y
+      var ff = data.tableDict.frame
+      var rows = data.rows
+      var table_dict = data.tableDict
+      var isFiltered = data.isFiltered
+      var progress = 0
+      for (var line = 0; line < rows; line++) {
+          var newProgress = Math.floor(100 * line / (rows+0.5));
+          if(newProgress != progress){
+              progress = newProgress
+              api.showProgress(progress)
+          }
+          if(isFiltered && !isFiltered[line]) continue
+          var f = parseInt(ff[line])
+          var x = parseInt(xx[line]/pixel_size)
+          var y = parseInt(yy[line]/pixel_size)
+          if(!f || !x || !y ){
+            continue
+          }
+          if(y>height || x>width) continue
+          var s =y * width + x;  // calculate the index in the array
+          canvas_data[s] = canvas_data[s]+1
+      }
+      const image = {type: 'image/grayscale', array: canvas_data, height: height, width: width}
+      // api.createWindow({name: 'Histogram', type: 'Image Window', data: {image: image}, config: {}})
+      console.timeEnd('plot histogram')
+      return image
+    } catch (e) {
+      console.error(e)
+      throw e
+    }
   }
 }
 
