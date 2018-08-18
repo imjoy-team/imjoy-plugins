@@ -10,7 +10,7 @@
   "tags": ["image", "op", "file_loader"],
   "inputs": {"name": {"type": "string", "pattern":".*\\.smlm|\\.SMLM", "required": true }},
   "outputs": {"type": {"enum": ["image/grayscale"], "required": true}},
-  "icon": null,
+  "icon": "🙀",
   "dependencies": ["Image Window", "2D Histogram"]
 }
 </config>
@@ -732,7 +732,6 @@ class SMLMFilePlugin {
     const files = await smlm.import_smlm(selected_file, false, (status)=>{
         status.running_prgress && api.showProgress(status.running_prgress)
         status.running_status && api.showStatus(status.running_status)
-        status.running && api.showStatus('load smlm file...')
     })
     console.timeEnd('import smlm')
     console.time('plot histogram')
@@ -775,10 +774,10 @@ class SMLMFilePlugin {
           var s =y * width + x;  // calculate the index in the array
           canvas_data[s] = canvas_data[s]+1
       }
-      const image = {type: 'image/grayscale', array: canvas_data, height: height, width: width}
-      // api.createWindow({name: 'Histogram', type: 'Image Window', data: {image: image}, config: {}})
+      const image = {type: 'image/grayscale', array: canvas_data, height: height, width: width, table: files[0].data}
+      api.createWindow({name: 'Histogram', type: 'Image Window', data: image, config: {}})
       console.timeEnd('plot histogram')
-      return image
+      //return my
     } catch (e) {
       console.error(e)
       throw e
