@@ -732,6 +732,7 @@ class SMLMFilePlugin {
     const files = await smlm.import_smlm(selected_file, false, (status)=>{
         status.running_prgress && api.showProgress(status.running_prgress)
         status.running_status && api.showStatus(status.running_status)
+        status.running && api.showStatus('load smlm file...')
     })
     console.timeEnd('import smlm')
     console.time('plot histogram')
