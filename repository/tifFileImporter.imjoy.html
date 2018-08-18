@@ -7,7 +7,6 @@
   "description": "A plugin for loading tif images.",
   "ui": null,
   "tags": ["image", "op", "file_loader"],
-  "extensions": [".tif", ".tiff"],
   "inputs": {"name": {"type": "string", "pattern":".*\\.tif|\\.tiff|\\.TIFF|\\.TIF", "required": true }},
   "outputs": {"type": {"enum": ["image/grayscale"], "required": true}},
   "icon": null,
@@ -80,8 +79,8 @@ class TifFile {
     const w = ifd.width
     let ret = null
     let min=Number.POSITIVE_INFINITY, max=Number.NEGATIVE_INFINITY, sticky_min=Number.POSITIVE_INFINITY, sticky_max = Number.NEGATIVE_INFINITY
-    const sticky_factor = 0.1
-    if(ifd.t258 == 16 && ifd.t262 == 1){
+    //ifd.t262 --> 0: WhiteIsZero, 1: BlackIsZero, 2: RGB, 3: Palette color, 4: Transparency mask, 5: CMYK
+    if(ifd.t258 == 16 && ifd.t262 <= 1){
       const raw = new Uint16Array(ifd.data.buffer)
       const data = new Uint16Array(ifd.data.buffer)
       console.assert(raw.length == w*h, 'data length mismatch')
@@ -96,27 +95,11 @@ class TifFile {
         data[i] = v
         if(v>max) max=v
         if(v<min) min=v
-        // if(v>sticky_max) {
-        //   if(sticky_max == Number.NEGATIVE_INFINITY){
-        //     sticky_max = v
-        //   }
-        //   else{
-        //     sticky_max += ((v-sticky_max)*sticky_factor)
-        //   }
-        // }
-        // if(v<sticky_min) {
-        //   if(sticky_min == Number.POSITIVE_INFINITY){
-        //     sticky_min = v
-        //   }
-        //   else{
-        //     sticky_min += ((v-sticky_min)*sticky_factor)
-        //   }
-        // }
       }
       ret = [data, w, h, max, min, sticky_max, sticky_min]
       console.log('min, max',sticky_min, sticky_max)
     }
-    else if(ifd.t258 == 32 && ifd.t262 == 1){
+    else if(ifd.t258 == 32 && ifd.t262 <= 1){
       const raw = new Uint32Array(ifd.data.buffer)
       const data = new Float32Array(ifd.data.buffer)
       console.log(raw.length)
@@ -132,27 +115,11 @@ class TifFile {
         data[i] = v
         if(v>max) max=v
         if(v<min) min=v
-        // if(v>sticky_max) {
-        //   if(sticky_max == Number.NEGATIVE_INFINITY){
-        //     sticky_max = v
-        //   }
-        //   else{
-        //     sticky_max += ((v-sticky_max)*sticky_factor)
-        //   }
-        // }
-        // if(v<sticky_min) {
-        //   if(sticky_min == Number.POSITIVE_INFINITY){
-        //     sticky_min = v
-        //   }
-        //   else{
-        //     sticky_min += ((v-sticky_min)*sticky_factor)
-        //   }
-        // }
       }
       ret = [data, w, h, max, min, sticky_max, sticky_min]
       console.log('min, max',sticky_min, sticky_max)
     }
-    else if(ifd.t258 == 8){
+    else if(ifd.t258 == 8 && ifd.t262 <= 1){
       const data = new Uint8Array(ifd.data.buffer)
       console.assert(data.length == w*h, 'data length mismatch')
       ret = [data, w, h, max, min, sticky_max, sticky_min]
