@@ -5,8 +5,7 @@
   "version": "0.1.0",
   "api_version": "0.1.0",
   "description": "A plugin for loading and exporting SMLM images.",
-   "ui": "Render a 2D histogram with: <br>pixel size={id:'pixel_size', type:'number', placeholder: 20}nm<br> width={id:'width', type:'number', placeholder: 2560} <br> height={id:'height', type:'number', placeholder: 2560}",
-
+  "ui": "Render a 2D histogram with: <br>pixel size={id:'pixel_size', type:'number', placeholder: 20}nm<br> width={id:'width', type:'number', placeholder: 2560} <br> height={id:'height', type:'number', placeholder: 2560}",
   "tags": ["image", "op", "file_loader"],
   "inputs": {"name": {"type": "string", "pattern":".*\\.smlm|\\.SMLM", "required": true }},
   "outputs": {"type": {"enum": ["image/grayscale"], "required": true}},
@@ -774,7 +773,7 @@ class SMLMFilePlugin {
           var s =y * width + x;  // calculate the index in the array
           canvas_data[s] = canvas_data[s]+1
       }
-      const image = {type: 'image/grayscale', array: canvas_data, height: height, width: width, table: files[0].data}
+      const image = {type: 'image/grayscale', array: canvas_data, height: height, width: width} // table: files[0].data
       api.createWindow({name: 'Histogram', type: 'Image Window', data: image, config: {}})
       console.timeEnd('plot histogram')
       //return my
