@@ -35,9 +35,9 @@ class PythonPlugin():
     print('initialized from python')
 
   def run(self, my):
-    # print(my['data']['_variables'])
-    if my['data']['_op'] == 'op with option':
-      print('run python_op: ' + my['config']['op_option'])
+    # print(my._variables)
+    if my._op == 'op with option':
+      print('run python_op: ' + my.config.op_option)
     else:
       print('hello world: ' + str(self.count))
     self.count += 1
