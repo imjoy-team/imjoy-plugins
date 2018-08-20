@@ -122,10 +122,20 @@
     "LUT"
    ],
    "inputs": {
-    "image": "image/grayscale"
+    "type": {
+     "enum": [
+      "image/grayscale"
+     ],
+     "required": true
+    }
    },
    "outputs": {
-    "image": "image/color"
+    "type": {
+     "enum": [
+      "image/color"
+     ],
+     "required": true
+    }
    },
    "icon": "color_lens",
    "dependencies": [],
@@ -160,7 +170,7 @@
    "version": "0.1.0",
    "api_version": "0.1.0",
    "description": "A plugin for loading and exporting SMLM images.",
-   "ui": null,
+   "ui": "Render a 2D histogram with: <br>pixel size={id:'pixel_size', type:'number', placeholder: 20}nm<br> width={id:'width', type:'number', placeholder: 2560} <br> height={id:'height', type:'number', placeholder: 2560}",
    "tags": [
     "image",
     "op",
@@ -181,7 +191,7 @@
      "required": true
     }
    },
-   "icon": null,
+   "icon": "🙀",
    "dependencies": [
     "Image Window",
     "2D Histogram"
@@ -225,12 +235,12 @@
    "uri": "tensorTest.imjoy.html"
   },
   {
-   "name": "Text File Importer",
+   "name": "Localization File (csv)",
    "mode": "webworker",
    "version": "0.1.0",
    "api_version": "0.1.0",
    "createdAt": "Mon Jun 18 2018 21:46:36",
-   "description": "A plugin for loading localization table from text files.",
+   "description": "A plugin for loading single molecule localization tables from text files including csv, xls etc.",
    "tags": [
     "localization",
     "op",
