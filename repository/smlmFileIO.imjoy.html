@@ -233,7 +233,7 @@ class smlmFile {
                       console.log(table_file)
                       const fileReader = new FileReader();
                       fileReader.onload = (evt) => {
-                          update_callback({running_status: 'table loaded.'})
+                          update_callback({running_status: 'file loaded, parsing the table...'})
                           const arrayBuffer = evt.target.result
                           const uint8Arr = new Uint8Array(arrayBuffer)
                           let rows = file_info.rows
@@ -744,6 +744,7 @@ class SMLMFilePlugin {
     
     my.data = {type:'localization/table', table: files[0].data}
    try {
+       api.showStatus("rendering...")
       var width = my.config.width
       var height = my.config.height
       var canvas_data = new Uint16Array(new ArrayBuffer(width*height*2)); //uint16
