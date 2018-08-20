@@ -744,7 +744,7 @@ class SMLMFilePlugin {
     
     my.data = {type:'localization/table', table: files[0].data}
    try {
-       api.showStatus("rendering...")
+      api.showStatus("rendering...")
       var width = my.config.width
       var height = my.config.height
       var canvas_data = new Uint16Array(new ArrayBuffer(width*height*2)); //uint16
@@ -774,6 +774,7 @@ class SMLMFilePlugin {
           var s =y * width + x;  // calculate the index in the array
           canvas_data[s] = canvas_data[s]+1
       }
+      api.showStatus("histogram rendered.")
       const image = {type: 'image/grayscale', array: canvas_data, height: height, width: width} // table: files[0].data
       api.createWindow({name: 'Histogram', type: 'Image Window', data: image, config: {}})
       console.timeEnd('plot histogram')
