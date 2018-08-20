@@ -7,8 +7,8 @@
   "createdAt": "Mon Jun 19 2018 16:33:11",
   "description": "A plugin for applying lookup table to a single-channel image.",
   "tags": ["image", "LUT"],
-  "inputs": {"image":"image/grayscale"},
-  "outputs": {"image":"image/color"},
+  "inputs": {"type": {"enum": ["image/grayscale"], "required": true}},
+  "outputs": {"type": {"enum": ["image/color"], "required": true}},
   "icon": "color_lens",
   "dependencies": []
 }
@@ -19,8 +19,8 @@ class LookupTablePlugin {
     api.register({
       name: "apply LUT",
       tags: ["image", "op", "LUT"],
-      inputs: {"image":"image/grayscale"},
-      outputs: {"image":"image/color"},
+      inputs: null,
+      outputs: null,
       ui: "apply LUT {id:'lut', type:'choose', options:['hot', 'rainbow'], placeholder: 'hot'}",
     })
   }
