@@ -1,0 +1,1305 @@
+
+<docs lang="markdown">
+Describe your plugin here.
+</docs>
+
+<config lang="json">
+{
+  "name": "Localization3D",
+  "mode": "iframe",
+  "tags": ["op", "window"],
+  "ui": null,
+  "version": "0.1.0",
+  "api_version": "0.1.0",
+  "description": "display localization table in 3D",
+  "icon": "extension",
+  "inputs": null,
+  "outputs": null,
+  "dependencies": []
+}
+</config>
+
+<script lang="javascript">
+importScripts("https://cdnjs.cloudflare.com/ajax/libs/three.js/r49/Three.min.js")
+
+/**
+ * @author Eberhard Graether / http://egraether.com/
+ */
+var isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
+
+var TrackballControlsWithPropagation = function ( object, domElement ) {
+
+	var _this = this,
+	STATE = { NONE : -1, ROTATE : 0, ZOOM : 1, PAN : 2 };
+
+	this.object = object;
+	this.lastDownTarget = null;
+	this.domElement = domElement;
+
+	//this.domElement = ( domElement !== undefined ) ? domElement : document;
+
+	// API
+
+	this.enabled = true;
+
+	this.screen = { width: window.innerWidth, height: window.innerHeight, offsetLeft: 0, offsetTop: 0 };
+	this.radius = ( this.screen.width + this.screen.height ) / 4;
+
+	this.rotateSpeed = 1.0;
+	this.zoomSpeed = 1.2;
+	this.panSpeed = 0.3;
+
+	this.noRotate = false;
+	this.noZoom = false;
+	this.noPan = false;
+
+  this.panStaticMoving = true
+	this.staticMoving = false;
+	this.dynamicDampingFactor = 0.2;
+
+	this.minDistance = 0;
+	this.maxDistance = Infinity;
+
+	this.keys = [ 65 /*A*/, 83 /*S*/, 68 /*D*/ ];
+
+	// internals
+
+	this.target = new THREE.Vector3( 0, 0, 0 );
+
+	var _keyPressed = false,
+	_state = STATE.NONE,
+
+	_eye = new THREE.Vector3(),
+
+	_rotateStart = new THREE.Vector3(),
+	_rotateEnd = new THREE.Vector3(),
+
+	_zoomStart = new THREE.Vector2(),
+	_zoomEnd = new THREE.Vector2(),
+
+	_panStart = new THREE.Vector2(),
+	_panEnd = new THREE.Vector2();
+
+
+	// methods
+
+	this.handleEvent = function ( event ) {
+
+		if ( typeof this[ event.type ] == 'function' ) {
+
+			this[ event.type ]( event );
+
+		}
+	};
+
+	this.getMouseOnScreen = function( clientX, clientY ) {
+
+		return new THREE.Vector2(
+			( clientX - _this.screen.offsetLeft ) / _this.radius * 0.5,
+			( clientY - _this.screen.offsetTop ) / _this.radius * 0.5
+		);
+
+	};
+
+	this.getMouseProjectionOnBall = function( clientX, clientY ) {
+
+		var mouseOnBall = new THREE.Vector3(
+			( clientX - _this.screen.width * 0.5 - _this.screen.offsetLeft ) / _this.radius,
+			( _this.screen.height * 0.5 + _this.screen.offsetTop - clientY ) / _this.radius,
+			0.0
+		);
+
+		var length = mouseOnBall.length();
+
+		if ( length > 1.0 ) {
+
+			mouseOnBall.normalize();
+
+		} else {
+
+			mouseOnBall.z = Math.sqrt( 1.0 - length * length );
+
+		}
+
+		_eye.copy( _this.object.position ).subSelf( _this.target );
+
+		var projection = _this.object.up.clone().setLength( mouseOnBall.y );
+		projection.addSelf( _this.object.up.clone().crossSelf( _eye ).setLength( mouseOnBall.x ) );
+		projection.addSelf( _eye.setLength( mouseOnBall.z ) );
+
+		return projection;
+
+	};
+
+	this.rotateCamera = function() {
+
+		var angle = Math.acos( _rotateStart.dot( _rotateEnd ) / _rotateStart.length() / _rotateEnd.length() );
+
+		if ( angle ) {
+
+			var axis = ( new THREE.Vector3() ).cross( _rotateStart, _rotateEnd ).normalize(),
+				quaternion = new THREE.Quaternion();
+
+			angle *= _this.rotateSpeed;
+
+			quaternion.setFromAxisAngle( axis, -angle );
+
+			quaternion.multiplyVector3( _eye );
+			quaternion.multiplyVector3( _this.object.up );
+
+			quaternion.multiplyVector3( _rotateEnd );
+
+			if ( _this.staticMoving ) {
+
+				_rotateStart = _rotateEnd;
+
+			} else {
+
+				quaternion.setFromAxisAngle( axis, angle * ( _this.dynamicDampingFactor - 1.0 ) );
+				quaternion.multiplyVector3( _rotateStart );
+
+			}
+
+		}
+
+	};
+
+	this.zoomCamera = function() {
+
+		var factor = 1.0 + ( _zoomEnd.y - _zoomStart.y ) * _this.zoomSpeed;
+
+		if ( factor !== 1.0 && factor > 0.0 ) {
+
+			_eye.multiplyScalar( factor );
+
+			if ( _this.staticMoving ) {
+
+				_zoomStart = _zoomEnd;
+
+			} else {
+
+				_zoomStart.y += ( _zoomEnd.y - _zoomStart.y ) * this.dynamicDampingFactor;
+
+			}
+
+		}
+
+	};
+
+	this.panCamera = function() {
+
+		var mouseChange = _panEnd.clone().subSelf( _panStart );
+
+		if ( mouseChange.lengthSq() ) {
+
+			mouseChange.multiplyScalar( _eye.length() * _this.panSpeed );
+
+			var pan = _eye.clone().crossSelf( _this.object.up ).setLength( mouseChange.x );
+			pan.addSelf( _this.object.up.clone().setLength( mouseChange.y ) );
+
+			_this.object.position.addSelf( pan );
+			_this.target.addSelf( pan );
+
+			if ( _this.staticMoving ||  _this.panStaticMoving) {
+
+				_panStart = _panEnd;
+
+			} else {
+
+				_panStart.addSelf( mouseChange.sub( _panEnd, _panStart ).multiplyScalar( _this.dynamicDampingFactor ) );
+
+			}
+
+		}
+
+	};
+
+	this.checkDistances = function() {
+
+		if ( !_this.noZoom || !_this.noPan ) {
+
+			if ( _this.object.position.lengthSq() > _this.maxDistance * _this.maxDistance ) {
+
+				_this.object.position.setLength( _this.maxDistance );
+
+			}
+
+			if ( _eye.lengthSq() < _this.minDistance * _this.minDistance ) {
+
+				_this.object.position.add( _this.target, _eye.setLength( _this.minDistance ) );
+
+			}
+
+		}
+
+	};
+
+	this.update = function() {
+
+		_eye.copy( _this.object.position ).subSelf( this.target );
+
+		if ( !_this.noRotate ) {
+
+			_this.rotateCamera();
+
+		}
+
+		if ( !_this.noZoom ) {
+
+			_this.zoomCamera();
+
+		}
+
+		if ( !_this.noPan ) {
+
+			_this.panCamera();
+
+		}
+
+		_this.object.position.add( _this.target, _eye );
+
+		_this.checkDistances();
+
+		_this.object.lookAt( _this.target );
+
+	};
+
+
+	// listeners
+
+	function keydown( event ) {
+
+		if ( ! _this.enabled ) return;
+
+		if ( _state !== STATE.NONE ) {
+
+			return;
+
+		} else if ( event.keyCode === _this.keys[ STATE.ROTATE ] && !_this.noRotate ) {
+
+			_state = STATE.ROTATE;
+
+		} else if ( event.keyCode === _this.keys[ STATE.ZOOM ] && !_this.noZoom ) {
+
+			_state = STATE.ZOOM;
+
+		} else if ( event.keyCode === _this.keys[ STATE.PAN ] && !_this.noPan ) {
+
+			_state = STATE.PAN;
+
+		}
+
+		if ( _state !== STATE.NONE ) {
+
+			_keyPressed = true;
+
+		}
+
+	};
+
+	function keyup( event ) {
+
+		if ( ! _this.enabled ) return;
+
+		if ( _state !== STATE.NONE ) {
+
+			_state = STATE.NONE;
+
+		}
+
+	};
+
+	function mousedown( event ) {
+
+		_this.lastDownTarget = event.target;
+		if(_this.lastDownTarget != _this.domElement) return;
+
+		if ( ! _this.enabled ) return;
+
+//		event.preventDefault();
+//		event.stopPropagation();
+
+		if ( _state === STATE.NONE ) {
+
+			_state = event.button;
+
+			if ( _state === STATE.ROTATE && !_this.noRotate ) {
+
+				_rotateStart = _rotateEnd = _this.getMouseProjectionOnBall( event.clientX, event.clientY );
+
+			} else if ( _state === STATE.ZOOM && !_this.noZoom ) {
+
+				_zoomStart = _zoomEnd = _this.getMouseOnScreen( event.clientX, event.clientY );
+
+			} else if ( !this.noPan ) {
+
+				_panStart = _panEnd = _this.getMouseOnScreen( event.clientX, event.clientY );
+
+			}
+
+		}
+
+
+	};
+
+	function mousemove( event ) {
+
+		if(_this.lastDownTarget != _this.domElement) return;
+
+		if ( ! _this.enabled ) return;
+
+		if ( _keyPressed ) {
+
+			_rotateStart = _rotateEnd = _this.getMouseProjectionOnBall( event.clientX, event.clientY );
+			_zoomStart = _zoomEnd = _this.getMouseOnScreen( event.clientX, event.clientY );
+			_panStart = _panEnd = _this.getMouseOnScreen( event.clientX, event.clientY );
+
+			_keyPressed = false;
+
+		}
+
+		if ( _state === STATE.NONE ) {
+
+			return;
+
+		} else if ( _state === STATE.ROTATE && !_this.noRotate ) {
+
+			_rotateEnd = _this.getMouseProjectionOnBall( event.clientX, event.clientY );
+
+		} else if ( _state === STATE.ZOOM && !_this.noZoom ) {
+
+			_zoomEnd = _this.getMouseOnScreen( event.clientX, event.clientY );
+
+		} else if ( _state === STATE.PAN && !_this.noPan ) {
+
+			_panEnd = _this.getMouseOnScreen( event.clientX, event.clientY );
+
+		}
+
+	};
+
+	function mouseup( event ) {
+		if(_this.lastDownTarget != _this.domElement) return;
+
+		if ( ! _this.enabled ) return;
+
+//		event.preventDefault();
+//		event.stopPropagation();
+
+		_state = STATE.NONE;
+
+	};
+
+
+	function touchstart( event ) {
+
+		if ( _this.enabled === false ) return;
+
+		switch ( event.touches.length ) {
+
+			case 1:
+				_state = STATE.TOUCH_ROTATE;
+				_moveCurr.copy( getMouseOnCircle( event.touches[ 0 ].pageX, event.touches[ 0 ].pageY ) );
+				_movePrev.copy( _moveCurr );
+				break;
+
+			default: // 2 or more
+				_state = STATE.TOUCH_ZOOM_PAN;
+				var dx = event.touches[ 0 ].pageX - event.touches[ 1 ].pageX;
+				var dy = event.touches[ 0 ].pageY - event.touches[ 1 ].pageY;
+				_touchZoomDistanceEnd = _touchZoomDistanceStart = Math.sqrt( dx * dx + dy * dy );
+
+				var x = ( event.touches[ 0 ].pageX + event.touches[ 1 ].pageX ) / 2;
+				var y = ( event.touches[ 0 ].pageY + event.touches[ 1 ].pageY ) / 2;
+				_panStart.copy( getMouseOnScreen( x, y ) );
+				_panEnd.copy( _panStart );
+				break;
+
+		}
+
+
+	}
+
+	function touchmove( event ) {
+
+		if ( _this.enabled === false ) return;
+
+		event.preventDefault();
+		event.stopPropagation();
+
+		switch ( event.touches.length ) {
+
+			case 1:
+				_movePrev.copy( _moveCurr );
+				_moveCurr.copy( getMouseOnCircle( event.touches[ 0 ].pageX, event.touches[ 0 ].pageY ) );
+				break;
+
+			default: // 2 or more
+				var dx = event.touches[ 0 ].pageX - event.touches[ 1 ].pageX;
+				var dy = event.touches[ 0 ].pageY - event.touches[ 1 ].pageY;
+				_touchZoomDistanceEnd = Math.sqrt( dx * dx + dy * dy );
+
+				var x = ( event.touches[ 0 ].pageX + event.touches[ 1 ].pageX ) / 2;
+				var y = ( event.touches[ 0 ].pageY + event.touches[ 1 ].pageY ) / 2;
+				_panEnd.copy( getMouseOnScreen( x, y ) );
+				break;
+
+		}
+
+	}
+
+	function touchend( event ) {
+
+		if ( _this.enabled === false ) return;
+
+		switch ( event.touches.length ) {
+
+			case 0:
+				_state = STATE.NONE;
+				break;
+
+			case 1:
+				_state = STATE.TOUCH_ROTATE;
+				_moveCurr.copy( getMouseOnCircle( event.touches[ 0 ].pageX, event.touches[ 0 ].pageY ) );
+				_movePrev.copy( _moveCurr );
+				break;
+
+		}
+
+
+	}
+
+	function mousewheel_firefox( event ) {
+
+		if ( _this.enabled === false ) return;
+
+		event.preventDefault();
+		event.stopPropagation();
+
+		_zoomStart.y -= event.deltaY * 0.01;
+
+   _state = STATE.NONE;
+	}
+
+	function mousewheel(event) {
+	  if(event.target != _this.domElement) return;
+	  event.preventDefault();
+	  event.stopPropagation();
+
+		var fovMAX = 130;
+	  var fovMIN = 1;
+		var camera = _this.object
+	  if(camera){
+	    camera.fov -= event.wheelDeltaY * 0.0033;
+	    camera.fov = Math.max(Math.min(camera.fov, fovMAX), fovMIN);
+	    camera.projectionMatrix = new THREE.Matrix4().makePerspective(camera.fov, window.innerWidth / window.innerHeight, camera.near, camera.far);
+	    // scopeParams.fov = camera.fov;
+	  }
+		_state = STATE.NONE;
+	}
+
+	document.addEventListener( 'contextmenu', function ( event ) { if( event.target != _this.domElement) return;  event.preventDefault(); }, false );
+
+	document.addEventListener( 'mousemove', mousemove, false );
+	document.addEventListener( 'mousedown', mousedown, false );
+	document.addEventListener( 'mouseup', mouseup, false );
+
+	document.addEventListener( 'touchstart', touchstart, false );
+	document.addEventListener( 'touchend', touchend, false );
+	document.addEventListener( 'touchmove', touchmove, false );
+   //
+	 if(isFirefox){
+		 document.addEventListener( 'wheel', mousewheel_firefox, false );
+	 }
+	 // else{
+		//  window.addEventListener('DOMMouseScroll', mousewheel, false);
+		//  window.addEventListener('mousewheel', mousewheel, false);
+	 // }
+
+	window.addEventListener( 'keydown', keydown, false );
+	window.addEventListener( 'keyup', keyup, false );
+
+};
+var shaderScripts = {"shader-particle-renderer-vs":
+  {type:"x-shader/x-vertex",
+  source: `#ifdef GL_ES
+  precision mediump float;
+  #endif
+  attribute vec2 uv;
+
+  uniform sampler2D sampler_particles;
+
+  uniform vec2 viewSize;
+  uniform vec4 scale;
+  uniform vec4 color1;
+  uniform vec2 clipX;
+  uniform vec2 clipY;
+  uniform vec2 clipZ;
+
+  uniform mat4 projectionMatrix;
+  uniform mat4 modelViewMatrix;
+
+  uniform float fov;
+  uniform vec3 camera;
+  uniform float pointSizeMin;
+  uniform float pointSizeMax;
+
+  varying vec4 col;
+  varying float alphaFactor;
+
+  void main() {
+  	vec4 pos = texture2D(sampler_particles, uv);
+  	bool isVisible = clipX.x - 0.5 <= pos.x && pos.x <= clipX.y - 0.5 && clipY.x - 0.5 <= pos.y && pos.y <= clipY.y - 0.5 && clipZ.x - 0.5 <= pos.z && pos.z <= clipZ.y - 0.5;
+  	pos.xyz += -vec3(clipX.x + clipX.y, clipY.x + clipY.y, clipZ.x + clipZ.y)*0.5 + 0.5;
+  	pos.xyz *= scale.xyz;
+
+  	float distance = length(camera-(modelViewMatrix * pos).xyz);
+  	gl_PointSize = scale.w*fov/distance*viewSize.y/2048.;
+
+  	alphaFactor = 1.;
+  	if(gl_PointSize < 1.){
+  		alphaFactor = max(gl_PointSize, 1./16.);
+  	}
+
+  	col = color1;
+
+  	pos.w = 1.;
+  	gl_Position = projectionMatrix  * modelViewMatrix * pos;
+
+  	if(!isVisible){
+  		col.a = 0.;
+  	}}`
+  },
+  "shader-vs":
+    {type:"x-shader/x-vertex",
+    source: `#ifdef GL_ES
+    precision mediump float;
+    #endif
+    attribute vec3 aPos;
+    attribute vec2 aTexCoord;
+    varying   vec2 uv;
+    varying vec2 uv_orig;
+    void main(void) {
+    	 gl_Position = vec4(aPos, 1.);
+    	 uv = aTexCoord;
+    	 uv_orig = uv;
+    }`
+  },
+  "shader-particle-renderer-fs":
+    {type:"x-shader/x-fragment",
+    source: `#ifdef GL_ES
+    precision mediump float;
+    #endif
+    varying vec4 col;
+    varying float alphaFactor;
+
+    void main() {
+    	gl_FragColor = col;
+    	gl_FragColor.a *= alphaFactor;
+    }`
+  }
+}
+
+
+
+
+
+
+
+function getShader(gl, id) {
+  var shaderScript = shaderScripts[id];
+  var shader;
+  if (shaderScript.type == "x-shader/x-fragment") {
+    shader = gl.createShader(gl.FRAGMENT_SHADER);
+  } else if (shaderScript.type == "x-shader/x-vertex")
+    shader = gl.createShader(gl.VERTEX_SHADER);
+  else
+    return null;
+  gl.shaderSource(shader, shaderScript.source);
+  gl.compileShader(shader);
+  if (gl.getShaderParameter(shader, gl.COMPILE_STATUS) == 0)
+    api.showStatus("error compiling shader '" + id + "'\n\n" + gl.getShaderInfoLog(shader));
+  return shader;
+}
+
+var gl;
+var ext;
+
+var prog_render_particles;
+
+var FBO_particles;
+
+// particle position buffer in a texture
+var texture_particles;
+
+var particlesWidth = 512;
+var particlesHeight = 512;
+
+var particleCount = 64 * 64 * 64;// can also be set to lower than particlesWidth * particlesHeight
+
+// main animation loop vars
+
+var sizeX = 1024; // texture size (must be powers of two, must also be greater than the particles texture *?*)
+var sizeY = 512;
+
+var viewX = sizeX; // viewport size (ideally exactly the texture size)
+var viewY = sizeY;
+
+var delay = 1 / 60;
+var it = 1; // main loop buffer toggle
+var frame = 0; // frame counter (to be resetted every 1000ms)
+var framecount = 0; // not resetted
+var fps;
+var time;
+var timer;
+var starttime = new Date().getTime();
+
+var particleBuffer;
+
+//Threejs setup
+var camera, scene, group, controls;
+var gui, scopeParams;
+
+var update_webgl_status_callback;
+var canvas;
+var ScopeParams = function () {
+  this.scaleX = 1;
+  this.scaleY = 1;
+  this.scaleZ = 1;
+  this.pointSize = 1;
+
+  this.distance = 4.0;
+  this.fov = 16.;
+  this.pointSizeMin = 0;
+  this.pointSizeMax = 12;
+}
+
+function onViewportChanged(){
+  viewX = window.innerWidth;
+  viewY = window.innerHeight;
+  canvas.width = viewX;
+  canvas.height = viewY;
+
+  var angle = 75;
+  var aspect = viewX / viewY;
+  var near = .1;
+  var far = 10000;
+
+  camera = new THREE.PerspectiveCamera(angle, aspect, near, far);
+  scene = new THREE.Scene();
+  group = new THREE.Object3D();
+  scene.add(camera);
+  scene.add(group);
+  camera.lookAt(group);
+
+  // Camera projection matrix
+
+  updateMatrices();
+
+  controls = new TrackballControlsWithPropagation(camera, canvas);
+
+  group.position.set(0, 0, 0);
+
+  camera.position.set(0, 0, scopeParams.distance);
+
+  camera.fov = scopeParams.fov;
+  camera.projectionMatrix = new THREE.Matrix4().makePerspective(camera.fov, window.innerWidth / window.innerHeight, camera.near, camera.far);
+
+  controls.rotateSpeed = 1.0;
+  controls.zoomSpeed = 1.2;
+  controls.panSpeed = 0.8;
+
+  controls.dynamicDampingFactor = 0.15;
+}
+
+var rerender = false;
+function setRerender() {
+  totalNumberOfChunks = 0;
+  scopeParams['Total # of locations'] = 0;
+  for(var i = 0; i < fileIDs.length; i++){
+    if(scopeParams['active ' + i] && scopeParams['alpha ' + i] > 0){
+      totalNumberOfChunks += files[fileIDs[i]].locations.numChunks;
+      scopeParams['Total # of locations'] += files[fileIDs[i]].locations.rows;
+    }
+    var color = scopeParams['color ' + i];
+    if(typeof(color) == "string"){
+      var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(color);
+      scopeParams['color ' + i] = [
+        parseInt(result[1], 16),
+        parseInt(result[2], 16),
+        parseInt(result[3], 16)
+      ];
+    }
+  }
+  rerender = true;
+}
+
+function load3DViewer(canvasElement, update_callback) {
+  update_webgl_status_callback = update_callback;
+  scopeParams = new ScopeParams();
+  // gui = new dat.GUI();
+  gui = new dat.GUI({ autoPlace: false });
+  var customContainer = document.getElementById('gui-webgl');
+  customContainer.appendChild(gui.domElement);
+  scopeParams['Total # of locations'] = 0;
+
+  scopeParams['reset scale'] = function(){
+    scopeParams['x'] = 1;
+    scopeParams['y'] = 1;
+    scopeParams['z'] = 1;
+    scopeParams['point size'] = 3;
+    rerender = true;
+  };
+
+  scopeParams['reset scale']();
+  var scaleFolder = gui.addFolder('Scale (x10)');
+  scaleFolder.add(scopeParams, 'x', 0, 10).listen().onChange(setRerender);
+  scaleFolder.add(scopeParams, 'y', 0, 10).listen().onChange(setRerender);
+  scaleFolder.add(scopeParams, 'z', 0, 10).listen().onChange(setRerender);
+  scaleFolder.add(scopeParams, 'point size', 0, 20).listen().onChange(setRerender);
+  scaleFolder.add(scopeParams, 'reset scale');
+
+  scopeParams['reset clipping'] = function(){
+    scopeParams['x min'] = 0;
+    scopeParams['x max'] = 1;
+    scopeParams['y min'] = 0;
+    scopeParams['y max'] = 1;
+    scopeParams['z min'] = 0;
+    scopeParams['z max'] = 1;
+    rerender = true;
+  };
+  scopeParams['reset clipping']();
+  var clippingFolder = gui.addFolder('Clipping');
+  clippingFolder.add(scopeParams, 'x min', 0, 1).listen().onChange(setRerender);
+  clippingFolder.add(scopeParams, 'x max', 0, 1).listen().onChange(setRerender);
+  clippingFolder.add(scopeParams, 'y min', 0, 1).listen().onChange(setRerender);
+  clippingFolder.add(scopeParams, 'y max', 0, 1).listen().onChange(setRerender);
+  clippingFolder.add(scopeParams, 'z min', 0, 1).listen().onChange(setRerender);
+  clippingFolder.add(scopeParams, 'z max', 0, 1).listen().onChange(setRerender);
+  clippingFolder.add(scopeParams, 'reset clipping');
+
+  gui.add(scopeParams, 'Total # of locations').listen();
+
+  canvas = canvasElement; //document.getElementById("c");
+  try {
+    gl = canvas.getContext("webgl", { depth: false, preserveDrawingBuffer: true });
+  } catch (e) {
+  }
+  if (!gl) {
+    api.showStatus("Meh! Y u no support WebGL !?!");
+    return;
+  }
+
+  ["OES_texture_float"].forEach(function (name) {
+    console.log("check " + name);
+    try {
+      ext = gl.getExtension(name);
+    } catch (e) {
+      api.showStatus(e);
+    }
+    if (!ext) {
+      api.showStatus("Meh! Y u no support " + name + " !?!");
+      return;
+    }
+    ext = false;
+  });
+
+  if (gl.getParameter(gl.MAX_VERTEX_TEXTURE_IMAGE_UNITS) == 0) {
+    api.showStatus("Meh! Y u no support vertex shader textures !?!");
+    return;
+  }
+
+
+  files = [];
+  fileIDs = [];
+
+  document.addEventListener("orientationchange", window.onresize = onViewportChanged);
+  window.addEventListener('DOMMouseScroll', mousewheel, false);
+  window.addEventListener('mousewheel', mousewheel, false);
+
+  onViewportChanged();
+
+  gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+
+  var d = 1 / 512;
+  var locationCoordsBuffer = new ArrayBuffer(512 * 512 * 16);
+  locationCoordsBuffer.float32 = new Float32Array(locationCoordsBuffer);
+  for(var i = 0; i < 512 ; i++){
+    for(var j = 0; j < 512 ; j++){
+      locationCoordsBuffer.float32[(i * 512 + j)*2 + 0] = d / 2 + j * d;
+      locationCoordsBuffer.float32[(i * 512 + j)*2 + 1] = d / 2 + i * d;
+    }
+  }
+  var attributesBuffer = new ArrayBuffer(512 * 512 * 16);
+  attributesBuffer.float32 = new Float32Array(attributesBuffer);
+
+  FBO_particles = gl.createFramebuffer();
+  texture_particles = createAndBindParticleTexture(attributesBuffer.float32, FBO_particles);
+
+  var aParticleLoc = 1;
+  prog_render_particles = createAndLinkParticleRenderer(aParticleLoc);
+
+  gl.useProgram(prog_render_particles);
+  gl.uniform1i(gl.getUniformLocation(prog_render_particles, "sampler_particles"), 0);
+
+  gl.enableVertexAttribArray(aParticleLoc);
+  particleBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, particleBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, locationCoordsBuffer.float32, gl.STATIC_DRAW);
+  gl.vertexAttribPointer(aParticleLoc, 2, gl.FLOAT, false, 8, 0);
+
+  timer = setInterval(fr, 1000);
+  time = new Date().getTime() - starttime;
+
+  gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+  gl.blendEquation(gl.FUNC_ADD);
+  gl.clearColor(0, 0, 0, 1);
+
+  anim();
+}
+
+function createAndLinkProgram(fsId) {
+  var program = gl.createProgram();
+  gl.attachShader(program, getShader(gl, "shader-vs"));
+  gl.attachShader(program, getShader(gl, fsId));
+  gl.linkProgram(program);
+  return program;
+}
+
+function createAndLinkParticleRenderer(aParticleLoc) {
+  var program = gl.createProgram();
+  gl.attachShader(program, getShader(gl, "shader-particle-renderer-vs"));
+  gl.attachShader(program, getShader(gl, "shader-particle-renderer-fs"));
+  gl.bindAttribLocation(program, aParticleLoc, "uv"); // can't use getAttribLocation later so we must bind before linking
+  gl.linkProgram(program);
+  return program;
+}
+
+function createAndBindTexture(glPixels, scale, fbo, filter) {
+  var texture = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+  gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, sizeX / scale, sizeY / scale, 0, gl.RGBA, gl.FLOAT, glPixels);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filter);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filter);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+  gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
+  checkFrameBuffer();
+  return texture;
+}
+
+function createAndBindParticleTexture(glPixels, fbo) {
+  var texture = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+  gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, particlesWidth, particlesHeight, 0, gl.RGBA, gl.FLOAT, glPixels);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+  gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
+  checkFrameBuffer();
+  return texture;
+}
+
+var newLocations = false;
+function onlocations() {
+  newLocations = true;
+}
+
+function loadNewLocationTextures() {
+  if (newLocations) {
+    // assume only one file has been loaded and it's the last in the list of IDs
+    var locations = files[fileIDs[fileIDs.length-1]].locations;
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, texture_particles);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, FBO_particles);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, particlesWidth, particlesHeight, 0, gl.RGBA, gl.FLOAT, locations.stridedFloat32Arrays[1]);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture_particles, 0);
+
+    setRerender();
+  }
+}
+
+function checkFrameBuffer() {
+  var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+  if (status != gl.FRAMEBUFFER_COMPLETE) {
+    console.log("Framebuffer, y u not completed yet!?");
+    for (var i in gl) {
+      if (typeof (gl[i]) == "number" && gl[i] == status) {
+        console.log("-> " + i);
+      }
+    }
+  }
+}
+
+function setUniforms(program) {
+  gl.uniform2f(gl.getUniformLocation(program, "viewSize"), viewX, viewY);
+
+  gl.uniform2f(gl.getUniformLocation(program, "aspect"), Math.max(1, viewX / viewY), Math.max(1, viewY / viewX));
+
+  gl.uniform4f(gl.getUniformLocation(program, "scale"), scopeParams['x'], scopeParams['y'], scopeParams['z'], scopeParams['point size']);
+
+  var minX = Math.min(scopeParams['x min'], scopeParams['x max']);
+  var maxX = Math.max(scopeParams['x min'], scopeParams['x max']);
+  gl.uniform2f(gl.getUniformLocation(program, "clipX"), minX, maxX);
+
+  var minY = Math.min(scopeParams['y min'], scopeParams['y max']);
+  var maxY = Math.max(scopeParams['y min'], scopeParams['y max']);
+  gl.uniform2f(gl.getUniformLocation(program, "clipY"), minY, maxY);
+
+  var minZ = Math.min(scopeParams['z min'], scopeParams['z max']);
+  var maxZ = Math.max(scopeParams['z min'], scopeParams['z max']);
+  gl.uniform2f(gl.getUniformLocation(program, "clipZ"), minZ, maxZ);
+
+  gl.uniform1f(gl.getUniformLocation(program, "fov"), 1./Math.tan(scopeParams.fov/180*Math.PI));
+  gl.uniform3f(gl.getUniformLocation(program, "camera"), 0, 0, scopeParams.distance);
+
+  gl.uniform1i(gl.getUniformLocation(program, "sampler_particles"), 1);
+}
+
+var oldProjectionMatrixArray = new Float32Array(16);
+var oldFov = 0;
+var oldViewMatrixArray = new Float32Array(16);
+var isStill = true; var wasStill = true;
+
+function anim(t) {
+  wasStill = isStill;
+  isStill = true;
+  for(var i = 0; i < 16; i++){
+    isStill = isStill &&
+      oldProjectionMatrixArray[i] - camera._projectionMatrixArray[i] == 0 &&
+      oldViewMatrixArray[i] - camera._viewMatrixArray[i] == 0;
+  }
+  isStill = isStill && camera.fov == oldFov
+  if(!isStill){
+    oldFov = camera.fov;
+    oldProjectionMatrixArray.set(camera._projectionMatrixArray);
+    oldViewMatrixArray.set(camera._viewMatrixArray);
+  }
+
+  loadNewLocationTextures();
+
+  controls.update();
+  updateMatrices();
+
+  renderParticles();
+
+  if(t)
+    throttle(t);
+
+  requestAnimationFrame(anim);
+
+  newLocations = false;
+
+  frame++;
+  framecount++;
+}
+
+var totalNumberOfChunks = 0;
+var chunksPerAnimationFrame = 0;
+var lastChunkRendered = -1;
+var targetFps = 24;
+var lastRenderTime = 0;
+
+function throttle(t){
+  var dt = t -lastRenderTime;
+  lastRenderTime = t;
+  if(isStill){
+    return;
+  }
+  if(dt < 1000 / targetFps){
+    chunksPerAnimationFrame+=0.25;
+  }else{
+    chunksPerAnimationFrame-=0.25;
+  }
+  chunksPerAnimationFrame = Math.max(chunksPerAnimationFrame, 0);
+  chunksPerAnimationFrame = Math.min(chunksPerAnimationFrame, totalNumberOfChunks);
+}
+
+function renderParticles() {
+  gl.viewport(0, 0, viewX, viewY);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+  var newMove = wasStill && !isStill;
+  if(rerender || !isStill || newLocations){
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.flush();
+    lastChunkRendered = -1;
+  }
+  if(isStill && lastChunkRendered == -1 && !newLocations && !rerender || totalNumberOfChunks == 0){
+    rerender = false;
+    return;
+  }
+  rerender = false;
+
+  gl.bindBuffer(gl.ARRAY_BUFFER, particleBuffer);
+  gl.useProgram(prog_render_particles);
+  setUniforms(prog_render_particles);
+
+  gl.uniformMatrix4fv(gl.getUniformLocation(prog_render_particles, "projectionMatrix"), false, camera._projectionMatrixArray);
+  gl.uniformMatrix4fv(gl.getUniformLocation(prog_render_particles, "modelViewMatrix"), false, camera._viewMatrixArray);
+
+  gl.enable(gl.BLEND);
+
+  gl.activeTexture(gl.TEXTURE1);
+  var chunk = 0;
+  loopFiles:
+  for(var i = 0; i < fileIDs.length; i++){
+    var file = files[fileIDs[i]];
+    var lastChunk = file.locations.numChunks - 1;
+    var color = scopeParams['color ' + i];
+    var alpha = scopeParams['alpha ' + i];
+    var active = scopeParams['active ' + i] && alpha > 0;
+    if(!active){
+      continue loopFiles; // skip the chunks of this file
+    }
+    gl.uniform4f(gl.getUniformLocation(prog_render_particles, "color1"), color[0]/255, color[1]/255, color[2]/255, alpha);
+    for(var j = 0; j < file.locations.numChunks; j++){
+      if(chunk > lastChunkRendered){
+        if(chunk <= lastChunkRendered + chunksPerAnimationFrame && chunk < totalNumberOfChunks){
+          var locationTexture = file.locations.textures[j];
+          gl.bindTexture(gl.TEXTURE_2D, locationTexture);
+          var pointCount = file.locations.bufferLength;
+          if(j == lastChunk){
+            pointCount = file.locations.rows - file.locations.bufferLength * lastChunk
+            lastChunkRendered = -1;
+          }
+          gl.drawArrays(gl.POINTS, 0, pointCount);
+        }else{
+          lastChunkRendered = chunk - 1;
+          break loopFiles; // get out of both for loops
+        }
+      }
+      chunk++;
+    }
+  }
+  gl.disable(gl.BLEND);
+  gl.flush();
+}
+
+function updateMatrices() {
+  scene.updateMatrixWorld();
+  camera.matrixWorldInverse.getInverse(camera.matrixWorld);
+
+  if (!camera._viewMatrixArray)
+    camera._viewMatrixArray = new Float32Array(16);
+  camera.matrixWorldInverse.flattenToArray(camera._viewMatrixArray);
+
+  if (!camera._projectionMatrixArray)
+    camera._projectionMatrixArray = new Float32Array(16);
+  camera.projectionMatrix.flattenToArray(camera._projectionMatrixArray);
+
+  if (!group.__webglInit) {
+    group._modelViewMatrix = new THREE.Matrix4();
+    group._objectMatrixArray = new Float32Array(16);
+    group._modelViewMatrixArray = new Float32Array(16);
+  }
+
+  group.matrixWorld.flattenToArray(group._objectMatrixArray);
+  group._modelViewMatrix.multiplyToArray(camera.matrixWorldInverse, group.matrixWorld, group._modelViewMatrixArray);
+}
+
+var colors = [
+  [0, 255, 0],
+  [255, 0, 255],
+  [0, 0, 255]
+];
+
+var files = [];
+var fileIDs = [];
+function createFileID(file){
+    if(file.hash && file.hash.length>5) return file.hash
+    else	return file.name + '.' + file.size;
+}
+function gotFile(file){
+	return fileIDs.indexOf(createFileID(file)) > -1;
+}
+function addFile(file){
+	var fileID = createFileID(file);
+	files[fileID] = file;
+	fileIDs.push(fileID);
+}
+
+function show3DLocalizations(options, update_status_callback){
+  // var fileid = createFileID({hash: options.file_hash, name: options.file_name, size: options.file_size})
+  // if(fileIDs.indexOf(fileid)>=0){
+  //   console.log('already added to the 3d view.')
+  //   update_status_callback({rendering_status:"3D view rendered(loc.:"+options.filteredRows+", file:"+options.file_name+").", rendering_progress: 100, rendering: false})
+  //   return false
+  // }
+  const bufferLength = (512 * 512); // defaulting to 2M
+  const before = Date.now();
+  const strideTitles = ["x", "y", "z"]
+  const stridedArrayBuffers = [];
+  const stridedFloat32Arrays = [];
+  const float32Arrays = options.tableDict;
+  const isFiltered = options.isFiltered;
+  const numChunks = isFiltered?Math.ceil(options.filteredRows/bufferLength): Math.ceil(options.rows/bufferLength);
+  for(var chunkIndex = 0; chunkIndex < numChunks; chunkIndex++){
+      stridedArrayBuffers[chunkIndex] = new ArrayBuffer(bufferLength * 16); // 4x4 for four float32 values of four bytes for the values for the given stride indices
+      stridedFloat32Arrays[chunkIndex]  = new Float32Array(stridedArrayBuffers[chunkIndex]);
+  }
+  const  normalization = {
+        scale: Math.max(
+            (options.max[strideTitles[0]]-options.min[strideTitles[0]]),
+            (options.max[strideTitles[1]]-options.min[strideTitles[1]]),
+            (options.max[strideTitles[2]]-options.min[strideTitles[2]])
+        ),
+        offsetX: (options.max[strideTitles[0]]-options.min[strideTitles[0]])/2,//options.avg[strideTitles[0]],
+        offsetY: (options.max[strideTitles[1]]-options.min[strideTitles[1]])/2,//options.avg[strideTitles[1]],
+        offsetZ: (options.max[strideTitles[2]]-options.min[strideTitles[2]])/2,//options.avg[strideTitles[2]],
+        offsetT: 0,//options.avg[strideTitles[3]],
+   }
+   if(update_status_callback)
+   update_status_callback({rendering: true, rendering_progress: 0, rendering_status: "normalize into strided array chunks"})
+
+  let progress = -1;
+  let filteredLine = 0;
+  for (var line = 0; line < options.rows; line++) {
+      var newProgress = Math.floor(100 * line / (options.rows+1));
+      if(newProgress != progress){
+          progress = newProgress;
+          if(update_status_callback)
+          update_status_callback({rendering_progress: progress})
+      }
+      if(isFiltered && !isFiltered[line]) continue
+      var chunkIndex = Math.floor(filteredLine/bufferLength);
+      var chunkLine = filteredLine - chunkIndex * bufferLength;
+      var stridedFloat32Array = stridedFloat32Arrays[chunkIndex];
+
+      stridedFloat32Array[chunkLine*4 + 0] = (float32Arrays[strideTitles[0]][line]-normalization.offsetX)/normalization.scale;
+      stridedFloat32Array[chunkLine*4 + 1] = (float32Arrays[strideTitles[1]][line]-normalization.offsetY)/normalization.scale;
+      stridedFloat32Array[chunkLine*4 + 2] = (float32Arrays[strideTitles[2]][line]-normalization.offsetZ)/normalization.scale;
+      stridedFloat32Array[chunkLine*4 + 3] = 1;//(float32Arrays[strideTitles[3]][line]-normalization.offsetT)/normalization.scale;
+      filteredLine += 1;
+  }
+  if(update_status_callback)
+  update_status_callback({rendering_status:"normalize into strided array chunks [ms]: "+ (Date.now() - before)})
+  const locations = {file_hash: options.file_hash, filteredRows:options.filteredRows, file_name: options.file_name, file_size: options.file_size, bufferLength: bufferLength, numChunks: numChunks, rows: options.rows, headers: options.headers, stridedArrayBuffers:stridedArrayBuffers}
+  console.log( "normalize into strided array chunks [ms]: "+ (Date.now() - before), locations);
+  render3DLocalizations(locations)
+  update_status_callback({rendering_status:"3D view rendered(loc.:"+options.filteredRows+", file:"+options.file_name+").", rendering_progress: 100, rendering: false})
+}
+
+function render3DLocalizations(locations) {
+  if (locations) {
+    var file = {hash: locations.file_hash, name: locations.file_name, size: locations.file_size}
+    var fileid = createFileID(file)
+    var indx = fileIDs.indexOf(fileid)
+    if(indx>=0){
+      file = files[fileid]
+    }
+    locations.stridedFloat32Arrays = [];
+    locations.textures = [];
+    for (var chunk = 0; chunk < locations.numChunks; chunk++) {
+      locations.stridedFloat32Arrays[chunk] = new Float32Array(locations.stridedArrayBuffers[chunk]);
+      locations.textures[chunk] = createAndBindParticleTexture(locations.stridedFloat32Arrays[chunk], FBO_particles);
+    }
+    console.log(files)
+    file.locations = locations;
+
+    totalNumberOfChunks += locations.numChunks;
+
+    if(indx>=0){
+      onlocations();
+    }
+    else{
+      addFile(file);
+      onlocations();
+      var colorIndex = fileIDs.length % colors.length;
+      if(locations.numChunks > 0){
+        var colorFolder = gui.addFolder(locations.file_name + ' (#' + locations.filteredRows +  ')');
+        var N = fileIDs.indexOf(fileid);
+        var activN = 'active ' + N;
+        var colorN = 'color ' + N;
+        var alphaN = 'alpha ' + N;
+        scopeParams[activN] = true;
+        scopeParams[colorN] = colors[colorIndex];
+        scopeParams[alphaN] = 0.9;
+        colorFolder.add(scopeParams, activN).onChange(setRerender);
+        colorFolder.addColor(scopeParams, colorN).onChange(setRerender);
+        colorFolder.add(scopeParams, alphaN, 0, 1).onChange(setRerender);
+        colorFolder.open();
+      }
+      console.log(files, fileIDs);
+      console.log("locations uploaded to WebGL textures:");
+      console.log(locations);
+    }
+
+    chunksPerAnimationFrame = totalNumberOfChunks; // this will throttle down quickly enough
+  } else {
+    console.log("something went wrong");
+  }
+}
+
+function fr() { // updates every second
+  scopeParams.Fps = frame;
+  gui.__controllers[0].updateDisplay();
+  // document.getElementById("fps").textContent = isStill ? 0 : frame;
+  // document.getElementById("ppf").textContent = isStill ? 0 : Math.floor(chunksPerAnimationFrame) + " x 256k";
+  if(update_webgl_status_callback)
+    update_webgl_status_callback({fps: isStill ? 0 : frame, ppf: isStill ? 0 : Math.floor(chunksPerAnimationFrame) + " x 256k"})
+  frame = 0; // reset the frame counter
+}
+
+function mousewheel(event) {
+  if(event.target != canvas) return;
+  event.preventDefault();
+  event.stopPropagation();
+
+  var fovMAX = 130;
+  var fovMIN = 1;
+
+  camera.fov -= event.wheelDeltaY * 0.0033;
+  camera.fov = Math.max(Math.min(camera.fov, fovMAX), fovMIN);
+  camera.projectionMatrix = new THREE.Matrix4().makePerspective(camera.fov, window.innerWidth / window.innerHeight, camera.near, camera.far);
+
+  scopeParams.fov = camera.fov;
+}
+
+
+class Localization3DPlugin {
+  async setup() {
+    importScripts("https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.2/dat.gui.min.js").then(()=>{
+        load3DViewer(document.getElementById("histogram_canvas_3d"), console.log)
+    })
+  }
+
+  run(my) {
+    console.log('running in the plugin ', my)
+
+  }
+}
+
+api.export(new Localization3DPlugin())
+</script>
+
+<window lang="html">
+<div>
+    <div id="gui-webgl"> </div>
+    <canvas id="histogram_canvas_3d"></canvas>
+</div>
+
+</window>
+
+<style lang="css">
+render-info {
+  z-index: 20;
+  text-align: right;
+  color: #de199e;
+  position: absolute;
+  top: 8px;
+  right: 45px;
+  margin-top: 8px;
+}
+#histogram_canvas_3d {
+  z-index: 13;
+	position: relative;
+	top: 0;
+	left: 0;
+}
+#gui-webgl {
+  z-index: 14;
+  position: fixed;
+
+}
+</style>

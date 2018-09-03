@@ -111,6 +111,23 @@
    "uri": "imageWindow.imjoy.html"
   },
   {
+   "name": "Localization3D",
+   "mode": "iframe",
+   "tags": [
+    "op",
+    "window"
+   ],
+   "ui": null,
+   "version": "0.1.0",
+   "api_version": "0.1.0",
+   "description": "display localization table in 3D",
+   "icon": "extension",
+   "inputs": null,
+   "outputs": null,
+   "dependencies": [],
+   "uri": "localization3D.imjoy.html"
+  },
+  {
    "name": "Lookup Table",
    "mode": "webworker",
    "version": "0.1.0",
