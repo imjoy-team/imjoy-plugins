@@ -111,6 +111,29 @@
    "uri": "imageWindow.imjoy.html"
   },
   {
+   "name": "Live Stream",
+   "mode": "pyworker",
+   "version": "0.1.0",
+   "api_version": "0.1.1",
+   "createdAt": "Mon Jun 26 2018 15:45:30",
+   "description": "A plugin for demonstrate streaming with python.",
+   "tags": [
+    "demo",
+    "op"
+   ],
+   "ui": "image processing with python",
+   "inputs": null,
+   "outputs": null,
+   "icon": null,
+   "env": null,
+   "requirements": [
+    "conda:ffmpeg && npm install ws"
+   ],
+   "cmd": "python",
+   "dependencies": [],
+   "uri": "liveStream.imjoy.html"
+  },
+  {
    "name": "Localization3D",
    "mode": "iframe",
    "tags": [
