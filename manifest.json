@@ -222,7 +222,9 @@
     "conda:ffmpeg && npm install ws"
    ],
    "cmd": "python",
-   "dependencies": [],
+   "dependencies": [
+    "Live Stream Window"
+   ],
    "uri": "microManager.imjoy.html"
   },
   {
