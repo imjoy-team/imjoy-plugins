@@ -130,8 +130,29 @@
     "conda:ffmpeg && npm install ws"
    ],
    "cmd": "python",
-   "dependencies": [],
+   "dependencies": [
+    "Live Stream Window"
+   ],
    "uri": "liveStream.imjoy.html"
+  },
+  {
+   "name": "Live Stream Window",
+   "mode": "iframe",
+   "tags": [
+    "op",
+    "window"
+   ],
+   "ui": "live streaming with iframe",
+   "version": "0.1.0",
+   "api_version": "0.1.0",
+   "description": "A plugin for live streaming.",
+   "icon": "extension",
+   "inputs": null,
+   "outputs": null,
+   "dependencies": [
+    "Live Stream"
+   ],
+   "uri": "liveStreamWindow.imjoy.html"
   },
   {
    "name": "Localization3D",
