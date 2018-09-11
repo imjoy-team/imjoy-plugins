@@ -17,9 +17,9 @@ Describe your plugin here.
   "outputs": null,
   "icon": null,
   "env": "conda create -n python2 python=2.7",
-  "requirements": ["conda:ffmpeg && npm install ws"],
+  "requirements": "conda config --add channels conda-forge && conda install -y ffmpeg nodejs && npm install ws",
   "cmd": "python",
-  "dependencies": ["Live Stream Window"]
+  "dependencies": []
 }
 </config>
 
@@ -91,9 +91,10 @@ class PythonPlugin():
     api.utils.kill(self.relay.pid)
 
   def run(self, my):
+    api.run("Live Stream Window")
     mmc.setExposure(10)
     mmc.startContinuousSequenceAcquisition(0)
-    api.run("Live Stream Window")
+
 
 api.export(PythonPlugin())
 </script>

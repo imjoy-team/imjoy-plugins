@@ -17,7 +17,7 @@ Describe your plugin here.
   "outputs": null,
   "icon": null,
   "env": null,
-  "requirements": ["conda:ffmpeg && npm install ws"],
+  "requirements": "conda config --add channels conda-forge && conda install -y ffmpeg nodejs && npm install ws",
   "cmd": "python",
   "dependencies": ["Live Stream Window"]
 }
