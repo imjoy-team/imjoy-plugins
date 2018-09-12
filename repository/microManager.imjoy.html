@@ -5,21 +5,21 @@ Describe your plugin here.
 
 <config lang="json">
 {
-  "name": "Live Stream",
+  "name": "MicroManager",
   "mode": "pyworker",
   "version": "0.1.0",
   "api_version": "0.1.1",
   "createdAt": "Mon Jun 26 2018 15:45:30",
-  "description": "A plugin for demonstrate streaming with python.",
+  "description": "A plugin for controlling MicroManager in Python.",
   "tags": ["demo", "op"],
-  "ui": "image processing with python",
+  "ui": "MicroManager Control",
   "inputs": null,
   "outputs": null,
   "icon": null,
-  "env": null,
+  "env": "conda create -n python2 python=2.7",
   "requirements": "conda config --add channels conda-forge && conda install -y ffmpeg nodejs && npm install ws",
   "cmd": "python",
-  "dependencies": ["Live Stream Window"]
+  "dependencies": []
 }
 </config>
 
@@ -33,6 +33,17 @@ import os
 import sys
 import traceback
 
+MMFolder = '/Applications/Micro-Manager-2.0.0-beta3-20180609/'
+MMConfig = os.path.join(MMFolder, "MMConfig_demo.cfg")
+sys.path.append(MMFolder)
+
+import MMCorePy
+
+mmc = MMCorePy.CMMCore()  # Instance micromanager core
+print( mmc.getVersionInfo() )
+mmc.loadSystemConfiguration(MMConfig)
+print('configuration file loaded: ', MMConfig)
+
 # prepare source code for the websocket relay.
 relay_code = '''var fs=require("fs"),http=require("http"),WebSocket=require("ws");process.argv.length<3&&(console.log("Usage: node websocket-relay.js <secret> [<stream-port> <websocket-port>]"),process.exit());var STREAM_SECRET=process.argv[2],STREAM_PORT=process.argv[3]||8081,WEBSOCKET_PORT=process.argv[4]||8082,RECORD_STREAM=!1,socketServer=new WebSocket.Server({port:WEBSOCKET_PORT,perMessageDeflate:!1});socketServer.connectionCount=0,socketServer.on("connection",function(e,o){socketServer.connectionCount++,console.log("New WebSocket Connection: ",(o||e.upgradeReq).socket.remoteAddress,(o||e.upgradeReq).headers["user-agent"],"("+socketServer.connectionCount+" total)"),e.on("close",function(e,o){socketServer.connectionCount--,console.log("Disconnected WebSocket ("+socketServer.connectionCount+" total)")})}),socketServer.broadcast=function(e){socketServer.clients.forEach(function(o){o.readyState===WebSocket.OPEN&&o.send(e)})};var streamServer=http.createServer(function(e,o){if(e.url.substr(1).split("/")[0]!==STREAM_SECRET&&(console.log("Failed Stream Connection: "+e.socket.remoteAddress+":"+e.socket.remotePort+" - wrong secret."),o.end()),o.connection.setTimeout(0),console.log("Stream Connected: "+e.socket.remoteAddress+":"+e.socket.remotePort),e.on("data",function(o){socketServer.broadcast(o),e.socket.recording&&e.socket.recording.write(o)}),e.on("end",function(){console.log("close"),e.socket.recording&&e.socket.recording.close()}),RECORD_STREAM){var t="recordings/"+Date.now()+".ts";e.socket.recording=fs.createWriteStream(t)}}).listen(STREAM_PORT);console.log("Listening for incomming MPEG-TS Stream on http://127.0.0.1:"+STREAM_PORT+"/<secret>"),console.log("Awaiting WebSocket connections on ws://127.0.0.1:"+WEBSOCKET_PORT+"/");'''
 with open('./__websocket_relay__.js', 'w') as f:
@@ -43,24 +54,29 @@ def run_server(abort):
     height = 512
     frame_size = width * height  # 3 bytes for rgb24
     frame_dim = '{}x{}'.format(width, height)
-    cmd = 'ffmpeg -f rawvideo -video_size {} -pixel_format gray16le -i pipe:0 -f mpegts -codec:v mpeg1video -s {} -b:v 1000k -bf 0 http://localhost:8081/supersecret'.format(frame_dim, frame_dim).split()
+    cmd = 'ffmpeg -f rawvideo -video_size {} -pixel_format gray16le -i pipe:0 -f mpegts -codec:v mpeg1video -s {} -b:v 1000k -bf 0 http://localhost:8081/micro-manager-L2J5F4S7LL2F'.format(frame_dim, frame_dim).split()
     converter = subprocess.Popen(cmd, stdin=subprocess.PIPE) #, stdout=subprocess.PIPE)
-    while not abort.is_set()
-        in_data = np.random.bytes(frame_size)
-        try:
-            converter.stdin.write(in_data)
-        except:
-            traceback.print_exc(file=sys.stdout)
-            if converter.poll() is not None:
-                print('the converter has stopped.')
-                break
+    while not abort.is_set():
+        if mmc.getRemainingImageCount() > 0:
+            image = mmc.getLastImage()
+            image = image.astype('float32')/image.max()*65535.0
+            in_data = image.astype('uint16').tobytes()
+            # in_data = np.random.bytes(frame_size)
+            try:
+                converter.stdin.write(in_data)
+                time.sleep(0.08)
+            except:
+                traceback.print_exc(file=sys.stdout)
+                if converter.poll() is not None:
+                    print('the converter has stopped.')
+                    break
     converter.stdin.close()
-    api.utils.kill(converter.pid)
+    converter.terminate()
 
 class PythonPlugin():
   def setup(self):
     print('starting the relay server')
-    self.relay = subprocess.Popen('node ./__websocket_relay__.js supersecret 8081 8082'.split(' '), shell=False)
+    self.relay = subprocess.Popen('node ./__websocket_relay__.js micro-manager-L2J5F4S7LL2F 8081 8082'.split(' '), shell=False)
     time.sleep(3)
     print('starting ffmpeg')
     self.abort = threading.Event()
@@ -69,12 +85,15 @@ class PythonPlugin():
     t.start()
 
   def exit(self):
-      print('aborting servers...', self.relay.pid)
-      self.abort = True
-      api.utils.kill(self.relay.pid)
+    mmc.stopSequenceAcquisition()
+    print('aborting servers...', self.relay.pid)
+    self.abort = True
+    api.utils.kill(self.relay.pid)
 
   def run(self, my):
     api.run("Live Stream Window")
+    mmc.setExposure(10)
+    mmc.startContinuousSequenceAcquisition(0)
 
 
 api.export(PythonPlugin())

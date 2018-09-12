@@ -130,8 +130,29 @@
     "conda:ffmpeg && npm install ws"
    ],
    "cmd": "python",
-   "dependencies": [],
+   "dependencies": [
+    "Live Stream Window"
+   ],
    "uri": "liveStream.imjoy.html"
+  },
+  {
+   "name": "Live Stream Window",
+   "mode": "iframe",
+   "tags": [
+    "op",
+    "window"
+   ],
+   "ui": "live streaming with iframe",
+   "version": "0.1.0",
+   "api_version": "0.1.0",
+   "description": "A plugin for live streaming.",
+   "icon": "extension",
+   "inputs": null,
+   "outputs": null,
+   "dependencies": [
+    "Live Stream"
+   ],
+   "uri": "liveStreamWindow.imjoy.html"
   },
   {
    "name": "Localization3D",
@@ -180,6 +201,31 @@
    "icon": "color_lens",
    "dependencies": [],
    "uri": "lookupTable.imjoy.html"
+  },
+  {
+   "name": "MicroManager",
+   "mode": "pyworker",
+   "version": "0.1.0",
+   "api_version": "0.1.1",
+   "createdAt": "Mon Jun 26 2018 15:45:30",
+   "description": "A plugin for controlling MicroManager in Python.",
+   "tags": [
+    "demo",
+    "op"
+   ],
+   "ui": "MicroManager Control",
+   "inputs": null,
+   "outputs": null,
+   "icon": null,
+   "env": "conda create -n python2 python=2.7",
+   "requirements": [
+    "conda:ffmpeg && npm install ws"
+   ],
+   "cmd": "python",
+   "dependencies": [
+    "Live Stream Window"
+   ],
+   "uri": "microManager.imjoy.html"
   },
   {
    "name": "Python Demo Plugin",
