@@ -13,7 +13,7 @@
   "dependencies": ["Image Window", "2D Histogram"]
 }
 </config>
-<script>
+<script lang="javascript">
 importScripts("https://cdn.rawgit.com/Stuk/jszip/9fb481ac/dist/jszip.min.js")
 importScripts("https://cdn.rawgit.com/satazor/js-spark-md5/bbd1624a/spark-md5.min.js")
 
@@ -584,7 +584,7 @@ class SMLMFilePlugin {
     //     tables[f.name] = {type:'localization/table', table: f.data}
     // }
     // return {type:'localization/table', table: files[0].data}
-    
+
     my.data = {type:'localization/table', table: files[0].data}
    try {
       api.showStatus("rendering...")

@@ -10,14 +10,9 @@ var uri_root = "https://raw.githubusercontent.com/oeway/ImJoy-Plugins/master/rep
 
 function parsePlugin(code){
   var pluginComp = pluginParser.parseComponent(code)
-  if(pluginComp && pluginComp.customBlocks){
+  if(pluginComp && pluginComp.config && pluginComp.config.length>0){
     var config = {}
-    for (let i = 0; i < pluginComp.customBlocks.length; i++) {
-      if (pluginComp.customBlocks[i].type == 'config') {
-        config = JSON.parse(pluginComp.customBlocks[i].content)
-        break
-      }
-    }
+    config = JSON.parse(pluginComp.config[0].content)
     return config;
   }
   else{

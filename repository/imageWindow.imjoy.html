@@ -19,12 +19,14 @@ This plugin is for dispalying 2d image.
   "dependencies": []
 }
 </config>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.1/dist/leaflet.css"
+integrity="sha512-Rksm5RenBEKSKFjgI3a41vrjkw4EVPlJ3+OiI65vTjIdo9brlAacEuKOiQ5OFh7cOI1bkDwLqdLw3Zg0cRJAAQ=="
+crossorigin=""/>
+<link rel="stylesheet" href="https://cdn.rawgit.com/leongersen/noUiSlider/aa64a6d9/distribute/nouislider.min.css"/>
+
 <window>
   <div>
-   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.1/dist/leaflet.css"
-   integrity="sha512-Rksm5RenBEKSKFjgI3a41vrjkw4EVPlJ3+OiI65vTjIdo9brlAacEuKOiQ5OFh7cOI1bkDwLqdLw3Zg0cRJAAQ=="
-   crossorigin=""/>
-   <link rel="stylesheet" href="https://cdn.rawgit.com/leongersen/noUiSlider/aa64a6d9/distribute/nouislider.min.css"/>
    <div id="slider"></div>
     <select id="lut" >
         <option value="gray">Gray</option>
@@ -34,7 +36,7 @@ This plugin is for dispalying 2d image.
   </div>
 </window>
 
-<script>
+<script lang="javascript">
 
 const hot_lut = [
   [10, 0, 0],
@@ -326,15 +328,15 @@ function array2url(imageArr, w, h, low, high, lut){
         canvas_img_data[i*4] = v[0]
         canvas_img_data[i*4+1] = v[1]
         canvas_img_data[i*4+2] = v[2]
-        canvas_img_data[i*4+3] = 255 
+        canvas_img_data[i*4+3] = 255
       }
       else{
         canvas_img_data[i*4] = v
         canvas_img_data[i*4+1] = v
         canvas_img_data[i*4+2] = v
-        canvas_img_data[i*4+3] = 255 
+        canvas_img_data[i*4+3] = 255
       }
-      
+
   }
   ctx.putImageData(canvas_img, 0, 0);
   return [canvas.toDataURL("image/png"), min, max, low, high]
@@ -365,7 +367,7 @@ class ImageWindowPlugin {
     this._slider.noUiSlider.on('change', ()=>{this.run(this._my)})
     this._my = null
     this.lutOpt = document.getElementById("lut");
-    
+
     this.lutOpt.onchange = ()=>{
         this.run()
     }
