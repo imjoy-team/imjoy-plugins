@@ -126,9 +126,7 @@
    "outputs": null,
    "icon": null,
    "env": null,
-   "requirements": [
-    "conda:ffmpeg && npm install ws"
-   ],
+   "requirements": "conda config --add channels conda-forge && conda install -y ffmpeg nodejs && npm install ws",
    "cmd": "python",
    "dependencies": [
     "Live Stream Window"
@@ -218,13 +216,9 @@
    "outputs": null,
    "icon": null,
    "env": "conda create -n python2 python=2.7",
-   "requirements": [
-    "conda:ffmpeg && npm install ws"
-   ],
+   "requirements": "conda config --add channels conda-forge && conda install -y ffmpeg nodejs && npm install ws",
    "cmd": "python",
-   "dependencies": [
-    "Live Stream Window"
-   ],
+   "dependencies": [],
    "uri": "microManager.imjoy.html"
   },
   {
@@ -411,6 +405,23 @@
     "Image Window"
    ],
    "uri": "tifFileImporter.imjoy.html"
+  },
+  {
+   "name": "Vega",
+   "mode": "iframe",
+   "tags": [
+    "op",
+    "window"
+   ],
+   "ui": null,
+   "version": "0.1.0",
+   "api_version": "0.1.0",
+   "description": "A plugin for Vega visualization.",
+   "icon": "extension",
+   "inputs": null,
+   "outputs": null,
+   "dependencies": [],
+   "uri": "vega.imjoy.html"
   }
  ]
 }

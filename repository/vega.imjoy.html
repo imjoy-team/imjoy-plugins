@@ -1,0 +1,60 @@
+
+<docs lang="markdown">
+Describe your plugin here.
+</docs>
+
+<config lang="json">
+{
+  "name": "Vega",
+  "mode": "iframe",
+  "tags": ["op", "window"],
+  "ui": null,
+  "version": "0.1.0",
+  "api_version": "0.1.0",
+  "description": "A plugin for Vega visualization.",
+  "icon": "extension",
+  "inputs": null,
+  "outputs": null,
+  "dependencies": []
+}
+</config>
+
+<script lang="javascript">
+class VegaPlugin {
+  async setup() {
+    await importScripts("https://cdn.jsdelivr.net/npm/vega@4.2.0", "https://cdn.jsdelivr.net/npm/vega-lite@3.0.0-rc6", "https://cdn.jsdelivr.net/npm/vega-embed@3.19.2")
+  }
+
+  run(my) {
+    // var spec = {
+    //
+    //   "$schema": "https://vega.github.io/schema/vega-lite/v2.0.json",
+    //   "description": "A simple bar chart with embedded data.",
+    //   "data": {
+    //     "values": [
+    //       {"a": "A","b": 28}, {"a": "B","b": 55}, {"a": "C","b": 43},
+    //       {"a": "D","b": 91}, {"a": "E","b": 81}, {"a": "F","b": 53},
+    //       {"a": "G","b": 19}, {"a": "H","b": 87}, {"a": "I","b": 52}
+    //     ]
+    //   },
+    //   "mark": "bar",
+    //   "encoding": {
+    //     "x": {"field": "a", "type": "ordinal"},
+    //     "y": {"field": "b", "type": "quantitative"}
+    //   }
+    // }
+    var spec = my.data
+    vegaEmbed("#vis", spec, {"actions": false});
+  }
+}
+
+api.export(new VegaPlugin())
+</script>
+
+<window lang="html">
+ <div id="vis"></div>
+</window>
+
+<style lang="css">
+
+</style>
