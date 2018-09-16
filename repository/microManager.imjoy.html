@@ -75,6 +75,10 @@ def run_server(abort):
 
 class PythonPlugin():
   def setup(self):
+    api.register(name="set exposure", ui="{id:'exposure', type:'number', min:1, placeholder: 50} ms", run=self.set_exposure)
+    api.register(name="start live", run=self.start_live)
+    api.register(name="stop live", run=self.stop_live)
+    
     print('starting the relay server')
     self.relay = subprocess.Popen('node ./__websocket_relay__.js micro-manager-L2J5F4S7LL2F 8081 8082'.split(' '), shell=False)
     time.sleep(3)
@@ -84,6 +88,21 @@ class PythonPlugin():
     t.daemon = True
     t.start()
 
+  def start_live(self, my):
+    print('start live')
+    api.run("Live Stream Window")
+    mmc.startContinuousSequenceAcquisition(0)
+
+  def stop_live(self, my):
+    print('stop live')
+    mmc.stopSequenceAcquisition()
+
+  def set_exposure(self, my):
+    print('set expousre: ', my.config.exposure)
+    mmc.stopSequenceAcquisition()
+    mmc.setExposure(my.config.exposure)
+    mmc.startContinuousSequenceAcquisition(0)
+
   def exit(self):
     mmc.stopSequenceAcquisition()
     print('aborting servers...', self.relay.pid)
@@ -92,7 +111,6 @@ class PythonPlugin():
 
   def run(self, my):
     api.run("Live Stream Window")
-    mmc.setExposure(10)
     mmc.startContinuousSequenceAcquisition(0)
 
 
