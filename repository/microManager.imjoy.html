@@ -75,7 +75,7 @@ def run_server(abort):
 
 class PythonPlugin():
   def setup(self):
-    api.register(name="set exposure", ui="{id:'exposure', type:'number', min:1, placeholder: 50} ms", run=self.set_exposure)
+    api.register(name="set exposure", ui="{id:'exposure', type:'number', min:1, placeholder: 50} ms", run=self.set_exposure, update=self.set_exposure)
     api.register(name="start live", run=self.start_live)
     api.register(name="stop live", run=self.stop_live)
     
