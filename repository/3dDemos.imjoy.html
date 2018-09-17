@@ -1,0 +1,51 @@
+
+<docs lang="markdown">
+Describe your plugin here.
+</docs>
+
+<config lang="json">
+{
+  "name": "3D Demos",
+  "mode": "iframe",
+  "tags": ["op", "window"],
+  "ui": "Demo: {id: 'demo', type:'choose', options: ['Sponza', 'Volume(three.js)', 'Volume(vtk.js)'], placeholder: 'Volume(three.js)'}",
+  "version": "0.1.0",
+  "api_version": "0.1.0",
+  "description": "A set of demo plugins of webGL 3D.",
+  "icon": "extension",
+  "inputs": null,
+  "outputs": null,
+  "dependencies": []
+}
+</config>
+
+<script lang="javascript">
+class ThreeDPlugin {
+  setup() {
+
+  }
+  run(my) {
+    var frame = document.createElement("iframe");
+    frame.width = '100%';
+    frame.height = '100%';
+    if(my.config.demo == 'Sponza'){
+        frame.src = "https://www.babylonjs.com/demos/sponzadynamicshadows";
+    }
+    else if(my.config.demo == 'Volume(three.js)'){
+        frame.src = "https://rawgit.com/almarklein/three.js/volumeexample/examples/webgl_materials_texture3d_volume1.html";
+    }
+    else if(my.config.demo == 'Volume(vtk.js)'){
+        frame.src = "https://kitware.github.io/vtk-js/examples/PiecewiseGaussianWidget/index.html";
+    }
+    var element = document.getElementById("3d_canvas");
+    element.appendChild(frame);
+  }
+}
+api.export(new ThreeDPlugin())
+</script>
+
+<window lang="html">
+
+  <div id="3d_canvas"></div>
+
+</window>

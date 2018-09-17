@@ -3,6 +3,23 @@
  "uri_root": "https://raw.githubusercontent.com/oeway/ImJoy-Plugins/master/repository",
  "plugins": [
   {
+   "name": "3D Demos",
+   "mode": "iframe",
+   "tags": [
+    "op",
+    "window"
+   ],
+   "ui": "Demo: {id: 'demo', type:'choose', options: ['Sponza', 'Volume(three.js)', 'Volume(vtk.js)'], placeholder: 'Volume(three.js)'}",
+   "version": "0.1.0",
+   "api_version": "0.1.0",
+   "description": "A set of demo plugins of webGL 3D.",
+   "icon": "extension",
+   "inputs": null,
+   "outputs": null,
+   "dependencies": [],
+   "uri": "3dDemos.imjoy.html"
+  },
+  {
    "name": "2D Histogram",
    "mode": "webworker",
    "version": "0.1.0",
@@ -422,23 +439,6 @@
    "outputs": null,
    "dependencies": [],
    "uri": "vega.imjoy.html"
-  },
-  {
-   "name": "Volume Rendering",
-   "mode": "iframe",
-   "tags": [
-    "op",
-    "window"
-   ],
-   "ui": null,
-   "version": "0.1.0",
-   "api_version": "0.1.0",
-   "description": "A demo plugin for volume rendering with Three.js (using iframe).",
-   "icon": "extension",
-   "inputs": null,
-   "outputs": null,
-   "dependencies": [],
-   "uri": "volumeRendering.imjoy.html"
   }
  ]
 }
