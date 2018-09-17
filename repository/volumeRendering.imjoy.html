@@ -11,7 +11,7 @@ Describe your plugin here.
   "ui": null,
   "version": "0.1.0",
   "api_version": "0.1.0",
-  "description": "A demo plugin for volume rendering with Three.js (using iframe).",
+  "description": "A demo plugin for volume rendering with vtk.js (using iframe).",
   "icon": "extension",
   "inputs": null,
   "outputs": null,
@@ -33,5 +33,7 @@ api.export(new UntitledPlugin())
 </script>
 
 <window lang="html">
-  <iframe width="100%" height="100%" src="https://rawgit.com/almarklein/three.js/volumeexample/examples/webgl_materials_texture3d_volume1.html"></iframe>
+  
+  <iframe width="100%" height="100%" src="https://kitware.github.io/vtk-js/examples/PiecewiseGaussianWidget/index.html"></iframe>
+<!--   <iframe width="100%" height="100%" src="https://rawgit.com/almarklein/three.js/volumeexample/examples/webgl_materials_texture3d_volume1.html"></iframe> -->
 </window>
