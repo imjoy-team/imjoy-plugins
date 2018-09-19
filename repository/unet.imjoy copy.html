@@ -1,0 +1,93 @@
+
+<docs lang="markdown">
+Describe your plugin here.
+</docs>
+
+<config lang="json">
+{
+  "name": "Unet Plugin",
+  "mode": "pyworker",
+  "version": "0.1.0",
+  "api_version": "0.1.1",
+  "description": "A plugin for demonstrate unet segmentation with keras.",
+  "tags": ["demo", "op"],
+  "ui": null,
+  "inputs": null,
+  "outputs": null,
+  "icon": null,
+  "env": null,
+  "requirements": "git clone https://github.com/zhixuhao/unet",
+  "dependencies": []
+}
+</config>
+
+<script lang="python">
+import os
+os.chdir("./unet")
+
+import threading
+from model import *
+from data import *
+import keras
+import numpy as np
+import sys
+import base64
+
+class UpdateUI(keras.callbacks.Callback):
+    def __init__(self, total_epoch):
+        self.total_epoch = total_epoch
+    def on_epoch_begin(self, epoch, logs):
+        api.showProgress(epoch/self.total_epoch*100)
+        api.showStatus(str(epoch/self.total_epoch*100)+'%')
+        sys.stdout.flush()
+
+class PythonPlugin():
+  def setup(self):
+    print('setup in python')
+    self.model = unet()
+    # self.model.load_weights("unet_membrane.hdf5")
+    api.register(name="train", run=self.train)
+
+  def train(self, dataDir):
+    data_gen_args = dict(rotation_range=0.2,
+                    width_shift_range=0.05,
+                    height_shift_range=0.05,
+                    shear_range=0.05,
+                    zoom_range=0.05,
+                    horizontal_flip=True,
+                    fill_mode='nearest')
+    api.showStatus('loading data...')
+
+    myGene = trainGenerator(2, dataDir,'image','label',data_gen_args,save_to_dir = None)
+    updateUI = UpdateUI(10)
+
+    model_checkpoint = ModelCheckpoint('unet_membrane.hdf5', monitor='loss',verbose=1, save_best_only=True)
+    api.showStatus('running...')
+    self.model.fit_generator(myGene,steps_per_epoch=1,epochs=10,callbacks=[model_checkpoint, updateUI])
+
+  def train(self, my):
+    def start(dataDir):
+        t = threading.Thread(target=self.train, args=(dataDir,))
+        t.daemon = True
+        t.start()
+    api.showFileDialog(type="directory").then(start)
+
+  def run(self, my):
+    def start(dataDir):
+        api.showStatus('testing...')
+        testGene  = testGenerator(dataDir)
+        results = self.model.predict_generator(testGene,3,verbose=1)
+        for i,item in enumerate(results):
+            img = item[:,:,0]
+            print(img.shape)
+            io.imsave(os.path.join("output.png"),img)
+            with open("output.png", "rb") as f:
+                data = f.read()
+                result = base64.b64encode(data).decode('ascii')
+                url = 'data:image/png;base64,' + result
+                api.createWindow(name='unet prediction', type = 'imjoy/image', w=7, h=7, data= {"src": url})
+
+    api.showFileDialog(type="directory").then(start).catch(print)
+
+api.export(PythonPlugin())
+</script>
