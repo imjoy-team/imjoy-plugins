@@ -15,8 +15,8 @@ Describe your plugin here.
   "inputs": null,
   "outputs": null,
   "icon": null,
-  "env": null,
-  "requirements": "pip install keras==2.1.4 && git clone https://github.com/zhixuhao/unet",
+  "env": "conda create -n unet python=3.6",
+  "requirements": "pip install tensorflow scikit-image keras==2.1.4 && git clone https://github.com/zhixuhao/unet",
   "dependencies": []
 }
 </config>
@@ -79,10 +79,10 @@ class PythonPlugin():
                     fill_mode='nearest')
         myGene = trainGenerator(my.config.batchsize, dataDir,'image','label',data_gen_args,save_to_dir = None)
         api.showStatus('start traning...')
-        self.start_train(myGene,my.config.epochs, my.config.steps)
-        # t = threading.Thread(target=self.start_train, args=(myGene,my.config.epochs, my.config.steps))
-        # t.daemon = True
-        # t.start()
+        # self.start_train(myGene,my.config.epochs, my.config.steps)
+        t = threading.Thread(target=self.start_train, args=(myGene,my.config.epochs, my.config.steps))
+        t.daemon = True
+        t.start()
 
 
     if self.workdir is None:
