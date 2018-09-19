@@ -40,6 +40,7 @@ class UpdateUI(keras.callbacks.Callback):
         api.showProgress(epoch/self.total_epoch*100)
         api.showStatus(str(epoch/self.total_epoch*100)+'%')
         sys.stdout.flush()
+        print('.')
 
 class PythonPlugin():
   def setup(self):
@@ -58,7 +59,7 @@ class PythonPlugin():
     def callback(workdir):
         api.showStatus('set work directory to '+workdir)
         self.workdir = workdir
-    api.showFileDialog(title="Select a working directory", type="directory", root=os.getcwd()).then(callback)
+    api.showFileDialog(title="Select a working directory", type="directory", root=os.getcwd()).then(callback).catch(print)
 
   def start_train(self, myGene, epochs, steps_per_epoch):
     updateUI = UpdateUI(epochs)
@@ -77,11 +78,15 @@ class PythonPlugin():
                     horizontal_flip=True,
                     fill_mode='nearest')
         myGene = trainGenerator(my.config.batchsize, dataDir,'image','label',data_gen_args,save_to_dir = None)
-        t = threading.Thread(target=self.start_train, args=(myGene,my.config.epochs, my.config.steps))
-        t.daemon = True
-        t.start()
+        api.showStatus('start traning...')
+        self.start_train(myGene,my.config.epochs, my.config.steps)
+        # t = threading.Thread(target=self.start_train, args=(myGene,my.config.epochs, my.config.steps))
+        # t.daemon = True
+        # t.start()
+
+
     if self.workdir is None:
-        api.showFileDialog(title="Select a directory with traning images", type="directory", root=os.getcwd()).then(callback)
+        api.showFileDialog(title="Select a directory with traning images", type="directory", root=os.getcwd()).then(callback).catch(print)
     else:
         callback(os.path.join(self.workdir, 'train'))
 
@@ -102,7 +107,7 @@ class PythonPlugin():
                 api.createWindow(name='unet prediction', type = 'imjoy/image', w=7, h=7, data= {"src": imgurl})
 
     if self.workdir is None:
-        api.showFileDialog(title="Select a directory with testing images", type="directory", root=os.getcwd()).then(callback)
+        api.showFileDialog(title="Select a directory with testing images", type="directory", root=os.getcwd()).then(callback).catch(print)
     else:
         callback(os.path.join(self.workdir, 'test'))
 
