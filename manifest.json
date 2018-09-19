@@ -424,6 +424,25 @@
    "uri": "tifFileImporter.imjoy.html"
   },
   {
+   "name": "Unet Segmentation",
+   "mode": "pyworker",
+   "version": "0.1.0",
+   "api_version": "0.1.1",
+   "description": "A plugin for demonstrate unet segmentation with keras.",
+   "tags": [
+    "demo",
+    "op"
+   ],
+   "ui": null,
+   "inputs": null,
+   "outputs": null,
+   "icon": null,
+   "env": null,
+   "requirements": "git clone https://github.com/zhixuhao/unet",
+   "dependencies": [],
+   "uri": "unet.imjoy.html"
+  },
+  {
    "name": "Vega",
    "mode": "iframe",
    "tags": [
