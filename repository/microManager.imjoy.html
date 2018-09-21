@@ -35,15 +35,16 @@ import traceback
 from skimage.external.tifffile import TiffWriter
 import uuid
 
-
 workdir = './imjoy-mm-data'
 if not os.path.exists(workdir):
     os.makedirs(workdir)
 
-
 MMFolder = '/Applications/Micro-Manager-2.0.0-beta3-20180609/'
 MMConfig = os.path.join(MMFolder, "MMConfig_demo.cfg")
-sys.path.append(MMFolder)
+
+sys.path.insert(0, MMFolder)
+os.environ['PATH'] = MMFolder  + ';' +  os.environ['PATH']
+os.environ['PYTHONPATH'] = MMFolder  + ';' +  os.environ['PYTHONPATH']
 
 import MMCorePy
 
