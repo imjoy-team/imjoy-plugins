@@ -93,6 +93,8 @@ class PythonPlugin():
   def test(self, my):
     def callback(dataDir):
         api.showStatus('testing...')
+        if os.path.exists('unet_membrane.hdf5'):
+            self.model.load_weights("unet_membrane.hdf5")
         my.config.num = my.config.num or 30
         testGene  = testGenerator(dataDir, num_image=my.config.num)
         results = self.model.predict_generator(testGene,my.config.num,verbose=1)
