@@ -37,12 +37,15 @@ import time
 class UpdateUI(keras.callbacks.Callback):
     def __init__(self, total_epoch):
         self.total_epoch = total_epoch
+
+    def on_batch_begin(self, batch, logs):
+        api.showStatus('training: ' + str(logs))
+        sys.stdout.flush()
+ 
     def on_epoch_begin(self, epoch, logs):
         api.showProgress(epoch/self.total_epoch*100)
-        api.showStatus(str(epoch/self.total_epoch*100)+'%')
-        sys.stdout.flush()
-        time.sleep(0)
-
+        api.showStatus('training epoch:'+str(epoch)+'/'+str(self.total_epoch) + ' '+ str(logs))
+ 
 class PythonPlugin():
   def setup(self):
     print('setup in python')
