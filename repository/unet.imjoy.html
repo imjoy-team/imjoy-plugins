@@ -38,15 +38,18 @@ class UpdateUI(keras.callbacks.Callback):
     def __init__(self, total_epoch):
         self.total_epoch = total_epoch
         self.epoch = 0
+        self.logs = {}
 
     def on_batch_begin(self, batch, logs):
-        api.showStatus('training epoch:'+str(epoch)+'/'+str(self.total_epoch) + str(logs))
+        self.logs = logs
+        api.showStatus('training epoch:'+str(self.epoch)+'/'+str(self.total_epoch) + ' ' + str(logs))
         sys.stdout.flush()
  
     def on_epoch_begin(self, epoch, logs):
         self.epoch = epoch
-        api.showProgress(epoch/self.total_epoch*100)
-        api.showStatus('training epoch:'+str(epoch)+'/'+str(self.total_epoch) + ' '+ str(logs))
+        self.logs = logs
+        api.showProgress(self.epoch/self.total_epoch*100)
+        api.showStatus('training epoch:'+str(self.epoch)+'/'+str(self.total_epoch) + ' '+ str(logs))
  
 class PythonPlugin():
   def setup(self):
