@@ -39,12 +39,12 @@ workdir = './imjoy-mm-data'
 if not os.path.exists(workdir):
     os.makedirs(workdir)
 
-MMFolder = '/Applications/Micro-Manager-2.0.0-beta3-20180609/'
+MMFolder = '/Applications/Micro-Manager/'
 MMConfig = os.path.join(MMFolder, "MMConfig_demo.cfg")
 
 sys.path.insert(0, MMFolder)
-os.environ['PATH'] = MMFolder  + ';' +  os.environ.get('PATH', '')
-os.environ['PYTHONPATH'] = MMFolder  + ';' +  os.environ.get('PYTHONPATH', '')
+os.environ['PATH'] = MMFolder  + os.pathsep +  os.environ.get('PATH', '')
+os.environ['PYTHONPATH'] = MMFolder  + os.pathsep +  os.environ.get('PYTHONPATH', '')
 
 
 import MMCorePy
