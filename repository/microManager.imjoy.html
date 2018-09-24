@@ -43,8 +43,9 @@ MMFolder = '/Applications/Micro-Manager-2.0.0-beta3-20180609/'
 MMConfig = os.path.join(MMFolder, "MMConfig_demo.cfg")
 
 sys.path.insert(0, MMFolder)
-os.environ['PATH'] = MMFolder  + ';' +  os.environ['PATH']
-os.environ['PYTHONPATH'] = MMFolder  + ';' +  os.environ['PYTHONPATH']
+os.environ['PATH'] = MMFolder  + ';' +  os.environ.get('PATH', '')
+os.environ['PYTHONPATH'] = MMFolder  + ';' +  os.environ.get('PYTHONPATH', '')
+
 
 import MMCorePy
 
