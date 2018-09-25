@@ -1,0 +1,91 @@
+
+<docs lang="markdown">
+Describe your plugin here.
+</docs>
+
+<config lang="json">
+{
+  "name": "ANNA-PALM",
+  "mode": "pyworker",
+  "version": "0.1.0",
+  "api_version": "0.1.1",
+  "description": "A plugin for train with ANNA-PALM.",
+  "tags": ["demo", "op"],
+  "ui": null,
+  "inputs": null,
+  "outputs": null,
+  "icon": null,
+  "env": "conda create -n anet python=3.6",
+  "requirements": "git clone https://github.com/imodpasteur/ANNA-PALM && cd ANNA-PALM && pip install -r requirements.txt",
+  "dependencies": []
+}
+</config>
+
+<script lang="python">
+import sys
+sys.path.insert(0, './ANNA-PALM')
+
+import os
+import sys
+import tensorflow as tf
+from AnetLib.options.train_options import Options
+from AnetLib.models.models import create_model
+from smlm_datasets import create_data_sources
+
+default_workdir = './workdir'
+opt = Options().parse(['--workdir=./tmp_test'])
+opt.model = 'a_net_tensorflow'
+opt.fineSize = 512
+opt.batchSize = 1
+opt.dim_ordering = 'channels_last'
+opt.display_freq = 500
+opt.use_resize_conv = True
+opt.norm_A = 'mean_std'
+opt.norm_B = 'min_max[0,1]'
+opt.lambda_A = 50
+opt.input_nc = 2
+opt.lr_nc = 1
+opt.lr_scale = 1.0/4.0
+opt.lambda_LR = 0
+opt.control_nc = 1
+opt.add_data_type_control = True
+opt.add_lr_channel = 'pseudo'
+
+class PythonPlugin():
+  def setup(self):
+    self.step = 0
+    api.register(name="train", run=self.train, ui="steps:{id:'steps', type:'number', min:1, placeholder:2000}<br>"\
+                "batch size:{id:'batchsize', type:'number', min:1, placeholder:1}<br>"
+                )
+    api.register(name="test", run=self.test, ui="")
+
+  def run(self, my):
+    self.test(my)
+
+  def train(self, my):
+    api.showStatus('preparing data...')
+    opt.batchSize = my.config.batchsize
+    sources = create_data_sources(['TransformedTubulin001NB'], opt)
+    d = sources['train']
+    api.showStatus('start training...')
+    model = create_model(opt)
+    def step_callback(model, details):
+        self.step += 1
+        api.showStatus('training: ' + str(details))
+        print(str(details))
+        sys.stdout.flush()
+    model.train(d, step_callback=step_callback, verbose=1, max_steps=my.config.steps)
+
+  def test(self, my):
+    model = create_model(opt)
+    sources = create_data_sources(['TransformedTubulin001NB'], opt)
+    d = sources['test']
+    api.showStatus('start testing...')
+    def step_callback(model, details):
+        api.showStatus('testing: ' + str(details))
+        print(str(details))
+        sys.stdout.flush()
+    model.predict(d, step_callback=step_callback, verbose=1)
+
+api.export(PythonPlugin())
+</script>

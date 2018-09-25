@@ -9,7 +9,7 @@
     "op",
     "window"
    ],
-   "ui": "Demo: {id: 'demo', type:'choose', options: ['Sponza', 'Volume(three.js)', 'Volume(vtk.js)'], placeholder: 'Volume(three.js)'}",
+   "ui": "Demo: {id: 'demo', type:'choose', options: ['Sponza', 'Volume(vtk.js)'], placeholder: 'Volume(vtk.js)'}",
    "version": "0.1.0",
    "api_version": "0.1.0",
    "description": "A set of demo plugins of webGL 3D.",
@@ -18,6 +18,25 @@
    "outputs": null,
    "dependencies": [],
    "uri": "3dDemos.imjoy.html"
+  },
+  {
+   "name": "ANNA-PALM",
+   "mode": "pyworker",
+   "version": "0.1.0",
+   "api_version": "0.1.1",
+   "description": "A plugin for train with ANNA-PALM.",
+   "tags": [
+    "demo",
+    "op"
+   ],
+   "ui": null,
+   "inputs": null,
+   "outputs": null,
+   "icon": null,
+   "env": "conda create -n anet python=3.6",
+   "requirements": "git clone https://github.com/imodpasteur/ANNA-PALM && cd ANNA-PALM && pip install -r requirements.txt",
+   "dependencies": [],
+   "uri": "annaPalm.imjoy.html"
   },
   {
    "name": "2D Histogram",
@@ -149,23 +168,6 @@
     "Live Stream Window"
    ],
    "uri": "liveStream.imjoy.html"
-  },
-  {
-   "name": "Live Stream Window",
-   "mode": "iframe",
-   "tags": [
-    "op",
-    "window"
-   ],
-   "ui": "live streaming with iframe",
-   "version": "0.1.0",
-   "api_version": "0.1.0",
-   "description": "A plugin for live streaming.",
-   "icon": "extension",
-   "inputs": null,
-   "outputs": null,
-   "dependencies": [],
-   "uri": "liveStreamWindow.imjoy.html"
   },
   {
    "name": "Localization3D",
@@ -437,8 +439,8 @@
    "inputs": null,
    "outputs": null,
    "icon": null,
-   "env": null,
-   "requirements": "git clone https://github.com/zhixuhao/unet",
+   "env": "conda create -n unet python=3.6",
+   "requirements": "pip install tensorflow==1.5 h5py scikit-image keras==2.1.4 && git clone https://github.com/zhixuhao/unet",
    "dependencies": [],
    "uri": "unet.imjoy.html"
   },
