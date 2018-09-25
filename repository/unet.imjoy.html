@@ -33,6 +33,7 @@ import numpy as np
 import sys
 import base64
 import time
+import requests
 
 class UpdateUI(keras.callbacks.Callback):
     def __init__(self, total_epoch):
@@ -57,6 +58,13 @@ class PythonPlugin():
     self.workdir = None
     self.model = unet()
     if os.path.exists('unet_membrane.hdf5'):
+        self.model.load_weights("unet_membrane.hdf5")
+    else:
+        print('downloading pretrained model.')
+        url = 'https://www.dropbox.com/s/1ghpyhk4jzqzdvo/unet_membrane-46000iterations.hdf5?dl=1'
+        r = requests.get(url, allow_redirects=True)
+        open('unet_membrane.hdf5', 'wb').write(r.content)
+        print('file downloaded.')
         self.model.load_weights("unet_membrane.hdf5")
     api.register(name="train", run=self.train, ui="epochs:{id:'epochs', type:'number', min:1, placeholder:10}<br>"\
                 "steps per epoch:{id:'steps', type:'number', min:1, placeholder:5}<br>"\
