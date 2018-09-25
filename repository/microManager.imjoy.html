@@ -7,7 +7,7 @@ Describe your plugin here.
 {
   "name": "MicroManager",
   "mode": "pyworker",
-  "version": "0.1.0",
+  "version": "0.1.3",
   "api_version": "0.1.1",
   "createdAt": "Mon Jun 26 2018 15:45:30",
   "description": "A plugin for controlling MicroManager in Python.",
@@ -17,9 +17,9 @@ Describe your plugin here.
   "outputs": null,
   "icon": null,
   "env": "conda create -n python2 python=2.7",
-  "requirements": "conda config --add channels conda-forge && conda install -y ffmpeg nodejs && npm install ws",
+  "requirements": "conda config --add channels conda-forge && conda install -y ffmpeg nodejs && npm install ws && pip install scikit-image",
   "cmd": "python",
-  "dependencies": []
+  "dependencies": ["Live Stream Window"]
 }
 </config>
 
@@ -32,10 +32,20 @@ import threading
 import os
 import sys
 import traceback
+from skimage.external.tifffile import TiffWriter
+import uuid
 
-MMFolder = '/Applications/Micro-Manager-2.0.0-beta3-20180609/'
+workdir = './imjoy-mm-data'
+if not os.path.exists(workdir):
+    os.makedirs(workdir)
+
+MMFolder = '/Applications/Micro-Manager/'
 MMConfig = os.path.join(MMFolder, "MMConfig_demo.cfg")
-sys.path.append(MMFolder)
+
+sys.path.insert(0, MMFolder)
+os.environ['PATH'] = MMFolder  + os.pathsep +  os.environ.get('PATH', '')
+os.environ['PYTHONPATH'] = MMFolder  + os.pathsep +  os.environ.get('PYTHONPATH', '')
+
 
 import MMCorePy
 
@@ -49,7 +59,10 @@ relay_code = '''var fs=require("fs"),http=require("http"),WebSocket=require("ws"
 with open('./__websocket_relay__.js', 'w') as f:
     f.write(relay_code)
 
+currentImage = None
+
 def run_server(abort):
+    global currentImage
     width = 512
     height = 512
     frame_size = width * height  # 3 bytes for rgb24
@@ -59,6 +72,7 @@ def run_server(abort):
     while not abort.is_set():
         if mmc.getRemainingImageCount() > 0:
             image = mmc.getLastImage()
+            currentImage = image
             image = image.astype('float32')/image.max()*65535.0
             in_data = image.astype('uint16').tobytes()
             # in_data = np.random.bytes(frame_size)
@@ -75,6 +89,14 @@ def run_server(abort):
 
 class PythonPlugin():
   def setup(self):
+    api.register(name="set exposure", ui="{id:'exposure', type:'number', min:1, placeholder: 50} ms", run=self.set_exposure, update=self.set_exposure)
+    api.register(name="start live", run=self.start_live)
+    api.register(name="stop live", run=self.stop_live)
+    api.register(name="snap", run=self.snap)
+
+    self.tiff_file_name = os.path.join(workdir, str(uuid.uuid4())+'.tiff')
+    self.saver = TiffWriter(self.tiff_file_name, bigtiff=True)
+
     print('starting the relay server')
     self.relay = subprocess.Popen('node ./__websocket_relay__.js micro-manager-L2J5F4S7LL2F 8081 8082'.split(' '), shell=False)
     time.sleep(3)
@@ -84,7 +106,49 @@ class PythonPlugin():
     t.daemon = True
     t.start()
 
+  def snap(self, my):
+    global currentImage
+    if not mmc.isSequenceRunning():
+        mmc.snapImage()
+        image = mmc.getImage()
+    elif currentImage is not None:
+        image = currentImage
+    else:
+        image = mmc.getLastImage()
+    assert image is not None, 'failed to snap image.'
+    image4save = image.reshape((1, 1, 1, image.shape[0], image.shape[1]))
+    self.saver.save(image4save, compress=6)
+    api.showSnackbar('image saved to ' + self.tiff_file_name )
+    
+  def start_live(self, my):
+    global currentImage
+    currentImage = None
+    print('start live')
+    api.run("Live Stream Window")
+    if not mmc.isSequenceRunning():
+        mmc.startContinuousSequenceAcquisition(0)
+
+  def stop_live(self, my):
+    global currentImage
+    currentImage = None
+    print('stop live')
+    mmc.stopSequenceAcquisition()
+
+  def set_exposure(self, my):
+    print('set expousre: ', my.config.exposure)
+    restart = False
+    if mmc.isSequenceRunning():
+        restart = True
+        mmc.stopSequenceAcquisition()
+    mmc.setExposure(my.config.exposure)
+    if restart:
+        mmc.startContinuousSequenceAcquisition(0)
+
   def exit(self):
+    global currentImage
+    currentImage = None
+    if self.saver:
+        self.saver.close()
     mmc.stopSequenceAcquisition()
     print('aborting servers...', self.relay.pid)
     self.abort = True
@@ -92,8 +156,8 @@ class PythonPlugin():
 
   def run(self, my):
     api.run("Live Stream Window")
-    mmc.setExposure(10)
-    mmc.startContinuousSequenceAcquisition(0)
+    if not mmc.isSequenceRunning():
+        mmc.startContinuousSequenceAcquisition(0)
 
 
 api.export(PythonPlugin())
