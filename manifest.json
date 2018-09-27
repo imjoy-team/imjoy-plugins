@@ -4,7 +4,7 @@
  "plugins": [
   {
    "name": "3D Demos",
-   "mode": "iframe",
+   "mode": "window",
    "tags": [],
    "ui": "Demo: {id: 'demo', type:'choose', options: ['Sponza', 'Volume(vtk.js)'], placeholder: 'Volume(vtk.js)'}",
    "version": "0.1.0",
@@ -81,7 +81,7 @@
   },
   {
    "name": "Image Window",
-   "mode": "iframe",
+   "mode": "window",
    "tags": [],
    "inputs": {
     "type": {
@@ -154,7 +154,7 @@
   },
   {
    "name": "Live Stream Window",
-   "mode": "iframe",
+   "mode": "window",
    "tags": [],
    "ui": "live streaming with iframe",
    "version": "0.1.0",
@@ -168,7 +168,7 @@
   },
   {
    "name": "Localization3D",
-   "mode": "iframe",
+   "mode": "window",
    "tags": [],
    "ui": null,
    "version": "0.1.0",
@@ -280,7 +280,7 @@
   },
   {
    "name": "tSNE",
-   "mode": "iframe",
+   "mode": "window",
    "version": "0.1.0",
    "api_version": "0.1.1",
    "tags": [],
@@ -345,7 +345,7 @@
   },
   {
    "name": "Three.js Demo",
-   "mode": "iframe",
+   "mode": "window",
    "tags": [],
    "ui": null,
    "inputs": null,
@@ -394,19 +394,25 @@
    "version": "0.1.0",
    "api_version": "0.1.1",
    "description": "A plugin for demonstrate unet segmentation with keras.",
-   "tags": [],
+   "tags": [
+    "CPU",
+    "GPU"
+   ],
    "ui": null,
    "inputs": null,
    "outputs": null,
    "icon": null,
-   "env": "conda create -n unet python=3.6",
-   "requirements": "conda install tensorflow==1.5 h5py scikit-image keras==2.1.4 && git clone https://github.com/zhixuhao/unet",
+   "env": {
+    "CPU": "conda create -n tf-cpu python=3.6 tensorflow==1.5",
+    "GPU": "conda create -n tf-gpu python=3.6 tensorflow-gpu==1.5"
+   },
+   "requirements": "conda install h5py scikit-image keras==2.1.4 && git clone https://github.com/zhixuhao/unet",
    "dependencies": [],
    "uri": "unet.imjoy.html"
   },
   {
    "name": "Vega",
-   "mode": "iframe",
+   "mode": "window",
    "tags": [],
    "ui": null,
    "version": "0.1.0",

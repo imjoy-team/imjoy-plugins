@@ -10,13 +10,13 @@ Describe your plugin here.
   "version": "0.1.0",
   "api_version": "0.1.1",
   "description": "A plugin for demonstrate unet segmentation with keras.",
-  "tags": [],
+  "tags": ["CPU", "GPU"],
   "ui": null,
   "inputs": null,
   "outputs": null,
   "icon": null,
-  "env": "conda create -n unet python=3.6",
-  "requirements": "conda install tensorflow==1.5 h5py scikit-image keras==2.1.4 && git clone https://github.com/zhixuhao/unet",
+  "env": {"CPU": "conda create -n tf-cpu python=3.6 tensorflow==1.5", "GPU": "conda create -n tf-gpu python=3.6 tensorflow-gpu==1.5"},
+  "requirements": "conda install h5py scikit-image keras==2.1.4 && git clone https://github.com/zhixuhao/unet",
   "dependencies": []
 }
 </config>
