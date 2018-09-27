@@ -153,6 +153,20 @@
    "uri": "liveStream.imjoy.html"
   },
   {
+   "name": "Live Stream Window",
+   "mode": "iframe",
+   "tags": [],
+   "ui": "live streaming with iframe",
+   "version": "0.1.0",
+   "api_version": "0.1.1",
+   "description": "A plugin for live streaming.",
+   "icon": "extension",
+   "inputs": null,
+   "outputs": null,
+   "dependencies": [],
+   "uri": "liveStreamWindow.imjoy.html"
+  },
+  {
    "name": "Localization3D",
    "mode": "iframe",
    "tags": [],
