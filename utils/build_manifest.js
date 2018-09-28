@@ -4,6 +4,7 @@ var process = require("process");
 var pluginParser = require('./pluginParser');
 
 var repository_dir = "./repository";
+var collections_dir = "./collections";
 var manifest_path = "./manifest.json"
 var repo_version = "0.2.0"
 var uri_root = "https://raw.githubusercontent.com/oeway/ImJoy-Plugins/master/repository"
@@ -40,17 +41,45 @@ fs.readdir(repository_dir, function(err, files) {
 
   });
 
-  if(plugin_configs.length>0){
-    console.log("Writing %s plugins into '%s'", plugin_configs.length, manifest_path);
-    var repo_manifest = {version: repo_version, uri_root: uri_root, plugins: plugin_configs}
-    var stream = fs.createWriteStream(manifest_path);
-    stream.once('open', function(fd) {
-      stream.write(JSON.stringify(repo_manifest,null,' '));
-      stream.end();
+  var collection_configs = [];
+  // Loop through all the files in the temp directory
+  fs.readdir(collections_dir, function(err, files) {
+    if (err) {
+      console.error("Could not list the directory.", err);
+      process.exit(1);
+    }
+    files.forEach(function(file, index) {
+      var collection_path = path.join(collections_dir, file);
+      if (collection_path.endsWith(".json")){
+          // console.log("reading '%s'...", plugin_path);
+          var coll = fs.readFileSync(collection_path, "utf8");
+          coll = JSON.parse(coll);
+          coll.plugins.forEach(function(p, i) {
+            var dep = p.split(":");
+            var ps = plugin_configs.filter(function(plugin) { return plugin.name == dep[0] })
+            if(ps.length != 1){
+              throw "Plugin does not exits in the repository: '" + dep[0] + "' plugin from " + collection_path
+            }
+          })
+          collection_configs.push(coll);
+          console.log('Adding collection ====>', coll.name);
+      }
+
     });
-    console.log("manifest file updated!");
-  }
-  else{
-    console.error('no plugin found.');
-  }
+
+    if(plugin_configs.length>0){
+      console.log("Writing %s plugins into '%s'", plugin_configs.length, manifest_path);
+      var repo_manifest = {version: repo_version, uri_root: uri_root, plugins: plugin_configs, collections: collection_configs}
+      var stream = fs.createWriteStream(manifest_path);
+      stream.once('open', function(fd) {
+        stream.write(JSON.stringify(repo_manifest,null,' '));
+        stream.end();
+      });
+      console.log("manifest file updated!");
+    }
+    else{
+      console.error('no plugin found.');
+    }
+  });
+
 });

@@ -1,0 +1,6 @@
+{
+  "name": "ImJoy Default Plugins",
+  "description": "",
+  "plugins": ["Tif File Importer"],
+  "workspace": "default"
+}
