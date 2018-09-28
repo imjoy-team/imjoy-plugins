@@ -10,13 +10,13 @@ Describe your plugin here.
   "version": "0.1.0",
   "api_version": "0.1.1",
   "description": "A plugin for demonstrate unet segmentation with keras.",
-  "tags": ["demo", "op"],
+  "tags": ["CPU", "GPU"],
   "ui": null,
   "inputs": null,
   "outputs": null,
   "icon": null,
-  "env": null,
-  "requirements": "git clone https://github.com/zhixuhao/unet",
+  "env": {"CPU": "conda create -n tf-cpu python=3.6 tensorflow==1.5", "GPU": "conda create -n tf-gpu python=3.6 tensorflow-gpu==1.5"},
+  "requirements": "conda install h5py scikit-image keras==2.1.4 && git clone https://github.com/zhixuhao/unet",
   "dependencies": []
 }
 </config>
@@ -32,51 +32,88 @@ import keras
 import numpy as np
 import sys
 import base64
+import time
+import requests
 
 class UpdateUI(keras.callbacks.Callback):
     def __init__(self, total_epoch):
         self.total_epoch = total_epoch
-    def on_epoch_begin(self, epoch, logs):
-        api.showProgress(epoch/self.total_epoch*100)
-        api.showStatus(str(epoch/self.total_epoch*100)+'%')
+        self.epoch = 0
+        self.logs = {}
+
+    def on_batch_begin(self, batch, logs):
+        self.logs = logs
+        api.showStatus('training epoch:'+str(self.epoch)+'/'+str(self.total_epoch) + ' ' + str(logs))
         sys.stdout.flush()
+
+    def on_epoch_begin(self, epoch, logs):
+        self.epoch = epoch
+        self.logs = logs
+        api.showProgress(self.epoch/self.total_epoch*100)
+        api.showStatus('training epoch:'+str(self.epoch)+'/'+str(self.total_epoch) + ' '+ str(logs))
 
 class PythonPlugin():
   def setup(self):
     print('setup in python')
+    self.workdir = None
     self.model = unet()
-    # self.model.load_weights("unet_membrane.hdf5")
-    api.register(name="train", run=self.train)
+    if os.path.exists('unet_membrane.hdf5'):
+        self.model.load_weights("unet_membrane.hdf5")
+    else:
+        print('downloading pretrained model.')
+        url = 'https://www.dropbox.com/s/1ghpyhk4jzqzdvo/unet_membrane-46000iterations.hdf5?dl=1'
+        r = requests.get(url, allow_redirects=True)
+        open('unet_membrane.hdf5', 'wb').write(r.content)
+        print('file downloaded.')
+        self.model.load_weights("unet_membrane.hdf5")
+    api.register(name="train", run=self.train, ui="epochs:{id:'epochs', type:'number', min:1, placeholder:10}<br>"\
+                "steps per epoch:{id:'steps', type:'number', min:1, placeholder:5}<br>"\
+                "batch size:{id:'batchsize', type:'number', min:1, placeholder:1}<br>"
+                )
+    api.register(name="test", run=self.test, ui="number of images:{id:'num', type:'number', min:1, placeholder:10}<br>")
 
-  def train(self, dataDir):
-    data_gen_args = dict(rotation_range=0.2,
+  def run(self, my):
+    def callback(workdir):
+        api.showStatus('set work directory to '+workdir)
+        self.workdir = workdir
+    api.showFileDialog(title="Select a working directory", type="directory", root=os.getcwd()).then(callback).catch(print)
+
+  def start_train(self, myGene, epochs, steps_per_epoch):
+    updateUI = UpdateUI(epochs)
+    model_checkpoint = ModelCheckpoint('unet_membrane.hdf5', monitor='loss',verbose=1, save_best_only=True)
+    api.showSnackbar('training started.')
+    self.model.fit_generator(myGene,steps_per_epoch=steps_per_epoch,epochs=epochs,callbacks=[model_checkpoint, updateUI])
+
+  def train(self, my):
+    def callback(dataDir):
+        api.showStatus('loading data...')
+        data_gen_args = dict(rotation_range=0.2,
                     width_shift_range=0.05,
                     height_shift_range=0.05,
                     shear_range=0.05,
                     zoom_range=0.05,
                     horizontal_flip=True,
                     fill_mode='nearest')
-    api.showStatus('loading data...')
+        myGene = trainGenerator(my.config.batchsize, dataDir,'image','label',data_gen_args,save_to_dir = None)
+        api.showStatus('start training...')
+        self.start_train(myGene,my.config.epochs, my.config.steps)
+        # t = threading.Thread(target=self.start_train, args=(myGene,my.config.epochs, my.config.steps))
+        # t.daemon = True
+        # t.start()
 
-    myGene = trainGenerator(2, dataDir,'image','label',data_gen_args,save_to_dir = None)
-    updateUI = UpdateUI(10)
+    if self.workdir is None:
+        api.showFileDialog(title="Select a directory with training images", type="directory", root=os.getcwd()).then(callback).catch(print)
+    else:
+        callback(os.path.join(self.workdir, 'train'))
 
-    model_checkpoint = ModelCheckpoint('unet_membrane.hdf5', monitor='loss',verbose=1, save_best_only=True)
-    api.showStatus('running...')
-    self.model.fit_generator(myGene,steps_per_epoch=1,epochs=10,callbacks=[model_checkpoint, updateUI])
-
-  def train(self, my):
-    def start(dataDir):
-        t = threading.Thread(target=self.train, args=(dataDir,))
-        t.daemon = True
-        t.start()
-    api.showFileDialog(type="directory").then(start)
-
-  def run(self, my):
-    def start(dataDir):
+  def test(self, my):
+    def callback(dataDir):
         api.showStatus('testing...')
-        testGene  = testGenerator(dataDir)
-        results = self.model.predict_generator(testGene,3,verbose=1)
+        if os.path.exists('unet_membrane.hdf5'):
+            self.model.load_weights("unet_membrane.hdf5")
+        my.config.num = my.config.num or 30
+        testGene  = testGenerator(dataDir, num_image=my.config.num)
+        results = self.model.predict_generator(testGene,my.config.num,verbose=1)
         for i,item in enumerate(results):
             img = item[:,:,0]
             print(img.shape)
@@ -84,10 +121,14 @@ class PythonPlugin():
             with open("output.png", "rb") as f:
                 data = f.read()
                 result = base64.b64encode(data).decode('ascii')
-                url = 'data:image/png;base64,' + result
-                api.createWindow(name='unet prediction', type = 'imjoy/image', w=7, h=7, data= {"src": url})
+                imgurl = 'data:image/png;base64,' + result
+                api.createWindow(name='unet prediction', type = 'imjoy/image', w=7, h=7, data= {"src": imgurl})
 
-    api.showFileDialog(type="directory").then(start).catch(print)
+    if self.workdir is None:
+        api.showFileDialog(title="Select a directory with testing images", type="directory", root=os.getcwd()).then(callback).catch(print)
+    else:
+        callback(os.path.join(self.workdir, 'test'))
+
 
 api.export(PythonPlugin())
 </script>

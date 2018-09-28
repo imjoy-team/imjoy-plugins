@@ -4,14 +4,11 @@
  "plugins": [
   {
    "name": "3D Demos",
-   "mode": "iframe",
-   "tags": [
-    "op",
-    "window"
-   ],
-   "ui": "Demo: {id: 'demo', type:'choose', options: ['Sponza', 'Volume(three.js)', 'Volume(vtk.js)'], placeholder: 'Volume(three.js)'}",
+   "mode": "window",
+   "tags": [],
+   "ui": "Demo: {id: 'demo', type:'choose', options: ['Sponza', 'Volume(vtk.js)'], placeholder: 'Volume(vtk.js)'}",
    "version": "0.1.0",
-   "api_version": "0.1.0",
+   "api_version": "0.1.1",
    "description": "A set of demo plugins of webGL 3D.",
    "icon": "extension",
    "inputs": null,
@@ -20,17 +17,29 @@
    "uri": "3dDemos.imjoy.html"
   },
   {
+   "name": "ANNA-PALM",
+   "mode": "pyworker",
+   "version": "0.1.0",
+   "api_version": "0.1.1",
+   "description": "A plugin for train with ANNA-PALM.",
+   "tags": [],
+   "ui": null,
+   "inputs": null,
+   "outputs": null,
+   "icon": null,
+   "env": "conda create -n anet python=3.6",
+   "requirements": "git clone https://github.com/imodpasteur/ANNA-PALM && cd ANNA-PALM && pip install -r requirements.txt",
+   "dependencies": [],
+   "uri": "annaPalm.imjoy.html"
+  },
+  {
    "name": "2D Histogram",
    "mode": "webworker",
    "version": "0.1.0",
-   "api_version": "0.1.0",
+   "api_version": "0.1.1",
    "createdAt": "Mon Jun 19 2018 15:45:30",
    "description": "A plugin for render 2D histogram from a localization table.",
-   "tags": [
-    "localization",
-    "op",
-    "render"
-   ],
+   "tags": [],
    "ui": "Render a 2D histogram with: <br>pixel size={id:'pixel_size', type:'number', placeholder: 20}nm<br> width={id:'width', type:'number', placeholder: 2560} <br> height={id:'height', type:'number', placeholder: 2560}",
    "inputs": {
     "type": {
@@ -72,12 +81,8 @@
   },
   {
    "name": "Image Window",
-   "mode": "iframe",
-   "tags": [
-    "2d",
-    "op",
-    "window"
-   ],
+   "mode": "window",
+   "tags": [],
    "inputs": {
     "type": {
      "enum": [
@@ -120,7 +125,7 @@
    },
    "show_panel": true,
    "version": "0.1.0",
-   "api_version": "0.1.0",
+   "api_version": "0.1.1",
    "createdAt": "Mon Jun 19 2018 15:45:30",
    "description": "A plugin for display simple image.",
    "icon": "image",
@@ -134,10 +139,7 @@
    "api_version": "0.1.1",
    "createdAt": "Mon Jun 26 2018 15:45:30",
    "description": "A plugin for demonstrate streaming with python.",
-   "tags": [
-    "demo",
-    "op"
-   ],
+   "tags": [],
    "ui": "image processing with python",
    "inputs": null,
    "outputs": null,
@@ -152,14 +154,11 @@
   },
   {
    "name": "Live Stream Window",
-   "mode": "iframe",
-   "tags": [
-    "op",
-    "window"
-   ],
+   "mode": "window",
+   "tags": [],
    "ui": "live streaming with iframe",
    "version": "0.1.0",
-   "api_version": "0.1.0",
+   "api_version": "0.1.1",
    "description": "A plugin for live streaming.",
    "icon": "extension",
    "inputs": null,
@@ -169,14 +168,11 @@
   },
   {
    "name": "Localization3D",
-   "mode": "iframe",
-   "tags": [
-    "op",
-    "window"
-   ],
+   "mode": "window",
+   "tags": [],
    "ui": null,
    "version": "0.1.0",
-   "api_version": "0.1.0",
+   "api_version": "0.1.1",
    "description": "display localization table in 3D",
    "icon": "extension",
    "inputs": null,
@@ -188,13 +184,10 @@
    "name": "Lookup Table",
    "mode": "webworker",
    "version": "0.1.0",
-   "api_version": "0.1.0",
+   "api_version": "0.1.1",
    "createdAt": "Mon Jun 19 2018 16:33:11",
    "description": "A plugin for applying lookup table to a single-channel image.",
-   "tags": [
-    "image",
-    "LUT"
-   ],
+   "tags": [],
    "inputs": {
     "type": {
      "enum": [
@@ -222,10 +215,7 @@
    "api_version": "0.1.1",
    "createdAt": "Mon Jun 26 2018 15:45:30",
    "description": "A plugin for controlling MicroManager in Python.",
-   "tags": [
-    "demo",
-    "op"
-   ],
+   "tags": [],
    "ui": "MicroManager Control",
    "inputs": null,
    "outputs": null,
@@ -245,10 +235,7 @@
    "api_version": "0.1.1",
    "createdAt": "Mon Jun 26 2018 15:45:30",
    "description": "A plugin for demonstrate python plugin.",
-   "tags": [
-    "demo",
-    "op"
-   ],
+   "tags": [],
    "ui": "run python plugin",
    "inputs": null,
    "outputs": null,
@@ -265,14 +252,10 @@
    "name": "SMLM File IO",
    "mode": "webworker",
    "version": "0.1.0",
-   "api_version": "0.1.0",
+   "api_version": "0.1.1",
    "description": "A plugin for loading and exporting SMLM images.",
    "ui": "Render a 2D histogram with: <br>pixel size={id:'pixel_size', type:'number', placeholder: 20}nm<br> width={id:'width', type:'number', placeholder: 2560} <br> height={id:'height', type:'number', placeholder: 2560}",
-   "tags": [
-    "image",
-    "op",
-    "file_loader"
-   ],
+   "tags": [],
    "inputs": {
     "name": {
      "type": "string",
@@ -297,13 +280,10 @@
   },
   {
    "name": "tSNE",
-   "mode": "iframe",
+   "mode": "window",
    "version": "0.1.0",
-   "api_version": "0.1.0",
-   "tags": [
-    "op",
-    "window"
-   ],
+   "api_version": "0.1.1",
+   "tags": [],
    "ui": "show tSNE plot",
    "inputs": null,
    "outputs": null,
@@ -317,11 +297,8 @@
    "name": "tensorTest",
    "mode": "iframe",
    "version": "0.1.0",
-   "api_version": "0.1.0",
-   "tags": [
-    "op",
-    "window"
-   ],
+   "api_version": "0.1.1",
+   "tags": [],
    "ui": null,
    "inputs": null,
    "outputs": null,
@@ -335,14 +312,10 @@
    "name": "Localization File (csv)",
    "mode": "webworker",
    "version": "0.1.0",
-   "api_version": "0.1.0",
+   "api_version": "0.1.1",
    "createdAt": "Mon Jun 18 2018 21:46:36",
    "description": "A plugin for loading single molecule localization tables from text files including csv, xls etc.",
-   "tags": [
-    "localization",
-    "op",
-    "file_loader"
-   ],
+   "tags": [],
    "ui": "Load a table from the file: add {id:'append_header', type:'string', placeholder:''} to the first line {id:'header_row', type:'choose', options:['read headers from the first line','use index as the header'], placeholder:'read headers from the first line'} and use {id:'delimiter', type:'string', placeholder:','} to seperate columns.",
    "extensions": [
     ".csv"
@@ -372,18 +345,14 @@
   },
   {
    "name": "Three.js Demo",
-   "mode": "iframe",
-   "tags": [
-    "3d",
-    "op",
-    "window"
-   ],
+   "mode": "window",
+   "tags": [],
    "ui": null,
    "inputs": null,
    "outputs": null,
    "show_panel": true,
    "version": "0.1.0",
-   "api_version": "0.1.0",
+   "api_version": "0.1.1",
    "createdAt": "Mon Jun 19 2018 15:45:30",
    "description": "A plugin for demonstrate that one can use Three.js in a plugin.",
    "icon": null,
@@ -394,14 +363,10 @@
    "name": "Tif File Importer",
    "mode": "webworker",
    "version": "0.1.1",
-   "api_version": "0.1.0",
+   "api_version": "0.1.1",
    "description": "A plugin for loading tif images.",
    "ui": null,
-   "tags": [
-    "image",
-    "op",
-    "file_loader"
-   ],
+   "tags": [],
    "inputs": {
     "name": {
      "type": "string",
@@ -430,28 +395,28 @@
    "api_version": "0.1.1",
    "description": "A plugin for demonstrate unet segmentation with keras.",
    "tags": [
-    "demo",
-    "op"
+    "CPU",
+    "GPU"
    ],
    "ui": null,
    "inputs": null,
    "outputs": null,
    "icon": null,
-   "env": null,
-   "requirements": "git clone https://github.com/zhixuhao/unet",
+   "env": {
+    "CPU": "conda create -n tf-cpu python=3.6 tensorflow==1.5",
+    "GPU": "conda create -n tf-gpu python=3.6 tensorflow-gpu==1.5"
+   },
+   "requirements": "conda install h5py scikit-image keras==2.1.4 && git clone https://github.com/zhixuhao/unet",
    "dependencies": [],
    "uri": "unet.imjoy.html"
   },
   {
    "name": "Vega",
-   "mode": "iframe",
-   "tags": [
-    "op",
-    "window"
-   ],
+   "mode": "window",
+   "tags": [],
    "ui": null,
    "version": "0.1.0",
-   "api_version": "0.1.0",
+   "api_version": "0.1.1",
    "description": "A plugin for Vega visualization.",
    "icon": "extension",
    "inputs": null,

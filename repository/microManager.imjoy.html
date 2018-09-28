@@ -11,7 +11,7 @@ Describe your plugin here.
   "api_version": "0.1.1",
   "createdAt": "Mon Jun 26 2018 15:45:30",
   "description": "A plugin for controlling MicroManager in Python.",
-  "tags": ["demo", "op"],
+  "tags": [],
   "ui": "MicroManager Control",
   "inputs": null,
   "outputs": null,
@@ -35,15 +35,17 @@ import traceback
 from skimage.external.tifffile import TiffWriter
 import uuid
 
-
 workdir = './imjoy-mm-data'
 if not os.path.exists(workdir):
     os.makedirs(workdir)
 
-
-MMFolder = '/Applications/Micro-Manager-2.0.0-beta3-20180609/'
+MMFolder = '/Applications/Micro-Manager/'
 MMConfig = os.path.join(MMFolder, "MMConfig_demo.cfg")
-sys.path.append(MMFolder)
+
+sys.path.insert(0, MMFolder)
+os.environ['PATH'] = MMFolder  + os.pathsep +  os.environ.get('PATH', '')
+os.environ['PYTHONPATH'] = MMFolder  + os.pathsep +  os.environ.get('PYTHONPATH', '')
+
 
 import MMCorePy
 
@@ -117,7 +119,7 @@ class PythonPlugin():
     image4save = image.reshape((1, 1, 1, image.shape[0], image.shape[1]))
     self.saver.save(image4save, compress=6)
     api.showSnackbar('image saved to ' + self.tiff_file_name )
-    
+
   def start_live(self, my):
     global currentImage
     currentImage = None

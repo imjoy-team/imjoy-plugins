@@ -6,11 +6,11 @@ Describe your plugin here.
 <config lang="json">
 {
   "name": "3D Demos",
-  "mode": "iframe",
-  "tags": ["op", "window"],
-  "ui": "Demo: {id: 'demo', type:'choose', options: ['Sponza', 'Volume(three.js)', 'Volume(vtk.js)'], placeholder: 'Volume(three.js)'}",
+  "mode": "window",
+  "tags": [],
+  "ui": "Demo: {id: 'demo', type:'choose', options: ['Sponza', 'Volume(vtk.js)'], placeholder: 'Volume(vtk.js)'}",
   "version": "0.1.0",
-  "api_version": "0.1.0",
+  "api_version": "0.1.1",
   "description": "A set of demo plugins of webGL 3D.",
   "icon": "extension",
   "inputs": null,
@@ -30,9 +30,6 @@ class ThreeDPlugin {
     frame.height = '100%';
     if(my.config.demo == 'Sponza'){
         frame.src = "https://www.babylonjs.com/demos/sponzadynamicshadows";
-    }
-    else if(my.config.demo == 'Volume(three.js)'){
-        frame.src = "https://rawgit.com/almarklein/three.js/volumeexample/examples/webgl_materials_texture3d_volume1.html";
     }
     else if(my.config.demo == 'Volume(vtk.js)'){
         frame.src = "https://kitware.github.io/vtk-js/examples/PiecewiseGaussianWidget/index.html";
