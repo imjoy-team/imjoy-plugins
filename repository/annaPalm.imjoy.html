@@ -15,8 +15,8 @@ Describe your plugin here.
   "inputs": null,
   "outputs": null,
   "icon": null,
-  "env": "conda create -n anet python=3.6",
-  "requirements": "git clone https://github.com/imodpasteur/ANNA-PALM & cd ANNA-PALM && pip install -r requirements.txt",
+  "env": ["conda create -n anet python=3.6", "git clone https://github.com/imodpasteur/ANNA-PALM"],
+  "requirements": "cd ANNA-PALM && pip install -r requirements.txt",
   "dependencies": []
 }
 </config>
