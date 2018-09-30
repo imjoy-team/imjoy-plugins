@@ -15,8 +15,9 @@ Describe your plugin here.
   "inputs": null,
   "outputs": null,
   "icon": null,
-  "env": {"CPU": "conda create -n tf-cpu python=3.6 tensorflow==1.5", "GPU": "conda create -n tf-gpu python=3.6 tensorflow-gpu==1.5"},
-  "requirements": "pip install h5py scikit-image keras==2.1.4 && git clone https://github.com/zhixuhao/unet",
+  "env": {"CPU": ["conda create -n tf-cpu python=3.6 tensorflow==1.5", "git clone https://github.com/zhixuhao/unet"],
+          "GPU": ["conda create -n tf-gpu python=3.6 tensorflow-gpu==1.5", "git clone https://github.com/zhixuhao/unet"]},
+  "requirements": "pip install h5py scikit-image keras==2.1.4",
   "dependencies": []
 }
 </config>
