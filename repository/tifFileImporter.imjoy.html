@@ -3,10 +3,10 @@
   "name": "Tif File Importer",
   "mode": "webworker",
   "version": "0.1.1",
-  "api_version": "0.1.1",
+  "api_version": "0.1.0",
   "description": "A plugin for loading tif images.",
-  "ui": null,
-  "tags": [],
+  "ui": "frame number:{id:'frame_num', type:'number', min:0, placeholder:0}",
+  "tags": ["image", "op", "file_loader"],
   "inputs": {"name": {"type": "string", "pattern":".*\\.tif|\\.tiff|\\.TIFF|\\.TIF", "required": true }},
   "outputs": {"type": {"enum": ["image/grayscale"], "required": true}},
   "icon": null,
@@ -142,14 +142,15 @@ class TifFilePlugin {
         api.showStatus('Error: you need to select your tif file first.')
         return
     }
+    
     const file = my.data
     const brightness = 0
-    const current_frame = 0
+    const current_frame = my.config.frame_num
     const fileObj = new TifFile(file)
     fileObj.load().then(() => {
       const frame_num = fileObj.frame_num
       const [canvas_data, w, h, max, min, sticky_max, sticky_min] = fileObj.read(current_frame)
-      const image = {type: 'image/grayscale', array: canvas_data, height: h, width: w}
+      const image = {type: 'image/grayscale', array: canvas_data, height: h, width: w, select_frame:this.run, my: my}
       api.createWindow({name: file.name, type: 'Image Window', w:7, h:7, data: image, config: {}})
     })
   }
