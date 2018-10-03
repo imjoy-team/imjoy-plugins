@@ -27,8 +27,11 @@
    "inputs": null,
    "outputs": null,
    "icon": null,
-   "env": "conda create -n anet python=3.6",
-   "requirements": "git clone https://github.com/imodpasteur/ANNA-PALM && cd ANNA-PALM && pip install -r requirements.txt",
+   "env": [
+    "conda create -n anet python=3.6",
+    "git clone https://github.com/imodpasteur/ANNA-PALM"
+   ],
+   "requirements": "cd ANNA-PALM && pip install -r requirements.txt",
    "dependencies": [],
    "uri": "annaPalm.imjoy.html"
   },
@@ -309,6 +312,56 @@
    "uri": "tensorTest.imjoy.html"
   },
   {
+   "name": "Test webworker Plugin",
+   "mode": "webworker",
+   "tags": [],
+   "ui": [
+    "plain string",
+    {
+     "test string option": "{id: 'option1', type: 'choose', options:['red', 'yellow']}",
+     "test dict option": {
+      "id": "option2",
+      "type": "choose",
+      "options": [
+       "read",
+       "yellow"
+      ]
+     },
+     "test number": {
+      "id": "option3",
+      "type": "number",
+      "placeholder": 1
+     }
+    }
+   ],
+   "version": "0.1.0",
+   "api_version": "0.1.0",
+   "description": "This plugin will run all the api functions for testing purposes.",
+   "icon": "extension",
+   "inputs": null,
+   "outputs": null,
+   "env": null,
+   "requirements": null,
+   "dependencies": [
+    "Test Window Plugin"
+   ],
+   "uri": "testWebworkerPlugin.imjoy.html"
+  },
+  {
+   "name": "Test window plugin",
+   "mode": "window",
+   "tags": [],
+   "ui": "UI for Untitled Plugin",
+   "version": "0.1.0",
+   "api_version": "0.1.0",
+   "description": "describe your plugin here.",
+   "icon": "extension",
+   "inputs": null,
+   "outputs": null,
+   "dependencies": [],
+   "uri": "testWindowPlugin.imjoy.html"
+  },
+  {
    "name": "Localization File (csv)",
    "mode": "webworker",
    "version": "0.1.0",
@@ -363,10 +416,14 @@
    "name": "Tif File Importer",
    "mode": "webworker",
    "version": "0.1.1",
-   "api_version": "0.1.1",
+   "api_version": "0.1.0",
    "description": "A plugin for loading tif images.",
-   "ui": null,
-   "tags": [],
+   "ui": "frame number:{id:'frame_num', type:'number', min:0, placeholder:0}",
+   "tags": [
+    "image",
+    "op",
+    "file_loader"
+   ],
    "inputs": {
     "name": {
      "type": "string",
@@ -396,17 +453,33 @@
    "description": "A plugin for demonstrate unet segmentation with keras.",
    "tags": [
     "CPU",
-    "GPU"
+    "GPU",
+    "Windows-CPU",
+    "Windows-GPU"
    ],
    "ui": null,
    "inputs": null,
    "outputs": null,
    "icon": null,
    "env": {
-    "CPU": "conda create -n tf-cpu python=3.6 tensorflow==1.5",
-    "GPU": "conda create -n tf-gpu python=3.6 tensorflow-gpu==1.5"
+    "CPU": [
+     "conda create -n tf-cpu python=3.6 tensorflow==1.5",
+     "git clone https://github.com/zhixuhao/unet"
+    ],
+    "GPU": [
+     "conda create -n tf-gpu python=3.6 tensorflow-gpu==1.5",
+     "git clone https://github.com/zhixuhao/unet"
+    ],
+    "Windows-CPU": [
+     "conda create -n tf-cpu python=3.5 tensorflow==1.2.1",
+     "git clone https://github.com/zhixuhao/unet"
+    ],
+    "Windows-GPU": [
+     "conda create -n tf-gpu python=3.5 tensorflow-gpu==1.2.1",
+     "git clone https://github.com/zhixuhao/unet"
+    ]
    },
-   "requirements": "conda install h5py scikit-image keras==2.1.4 && git clone https://github.com/zhixuhao/unet",
+   "requirements": "pip install h5py scikit-image keras==2.1.4",
    "dependencies": [],
    "uri": "unet.imjoy.html"
   },

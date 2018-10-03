@@ -1,0 +1,51 @@
+﻿
+<docs lang="markdown">
+Describe your plugin here.
+</docs>
+
+<config lang="json">
+{
+  "name": "Test window plugin",
+  "mode": "window",
+  "tags": [],
+  "ui": "UI for Untitled Plugin",
+  "version": "0.1.0",
+  "api_version": "0.1.0",
+  "description": "describe your plugin here.",
+  "icon": "extension",
+  "inputs": null,
+  "outputs": null,
+  "dependencies": []
+}
+</config>
+
+<script lang="javascript">
+class UntitledPlugin {
+  async setup() {
+  }
+
+  run(my) {
+    console.log('running the window plugin ', my.data)
+    const node = document.createElement("li");                 // Create a <li> node
+    const textnode = document.createTextNode('upate my dummy value: ' + my.data.dummy_value);         // Create a text node
+    node.appendChild(textnode);                              // Append the text to <li>
+    document.getElementById("myList").appendChild(node);     // Append <li> to <ul> with id="myList"
+    if(my.data.callback) my.data.callback('hello from the window plugin')
+  }
+}
+
+api.export(new UntitledPlugin())
+</script>
+
+<window lang="html">
+  <div>
+    <p>
+    Hello World
+    </p>
+    <div id="myList"></div>
+  </div>
+</window>
+
+<style lang="css">
+
+</style>

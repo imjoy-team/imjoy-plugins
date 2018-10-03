@@ -1,0 +1,56 @@
+﻿
+<docs>
+Describe your plugin here.
+</docs>
+
+<config lang="json">
+{
+  "name": "Test webworker Plugin",
+  "mode": "webworker",
+  "tags": [],
+  "ui": ["plain string",
+         {"test string option": "{id: 'option1', type: 'choose', options:['red', 'yellow']}",
+          "test dict option": {"id": "option2", "type": "choose", "options": ["read", "yellow"]},
+          "test number": {"id": "option3", "type": "number",  "placeholder": 1}
+         }],
+  "version": "0.1.0",
+  "api_version": "0.1.0",
+  "description": "This plugin will run all the api functions for testing purposes.",
+  "icon": "extension",
+  "inputs": null,
+  "outputs": null,
+  "env": null,
+  "requirements": null,
+  "dependencies": ["Test Window Plugin"]
+}
+</config>
+
+<script lang="javascript">
+class TestPlugin {
+  async setup() {
+    //await importScripts("http://xxxx/xxx.js")
+  }
+  callback(param){
+      console.log('calling back: ', param)
+  }
+  run(my) {
+    for(let i=0; i<= 10; i++){
+        api.showStatus('hello world ' + i).then(()=>{
+            api.showProgress(i*10)
+        })
+    }
+    //Javascript
+    const window_callback = (windowId)=>{
+         //use `windowId` here to access the window
+        console.log(windowId)
+        for(let i=0; i<= 20; i++){
+            api.updateWindow({id: windowId, data: {dummy_value: i}})
+        }
+    }
+    api.createWindow({name: 'test window', type: 'Test Window Plugin', w:7, h:7, data: {dummy_value: 123456, callback: this.callback}, config: {}}).then(window_callback)
+  }
+}
+
+api.export(new TestPlugin())
+</script>
+
