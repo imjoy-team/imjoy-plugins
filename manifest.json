@@ -312,7 +312,7 @@
    "uri": "tensorTest.imjoy.html"
   },
   {
-   "name": "Test webworker Plugin",
+   "name": "Test Webworker Plugin",
    "mode": "webworker",
    "tags": [],
    "ui": [
@@ -348,7 +348,7 @@
    "uri": "testWebworkerPlugin.imjoy.html"
   },
   {
-   "name": "Test window plugin",
+   "name": "Test Window Plugin",
    "mode": "window",
    "tags": [],
    "ui": "UI for Untitled Plugin",
