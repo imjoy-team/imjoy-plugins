@@ -8,6 +8,8 @@ var collections_dir = "./collections";
 var manifest_path = "./manifest.json"
 var repo_version = "0.2.0"
 var uri_root = "https://raw.githubusercontent.com/oeway/ImJoy-Plugins/master/repository"
+var repo_name = "ImJoy Repository"
+var repo_description = "This is the official repository for ImJoy.io"
 
 function parsePlugin(code){
   var pluginComp = pluginParser.parseComponent(code)
@@ -69,7 +71,7 @@ fs.readdir(repository_dir, function(err, files) {
 
     if(plugin_configs.length>0){
       console.log("Writing %s plugins into '%s'", plugin_configs.length, manifest_path);
-      var repo_manifest = {version: repo_version, uri_root: uri_root, plugins: plugin_configs, collections: collection_configs}
+      var repo_manifest = {name: repo_name, description, repo_description, version: repo_version, uri_root: uri_root, plugins: plugin_configs, collections: collection_configs}
       var stream = fs.createWriteStream(manifest_path);
       stream.once('open', function(fd) {
         stream.write(JSON.stringify(repo_manifest,null,' '));
