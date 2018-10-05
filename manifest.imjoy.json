@@ -413,6 +413,7 @@
    "description": "A plugin for demonstrate that one can use Three.js in a plugin.",
    "icon": null,
    "dependencies": [],
+   "disabled": true,
    "uri": "threejsDemo.imjoy.html"
   },
   {
