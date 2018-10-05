@@ -1,5 +1,7 @@
 {
  "version": "0.2.0",
+ "name": "ImJoy Repository",
+ "description": "This is the official repository for ImJoy.io",
  "uri_root": "https://raw.githubusercontent.com/oeway/ImJoy-Plugins/master/repository",
  "plugins": [
   {
