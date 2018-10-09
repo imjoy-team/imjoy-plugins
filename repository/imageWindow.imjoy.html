@@ -19,7 +19,7 @@ This plugin is for dispalying 2d image.
   "dependencies": []
 }
 </config>
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/0.4.2/leaflet.draw.css"/>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.1/dist/leaflet.css"
 integrity="sha512-Rksm5RenBEKSKFjgI3a41vrjkw4EVPlJ3+OiI65vTjIdo9brlAacEuKOiQ5OFh7cOI1bkDwLqdLw3Zg0cRJAAQ=="
 crossorigin=""/>
@@ -78,7 +78,8 @@ class ImageWindowPlugin {
   async setup() {
     await importScripts("https://cdn.rawgit.com/dataarts/dat.gui/bc11a9e5/build/dat.gui.min.js")
     await importScripts("https://unpkg.com/leaflet@1.3.1/dist/leaflet.js")
-    await importScripts("https://cdnjs.cloudflare.com/ajax/libs/leaflet.freedraw/2.0.1/leaflet-freedraw.web.js")
+    // await importScripts("https://cdnjs.cloudflare.com/ajax/libs/leaflet.freedraw/2.0.1/leaflet-freedraw.web.js")
+    await importScripts("https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/0.4.2/leaflet.draw.js")
     this._slider = document.getElementById('slider');
     const self = this;
     var DisplayCtrl = function() {
@@ -107,15 +108,16 @@ class ImageWindowPlugin {
         this.run()
     });
     gui.add(this.ctrl, 'annotation').onChange((value)=>{
-        if(self.freeDraw){
-            if(value){
-                self.freeDraw.mode(FreeDraw.ALL);
-            }
-            else{
-                self.freeDraw.mode(FreeDraw.NONE);
-            }
-        }
+        // if(self.freeDraw){
+        //     if(value){
+        //         self.freeDraw.mode(FreeDraw.ALL);
+        //     }
+        //     else{
+        //         self.freeDraw.mode(FreeDraw.NONE);
+        //     }
+        // }
     });
+
     const map = L.map('leaflet_canvas', {
       minZoom: -3,
       maxZoom: 3,
@@ -171,10 +173,39 @@ class ImageWindowPlugin {
     }
     this.inputLayer = L.imageOverlay(imageUrl, bounds)
     this.inputLayer.addTo(map);
-    this.freeDraw = new FreeDraw({ mode: FreeDraw.ALL, mergePolygons: false, simplifyFactor: 0.5, smoothFactor:0.01 });
-    map.addLayer(this.freeDraw);
-    this.freeDraw.mode(FreeDraw.NONE);
+    // this.freeDraw = new FreeDraw({ mode: FreeDraw.ALL, mergePolygons: false, simplifyFactor: 0.5, smoothFactor:0.01 });
+    // map.addLayer(this.freeDraw);
+    // this.freeDraw.mode(FreeDraw.NONE);
     map.setMaxBounds(bounds);
+    // FeatureGroup is to store editable layers
+     var drawnItems = new L.FeatureGroup();
+     map.addLayer(drawnItems);
+     map.addControl(new L.Control.Draw({
+        edit: {
+            featureGroup: drawnItems,
+            poly: {
+                allowIntersection: false
+            }
+        },
+        draw: {
+            polygon: {
+                allowIntersection: false,
+                showArea: true
+            }
+        }
+    }));
+    map.on(L.Draw.Event.CREATED, function (e) {
+        var type = e.layerType,
+            layer = e.layer;
+        if (type === 'marker') {
+            // Do marker specific actions
+        }
+        // Do whatever else you need to. (save to db; add to map etc)
+        map.addLayer(layer);
+    });
+
+
+
     this._my = my;
   }
 }
@@ -191,24 +222,4 @@ const hot_lut=[[10,0,0],[13,0,0],[15,0,0],[18,0,0],[21,0,0],[23,0,0],[26,0,0],[2
   z-index: 0;
 }
 
-
-.map.mode-create {
-    cursor: crosshair;
-}
-
-.leaflet-edge {
-    background-color: #95bc59;
-    box-shadow: 0 0 0 2px white, 0 0 4px rgba(0, 0, 0, .35);
-    border-radius: 50%;
-    cursor: move;
-    outline: none;
-    transition: background-color .25s;
-}
-
-.leaflet-polygon {
-    fill: #b4cd8a;
-    stroke: #50622b;
-    stroke-width: 1;
-    fill-opacity: 0.1;
-}
 </style>
