@@ -9,7 +9,6 @@ Describe your plugin here.
   "mode": "pyworker",
   "version": "0.1.0",
   "api_version": "0.1.1",
-  "createdAt": "Mon Jun 26 2018 15:45:30",
   "description": "A plugin for demonstrate streaming with python.",
   "tags": [],
   "ui": "image processing with python",
@@ -45,7 +44,7 @@ def run_server(abort):
     frame_dim = '{}x{}'.format(width, height)
     cmd = 'ffmpeg -f rawvideo -video_size {} -pixel_format gray16le -i pipe:0 -f mpegts -codec:v mpeg1video -s {} -b:v 1000k -bf 0 http://localhost:8081/supersecret'.format(frame_dim, frame_dim).split()
     converter = subprocess.Popen(cmd, stdin=subprocess.PIPE) #, stdout=subprocess.PIPE)
-    while not abort.is_set()
+    while not abort.is_set():
         in_data = np.random.bytes(frame_size)
         try:
             converter.stdin.write(in_data)
