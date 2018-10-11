@@ -133,7 +133,7 @@ class TifFile {
 
 }
 
-class TifFilePlugin {
+class ImJoyPlugin {
   setup(){
   }
   async run(my){
@@ -142,7 +142,7 @@ class TifFilePlugin {
         api.showStatus('Error: you need to select your tif file first.')
         return
     }
-    
+
     const file = my.data
     const brightness = 0
     const current_frame = my.config.frame_num
@@ -156,5 +156,5 @@ class TifFilePlugin {
   }
 }
 
-api.export(new TifFilePlugin())
+api.export(new ImJoyPlugin())
 </script>

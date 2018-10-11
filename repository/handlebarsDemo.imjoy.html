@@ -21,7 +21,7 @@ For more detailed usage, please refer to [handlbebars](https://handlebarsjs.com/
 }
 </config>
 <script lang="javascript">
-class UntitledPlugin {
+class ImJoyPlugin {
   async setup() {
     await importScripts("https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.12/handlebars.min.js")
     self.context = {title: "My New Post", body: "This is my first post!"}
@@ -42,7 +42,7 @@ class UntitledPlugin {
   }
 }
 
-api.export(new UntitledPlugin())
+api.export(new ImJoyPlugin())
 </script>
 
 <window lang="html">

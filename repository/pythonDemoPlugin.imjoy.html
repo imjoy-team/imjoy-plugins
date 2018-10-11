@@ -21,7 +21,7 @@
 <script lang="python">
 import numpy as np
 
-class PythonPlugin():
+class ImJoyPlugin():
   def setup(self):
     self.count = 0
 
@@ -43,5 +43,5 @@ class PythonPlugin():
     self.count += 1
     return np.zeros(10) + self.count
 
-api.export(PythonPlugin())
+api.export(ImJoyPlugin())
 </script>

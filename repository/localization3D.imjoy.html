@@ -1257,7 +1257,7 @@ function mousewheel(event) {
 }
 
 
-class Localization3DPlugin {
+class ImJoyPlugin {
   async setup() {
     importScripts("https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.2/dat.gui.min.js").then(()=>{
         load3DViewer(document.getElementById("histogram_canvas_3d"), console.log)
@@ -1270,7 +1270,7 @@ class Localization3DPlugin {
   }
 }
 
-api.export(new Localization3DPlugin())
+api.export(new ImJoyPlugin())
 </script>
 
 <window lang="html">

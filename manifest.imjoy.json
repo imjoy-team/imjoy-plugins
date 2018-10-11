@@ -156,7 +156,6 @@
    "mode": "pyworker",
    "version": "0.1.0",
    "api_version": "0.1.1",
-   "createdAt": "Mon Jun 26 2018 15:45:30",
    "description": "A plugin for demonstrate streaming with python.",
    "tags": [],
    "ui": "image processing with python",
@@ -477,18 +476,22 @@
    "icon": null,
    "env": {
     "CPU": [
+     "conda config --add channels conda-forge",
      "conda create -n tf-cpu python=3.6 tensorflow==1.5",
      "git clone https://github.com/zhixuhao/unet"
     ],
     "GPU": [
+     "conda config --add channels conda-forge",
      "conda create -n tf-gpu python=3.6 tensorflow-gpu==1.5",
      "git clone https://github.com/zhixuhao/unet"
     ],
     "Windows-CPU": [
+     "conda config --add channels conda-forge",
      "conda create -n tf-cpu python=3.5 tensorflow==1.2.1",
      "git clone https://github.com/zhixuhao/unet"
     ],
     "Windows-GPU": [
+     "conda config --add channels conda-forge",
      "conda create -n tf-gpu python=3.5 tensorflow-gpu==1.2.1",
      "git clone https://github.com/zhixuhao/unet"
     ]

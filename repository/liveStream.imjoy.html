@@ -56,7 +56,7 @@ def run_server(abort):
     converter.stdin.close()
     api.utils.kill(converter.pid)
 
-class PythonPlugin():
+class ImJoyPlugin():
   def setup(self):
     print('starting the relay server')
     self.relay = subprocess.Popen('node ./__websocket_relay__.js supersecret 8081 8082'.split(' '), shell=False)
@@ -76,5 +76,5 @@ class PythonPlugin():
     api.run("Live Stream Window")
 
 
-api.export(PythonPlugin())
+api.export(ImJoyPlugin())
 </script>

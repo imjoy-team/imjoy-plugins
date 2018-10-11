@@ -51,7 +51,7 @@ opt.control_nc = 1
 opt.add_data_type_control = True
 opt.add_lr_channel = 'pseudo'
 
-class PythonPlugin():
+class ImJoyPlugin():
   def setup(self):
     self.step = 0
     api.register(name="train", run=self.train, ui="steps:{id:'steps', type:'number', min:1, placeholder:2000}<br>"\
@@ -87,5 +87,5 @@ class PythonPlugin():
         sys.stdout.flush()
     model.predict(d, step_callback=step_callback, verbose=1)
 
-api.export(PythonPlugin())
+api.export(ImJoyPlugin())
 </script>

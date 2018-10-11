@@ -87,7 +87,7 @@ def run_server(abort):
     converter.stdin.close()
     converter.terminate()
 
-class PythonPlugin():
+class ImJoyPlugin():
   def setup(self):
     api.register(name="set exposure", ui="{id:'exposure', type:'number', min:1, placeholder: 50} ms", run=self.set_exposure, update=self.set_exposure)
     api.register(name="start live", run=self.start_live)
@@ -160,5 +160,5 @@ class PythonPlugin():
         mmc.startContinuousSequenceAcquisition(0)
 
 
-api.export(PythonPlugin())
+api.export(ImJoyPlugin())
 </script>
