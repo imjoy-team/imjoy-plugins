@@ -10,12 +10,11 @@
   "inputs": {"name": {"type": "string", "pattern":".*\\.tif|\\.tiff|\\.TIFF|\\.TIF", "required": true }},
   "outputs": {"type": {"enum": ["image/grayscale"], "required": true}},
   "icon": null,
+  "requirements": ["https://cdn.rawgit.com/photopea/UTIF.js/4f1b10cb/UTIF.js"],
   "dependencies": ["Image Window"]
 }
 </config>
 <script lang="javascript">
-
-importScripts("https://cdn.rawgit.com/photopea/UTIF.js/4f1b10cb/UTIF.js")
 
 function swap16(val) {
     return ((val & 0xFF) << 8) | ((val >> 8) & 0xFF);

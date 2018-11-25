@@ -20,7 +20,7 @@ Describe your plugin here.
           "Windows-CPU": ["conda config --add channels conda-forge", "conda create -n tf-cpu python=3.5 tensorflow==1.2.1", "git clone https://github.com/zhixuhao/unet"],
           "Windows-GPU": ["conda config --add channels conda-forge", "conda create -n tf-gpu python=3.5 tensorflow-gpu==1.2.1", "git clone https://github.com/zhixuhao/unet"]
           },
-  "requirements": "pip install h5py scikit-image keras==2.1.4",
+  "requirements": ["h5py", "scikit-image", "keras==2.1.4"],
   "dependencies": []
 }
 </config>

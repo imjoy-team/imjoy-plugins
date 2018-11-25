@@ -12,6 +12,7 @@
   "inputs": {"name": {"type": "string", "pattern":".*\\.csv|\\.xls", "required": true }},
   "outputs":{"type": {"enum": ["localization/table"], "required": true},"table": {"type":"object", "required": true}},
   "icon": null,
+  "requirements": ["https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"],
   "dependencies": []
 }
 </config>
@@ -242,7 +243,6 @@ function _loadFile(file, format) {
 
 class ImJoyPlugin {
   async setup(){
-      await importScripts("https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js")
   }
   async run(my){
     console.log('running in the plugin', my)
@@ -255,7 +255,7 @@ class ImJoyPlugin {
       header_transform: {'x [nm]': 'x', 'y [nm]':'y', 'sigma [nm]': 'sigma'}
     }
     let table;
-    
+
     if(my.data.data){
         my.data = my.data.data
     }

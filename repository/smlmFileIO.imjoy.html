@@ -10,12 +10,11 @@
   "inputs": {"name": {"type": "string", "pattern":".*\\.smlm|\\.SMLM", "required": true }},
   "outputs": {"type": {"enum": ["image/grayscale"], "required": true}},
   "icon": "🙀",
+  "requirements": ["https://cdn.rawgit.com/Stuk/jszip/9fb481ac/dist/jszip.min.js","https://cdn.rawgit.com/satazor/js-spark-md5/bbd1624a/spark-md5.min.js"],
   "dependencies": ["Image Window", "2D Histogram"]
 }
 </config>
 <script lang="javascript">
-importScripts("https://cdn.rawgit.com/Stuk/jszip/9fb481ac/dist/jszip.min.js")
-importScripts("https://cdn.rawgit.com/satazor/js-spark-md5/bbd1624a/spark-md5.min.js")
 
 function randId() {
      return Math.random().toString(36).substr(2, 10);

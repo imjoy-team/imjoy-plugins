@@ -16,13 +16,16 @@ This plugin is for dispalying 2d image.
   "createdAt": "Mon Jun 19 2018 15:45:30",
   "description": "A plugin for display simple image.",
   "icon": "image",
+  "requirements": ["https://unpkg.com/leaflet@1.3.1/dist/leaflet.js",
+                  "https://cdn.rawgit.com/dataarts/dat.gui/bc11a9e5/build/dat.gui.min.js",
+                  "https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/0.4.2/leaflet.draw.js",
+                  "https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/0.4.2/leaflet.draw.css",
+                  "https://unpkg.com/leaflet@1.3.1/dist/leaflet.css"
+  ],
   "dependencies": []
 }
 </config>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/0.4.2/leaflet.draw.css"/>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.1/dist/leaflet.css"
-integrity="sha512-Rksm5RenBEKSKFjgI3a41vrjkw4EVPlJ3+OiI65vTjIdo9brlAacEuKOiQ5OFh7cOI1bkDwLqdLw3Zg0cRJAAQ=="
-crossorigin=""/>
+
 <window>
   <div>
    <div id="leaflet_canvas"></div>
@@ -76,10 +79,6 @@ function array2url(imageArr, w, h, low, high, lut){
 }
 class ImJoyPlugin {
   async setup() {
-    await importScripts("https://cdn.rawgit.com/dataarts/dat.gui/bc11a9e5/build/dat.gui.min.js")
-    await importScripts("https://unpkg.com/leaflet@1.3.1/dist/leaflet.js")
-    // await importScripts("https://cdnjs.cloudflare.com/ajax/libs/leaflet.freedraw/2.0.1/leaflet-freedraw.web.js")
-    await importScripts("https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/0.4.2/leaflet.draw.js")
     this._slider = document.getElementById('slider');
     const self = this;
     var DisplayCtrl = function() {

@@ -65,6 +65,7 @@
     }
    },
    "icon": null,
+   "requirements": [],
    "dependencies": [
     "Lookup Table"
    ],
@@ -120,6 +121,13 @@
    "createdAt": "Mon Jun 19 2018 15:45:30",
    "description": "A plugin for display simple image.",
    "icon": "image",
+   "requirements": [
+    "https://unpkg.com/leaflet@1.3.1/dist/leaflet.js",
+    "https://cdn.rawgit.com/dataarts/dat.gui/bc11a9e5/build/dat.gui.min.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/0.4.2/leaflet.draw.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/0.4.2/leaflet.draw.css",
+    "https://unpkg.com/leaflet@1.3.1/dist/leaflet.css"
+   ],
    "dependencies": [],
    "uri": "imageWindow.imjoy.html"
   },
@@ -135,7 +143,7 @@
    "outputs": null,
    "icon": null,
    "env": null,
-   "requirements": "conda config --add channels conda-forge && conda install -y ffmpeg nodejs && npm install ws",
+   "requirements": [],
    "cmd": "python",
    "dependencies": [
     "Live Stream Window"
@@ -153,6 +161,7 @@
    "icon": "extension",
    "inputs": null,
    "outputs": null,
+   "requirements": [],
    "dependencies": [],
    "uri": "liveStreamWindow.imjoy.html"
   },
@@ -167,6 +176,9 @@
    "icon": "extension",
    "inputs": null,
    "outputs": null,
+   "requirements": [
+    "https://cdnjs.cloudflare.com/ajax/libs/three.js/r49/Three.min.js"
+   ],
    "dependencies": [],
    "uri": "localization3D.imjoy.html"
   },
@@ -183,7 +195,7 @@
    "outputs": null,
    "icon": null,
    "env": "conda create -n python2 python=2.7",
-   "requirements": "conda config --add channels conda-forge && conda install -y ffmpeg nodejs && npm install ws && pip install numpy scikit-image Pillow",
+   "requirements": [],
    "cmd": "python",
    "dependencies": [
     "Live Stream Window"
@@ -214,6 +226,10 @@
     }
    },
    "icon": "🙀",
+   "requirements": [
+    "https://cdn.rawgit.com/Stuk/jszip/9fb481ac/dist/jszip.min.js",
+    "https://cdn.rawgit.com/satazor/js-spark-md5/bbd1624a/spark-md5.min.js"
+   ],
    "dependencies": [
     "Image Window",
     "2D Histogram"
@@ -252,6 +268,9 @@
     }
    },
    "icon": null,
+   "requirements": [
+    "https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"
+   ],
    "dependencies": [],
    "uri": "textFileImporter.imjoy.html"
   },
@@ -279,6 +298,9 @@
     }
    },
    "icon": null,
+   "requirements": [
+    "https://cdn.rawgit.com/photopea/UTIF.js/4f1b10cb/UTIF.js"
+   ],
    "dependencies": [
     "Image Window"
    ],
@@ -322,7 +344,11 @@
      "git clone https://github.com/zhixuhao/unet"
     ]
    },
-   "requirements": "pip install h5py scikit-image keras==2.1.4",
+   "requirements": [
+    "h5py",
+    "scikit-image",
+    "keras==2.1.4"
+   ],
    "dependencies": [],
    "uri": "unet.imjoy.html"
   },
@@ -337,6 +363,11 @@
    "icon": "extension",
    "inputs": null,
    "outputs": null,
+   "requirements": [
+    "https://cdn.jsdelivr.net/npm/vega@4.2.0",
+    "https://cdn.jsdelivr.net/npm/vega-lite@3.0.0-rc6",
+    "https://cdn.jsdelivr.net/npm/vega-embed@3.19.2"
+   ],
    "dependencies": [],
    "disabled": true,
    "uri": "vega.imjoy.html"

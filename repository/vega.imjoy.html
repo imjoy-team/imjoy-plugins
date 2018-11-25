@@ -15,6 +15,9 @@ Describe your plugin here.
   "icon": "extension",
   "inputs": null,
   "outputs": null,
+  "requirements": ["https://cdn.jsdelivr.net/npm/vega@4.2.0",
+                   "https://cdn.jsdelivr.net/npm/vega-lite@3.0.0-rc6",
+                   "https://cdn.jsdelivr.net/npm/vega-embed@3.19.2"],
   "dependencies": [],
   "disabled": true
 }
@@ -23,7 +26,7 @@ Describe your plugin here.
 <script lang="javascript">
 class ImJoyPlugin {
   async setup() {
-    await importScripts("https://cdn.jsdelivr.net/npm/vega@4.2.0", "https://cdn.jsdelivr.net/npm/vega-lite@3.0.0-rc6", "https://cdn.jsdelivr.net/npm/vega-embed@3.19.2")
+
   }
 
   run(my) {
