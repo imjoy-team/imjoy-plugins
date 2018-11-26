@@ -67,7 +67,7 @@
    "icon": null,
    "requirements": [],
    "dependencies": [
-    "Lookup Table"
+    "oeway/ImJoy-Plugins:Lookup Table"
    ],
    "uri": "histogram2D.imjoy.html"
   },
@@ -146,7 +146,7 @@
    "requirements": [],
    "cmd": "python",
    "dependencies": [
-    "Live Stream Window"
+    "oeway/ImJoy-Plugins:Live Stream Window"
    ],
    "uri": "liveStream.imjoy.html"
   },
@@ -198,7 +198,7 @@
    "requirements": [],
    "cmd": "python",
    "dependencies": [
-    "Live Stream Window"
+    "oeway/ImJoy-Plugins:Live Stream Window"
    ],
    "uri": "microManager.imjoy.html"
   },
@@ -231,8 +231,8 @@
     "https://cdn.rawgit.com/satazor/js-spark-md5/bbd1624a/spark-md5.min.js"
    ],
    "dependencies": [
-    "Image Window",
-    "2D Histogram"
+    "oeway/ImJoy-Plugins:Image Window",
+    "oeway/ImJoy-Plugins:2D Histogram"
    ],
    "uri": "smlmFileIO.imjoy.html"
   },
@@ -302,7 +302,7 @@
     "https://cdn.rawgit.com/photopea/UTIF.js/4f1b10cb/UTIF.js"
    ],
    "dependencies": [
-    "Image Window"
+    "oeway/ImJoy-Plugins:Image Window"
    ],
    "uri": "tifFileImporter.imjoy.html"
   },
