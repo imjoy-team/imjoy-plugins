@@ -7,7 +7,7 @@ var repository_dir = "./repository";
 var collections_dir = "./collections";
 var manifest_path = "./manifest.imjoy.json"
 var repo_version = "0.2.0"
-var uri_root = "https://raw.githubusercontent.com/oeway/ImJoy-Plugins/master/repository"
+var uri_root = "/repository"
 var repo_name = "ImJoy Repository"
 var repo_description = "The official plugin repository provided by ImJoy.io."
 
