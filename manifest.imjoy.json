@@ -2,7 +2,7 @@
  "name": "ImJoy Repository",
  "description": "The official plugin repository provided by ImJoy.io.",
  "version": "0.2.0",
- "uri_root": "https://raw.githubusercontent.com/oeway/ImJoy-Plugins/master/repository",
+ "uri_root": "/repository",
  "plugins": [
   {
    "name": "ANNA-PALM",
