@@ -7,9 +7,10 @@ var repository_dir = "./repository";
 var collections_dir = "./collections";
 var manifest_path = "./manifest.imjoy.json"
 var repo_version = "0.2.0"
-var uri_root = "/repository"
-var repo_name = "ImJoy Repository"
-var repo_description = "The official plugin repository provided by ImJoy.io."
+
+var default_repo_name = "ImJoy Repository"
+var default_repo_description = "ImJoy plugin repository."
+var default_uri_root = "/repository"
 
 function parsePlugin(code){
   var pluginComp = pluginParser.parseComponent(code)
@@ -71,7 +72,20 @@ fs.readdir(repository_dir, function(err, files) {
 
     if(plugin_configs.length>0){
       console.log("Writing %s plugins into '%s'", plugin_configs.length, manifest_path);
-      var repo_manifest = {name: repo_name, description: repo_description, version: repo_version, uri_root: uri_root, plugins: plugin_configs, collections: collection_configs}
+      var repo_manifest =  {}
+      if (fs.existsSync(manifest_path)) {
+        try {
+           repo_manifest = JSON.parse(fs.readFileSync(manifest_path));
+        } catch (e) {
+          console.log('Error occured when reading the old manifest file, please make sure the format is correct or remove the old one. Error: '+e.toString())
+        }
+      }
+      repo_manifest.name = repo_manifest.name || default_repo_name
+      repo_manifest.description = repo_manifest.description || default_repo_description
+      repo_manifest.uri_root = repo_manifest.uri_root || default_uri_root
+      repo_manifest.version = repo_version
+      repo_manifest.plugins = plugin_configs
+      repo_manifest.collections = collection_configs
       var stream = fs.createWriteStream(manifest_path);
       stream.once('open', function(fd) {
         stream.write(JSON.stringify(repo_manifest,null,' '));
