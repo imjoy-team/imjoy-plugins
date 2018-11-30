@@ -2,7 +2,7 @@
  "name": "ImJoy Repository",
  "description": "The official plugin repository provided by ImJoy.io.",
  "version": "0.2.0",
- "uri_root": "/repository",
+ "uri_root": "",
  "plugins": [
   {
    "name": "ANNA-PALM",
@@ -21,7 +21,7 @@
    ],
    "requirements": "cd ANNA-PALM && pip install -r requirements.txt",
    "dependencies": [],
-   "uri": "annaPalm.imjoy.html"
+   "uri": "repository/annaPalm.imjoy.html"
   },
   {
    "name": "2D Histogram",
@@ -69,7 +69,7 @@
    "dependencies": [
     "oeway/ImJoy-Plugins:Lookup Table"
    ],
-   "uri": "histogram2D.imjoy.html"
+   "uri": "repository/histogram2D.imjoy.html"
   },
   {
    "name": "Image Window",
@@ -129,7 +129,7 @@
     "https://unpkg.com/leaflet@1.3.1/dist/leaflet.css"
    ],
    "dependencies": [],
-   "uri": "imageWindow.imjoy.html"
+   "uri": "repository/imageWindow.imjoy.html"
   },
   {
    "name": "Live Stream",
@@ -148,7 +148,7 @@
    "dependencies": [
     "oeway/ImJoy-Plugins:Live Stream Window"
    ],
-   "uri": "liveStream.imjoy.html"
+   "uri": "repository/liveStream.imjoy.html"
   },
   {
    "name": "Live Stream Window",
@@ -163,7 +163,7 @@
    "outputs": null,
    "requirements": [],
    "dependencies": [],
-   "uri": "liveStreamWindow.imjoy.html"
+   "uri": "repository/liveStreamWindow.imjoy.html"
   },
   {
    "name": "Localization3D",
@@ -180,7 +180,7 @@
     "https://cdnjs.cloudflare.com/ajax/libs/three.js/r49/Three.min.js"
    ],
    "dependencies": [],
-   "uri": "localization3D.imjoy.html"
+   "uri": "repository/localization3D.imjoy.html"
   },
   {
    "name": "MicroManager",
@@ -200,7 +200,7 @@
    "dependencies": [
     "oeway/ImJoy-Plugins:Live Stream Window"
    ],
-   "uri": "microManager.imjoy.html"
+   "uri": "repository/microManager.imjoy.html"
   },
   {
    "name": "SMLM File IO",
@@ -234,7 +234,7 @@
     "oeway/ImJoy-Plugins:Image Window",
     "oeway/ImJoy-Plugins:2D Histogram"
    ],
-   "uri": "smlmFileIO.imjoy.html"
+   "uri": "repository/smlmFileIO.imjoy.html"
   },
   {
    "name": "Localization File (csv)",
@@ -272,7 +272,7 @@
     "https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"
    ],
    "dependencies": [],
-   "uri": "textFileImporter.imjoy.html"
+   "uri": "repository/textFileImporter.imjoy.html"
   },
   {
    "name": "Tif File Importer",
@@ -304,7 +304,7 @@
    "dependencies": [
     "oeway/ImJoy-Plugins:Image Window"
    ],
-   "uri": "tifFileImporter.imjoy.html"
+   "uri": "repository/tifFileImporter.imjoy.html"
   },
   {
    "name": "Unet Segmentation",
@@ -350,7 +350,7 @@
     "keras==2.1.4"
    ],
    "dependencies": [],
-   "uri": "unet.imjoy.html"
+   "uri": "repository/unet.imjoy.html"
   },
   {
    "name": "Vega",
@@ -370,7 +370,7 @@
    ],
    "dependencies": [],
    "disabled": true,
-   "uri": "vega.imjoy.html"
+   "uri": "repository/vega.imjoy.html"
   }
  ],
  "collections": [
