@@ -72,6 +72,29 @@
    "uri": "repository/histogram2D.imjoy.html"
   },
   {
+   "name": "Image Recognition",
+   "mode": "window",
+   "tags": [],
+   "ui": "A pretrained MobileNet image classifier built with Tensorflow.js",
+   "version": "0.1.0",
+   "api_version": "0.1.1",
+   "description": "A pretrained MobileNet image classifier built with Tensorflow.js",
+   "icon": "extension",
+   "inputs": null,
+   "outputs": null,
+   "env": "",
+   "requirements": [
+    "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@0.13.0",
+    "https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@0.1.1"
+   ],
+   "dependencies": [],
+   "defaults": {
+    "w": 10,
+    "h": 10
+   },
+   "uri": "repository/imageRecognition.imjoy.html"
+  },
+  {
    "name": "Image Window",
    "mode": "window",
    "tags": [],

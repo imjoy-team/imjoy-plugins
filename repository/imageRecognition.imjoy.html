@@ -1,0 +1,123 @@
+
+<docs lang="markdown">
+A pretrained MobileNet image classifier built with Tensorflow.js.
+
+This plugin is ported from: [mobilenet example for Tensorflow.js](https://github.com/tensorflow/tfjs-models/tree/master/mobilenet).
+</docs>
+
+<config lang="json">
+{
+  "name": "Image Recognition",
+  "mode": "window",
+  "tags": [],
+  "ui": "A pretrained MobileNet image classifier built with Tensorflow.js",
+  "version": "0.1.0",
+  "api_version": "0.1.1",
+  "description": "A pretrained MobileNet image classifier built with Tensorflow.js",
+  "icon": "extension",
+  "inputs": null,
+  "outputs": null,
+  "env": "",
+  "requirements": [
+    "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@0.13.0",
+    "https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@0.1.1"
+  ],
+  "dependencies": [],
+  "defaults": {"w": 10, "h": 10}
+}
+</config>
+
+<script lang="javascript">
+class ImJoyPlugin {
+  async setup() {
+    // bind predict() to the button
+    const predictBtn = document.getElementById('predict-btn');
+    predictBtn.onclick = ()=>{
+      this.predict()
+    }
+
+    // Display image when a file is selected.
+    const fileInput = document.getElementById("file-input");
+    const canvas = document.getElementById("input-canvas");
+    const drawImage = (url, callback)=>{
+        var img = new Image()
+        img.crossOrigin = "anonymous"
+        img.onload = function(){
+            const ctx = canvas.getContext("2d");
+            canvas.width = Math.min(this.width, 512);
+            canvas.height= Math.min(this.height, parseInt(512*this.height/this.width), 1024);
+            // draw the img into canvas
+            ctx.drawImage(this, 0, 0, canvas.width, canvas.height);
+            if(callback) callback();
+        }
+        img.src = url;
+    }
+    //load a preset image
+    drawImage('https://static.imjoy.io/img/cat.jpg')
+    
+    const readImageFile = ()=>{
+        return new Promise((resolve, reject)=>{
+            const U = window.URL || window.webkitURL;
+            // this works for safari
+            if(U.createObjectURL){
+                drawImage(U.createObjectURL(fileInput.files[0]), resolve)
+            }
+            // fallback
+            else{
+                var fr = new FileReader();
+                // when image is loaded, set the src of the image where you want to display it
+                fr.onload = function(e) {
+                    drawImage(e.target.result, resolve)
+                };
+                fr.onerror = reject
+                // fill fr with image data
+                fr.readAsDataURL(fileInput.files[0]);
+            }
+        })
+    }
+    
+    // If user selected a new file or take a new photo, load it and do prediction.
+    fileInput.addEventListener("change", ()=>{
+        readImageFile().then(()=>{
+            this.predict();
+        })
+    }, true);
+
+    // Load the model.
+    const statusElement = document.getElementById("status");
+    statusElement.innerHTML = 'Loading pretrained model...';
+    this.model = await mobilenet.load();
+    statusElement.innerHTML = 'Model loaded, please open an image (.png/.jpg) and click `Predict`!';
+    
+    // Display the predict button and file selection
+    predictBtn.style.display = "inline";
+    fileInput.style.display = "inline";
+  }
+
+  async predict(){    
+    const canvas = document.getElementById('input-canvas');
+    // Classify the image.
+    const predictions = await this.model.classify(canvas)
+    // Output the result
+    console.log('Predictions: ', predictions);
+    const result_string = `Prediction: Top-1 ${predictions[0].className} (${Math.round(predictions[0].probability*100)}%); Top-2 ${predictions[1].className} (${Math.round(predictions[1].probability*100)}%);`;
+    document.getElementById("status").innerHTML = result_string
+    api.alert(result_string)
+  }
+
+  run(my) {
+
+  }
+}
+
+api.export(new ImJoyPlugin())
+</script>
+
+<window lang="html">
+  <div>
+    <p id="status"></p>
+    <input class="form-input" id="file-input" style="display: none;" accept="image/*" capture="camera" type="file"/>
+    <button class="form-input btn" style="display: none;" id="predict-btn">Predict</button>
+    <canvas id="input-canvas" style="width: 100%; object-fit: cover;"></canvas>
+  </div>
+</window>
