@@ -1,4 +1,4 @@
-﻿
+
 <docs>
 # MINST Classification with CNN
 
@@ -218,7 +218,46 @@ class ImJoyPlugin {
     this.model = getModel()
     this.data = await loadData()
 
+    this.classNames = ['Zero', 'One', 'Two', 'Three', 'Four', 'Five',
+            'Six', 'Seven', 'Eight', 'Nine'];
+
+          
+
+          
+
+          document.querySelector('#show-accuracy')
+            .addEventListener('click', () => this.showAccuracy());
+
+          document.querySelector('#show-confusion')
+            .addEventListener('click', () => this.showConfusion());
+
   }
+   doPrediction(testDataSize = 500) {
+        const testData = this.data.nextTestBatch(testDataSize);
+        const testxs = testData.xs.reshape([testDataSize, 28, 28, 1]);
+        const labels = testData.labels.argMax([-1]);
+        const preds = this.model.predict(testxs).argMax([-1]);
+
+        testxs.dispose();
+        return [preds, labels];
+    }
+
+    async  showAccuracy() {
+        const [preds, labels] = this.doPrediction();
+        const classAccuracy = await tfvis.metrics.perClassAccuracy(labels, preds);
+        const container = { name: 'Accuracy', tab: 'Evaluation' };
+        tfvis.show.perClassAccuracy(container, classAccuracy, this.classNames);
+
+        labels.dispose();
+    }
+    async  showConfusion() {
+        const [preds, labels] = this.doPrediction();
+        const confusionMatrix = await tfvis.metrics.confusionMatrix(labels, preds);
+        const container = { name: 'Confusion Matrix', tab: 'Evaluation' };
+        tfvis.show.confusionMatrix(container, confusionMatrix, this.classNames);
+
+        labels.dispose();
+    }
   async watchTraining() {
     const metrics = ['loss', 'val_loss', 'acc', 'val_acc'];
     const container = {
@@ -295,6 +334,8 @@ api.export(new ImJoyPlugin())
   <div>
     <button id="show-examples">Show Examples</button>
     <button id="start-training">Start Training</button>
+    <button id="show-accuracy">Show Accuracy</button>
+    <button id="show-confusion">Show Confusion Matrix</button>
     <div id="tf-surface">
     </div>
   </div>
