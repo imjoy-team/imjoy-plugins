@@ -1,0 +1,321 @@
+﻿
+<docs>
+# MINST Classification with CNN
+
+This plugin demonstrate using CNN to classify digits.
+
+[Reference](https://storage.googleapis.com/tfjs-vis/mnist/dist/index.html)
+</docs>
+
+<config lang="json">
+{
+  "name": "MNIST-CNN",
+  "mode": "window",
+  "tags": [],
+  "ui": [],
+  "version": "0.1.0",
+  "api_version": "0.1.1",
+  "url": "",
+  "description": "This plugin demonstrate using CNN to classify digits.",
+  "icon": "extension",
+  "inputs": null,
+  "outputs": null,
+  "env": null,
+  "requirements": ["https://cdn.jsdelivr.net/npm/@tensorflow/tfjs", "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis"],
+  "dependencies": [],
+  "defaults": {"w": 20, "h": 20}
+}
+</config>
+
+
+<script lang="javascript">
+const IMAGE_SIZE = 784;
+const NUM_CLASSES = 10;
+const NUM_DATASET_ELEMENTS = 65000;
+
+const NUM_TRAIN_ELEMENTS = 55000;
+const NUM_TEST_ELEMENTS = NUM_DATASET_ELEMENTS - NUM_TRAIN_ELEMENTS;
+
+const MNIST_IMAGES_SPRITE_PATH =
+    'https://storage.googleapis.com/learnjs-data/model-builder/mnist_images.png';
+const MNIST_LABELS_PATH =
+    'https://storage.googleapis.com/learnjs-data/model-builder/mnist_labels_uint8';
+
+/**
+ * A class that fetches the sprited MNIST dataset and returns shuffled batches.
+ *
+ * NOTE: This will get much easier. For now, we do data fetching and
+ * manipulation manually.
+ */
+class MnistData {
+  constructor() {
+    this.shuffledTrainIndex = 0;
+    this.shuffledTestIndex = 0;
+  }
+
+  async load() {
+    // Make a request for the MNIST sprited image.
+    const img = new Image();
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const imgRequest = new Promise((resolve, reject) => {
+      img.crossOrigin = '';
+      img.onload = () => {
+        img.width = img.naturalWidth;
+        img.height = img.naturalHeight;
+
+        const datasetBytesBuffer =
+            new ArrayBuffer(NUM_DATASET_ELEMENTS * IMAGE_SIZE * 4);
+
+        const chunkSize = 5000;
+        canvas.width = img.width;
+        canvas.height = chunkSize;
+
+        for (let i = 0; i < NUM_DATASET_ELEMENTS / chunkSize; i++) {
+          const datasetBytesView = new Float32Array(
+              datasetBytesBuffer, i * IMAGE_SIZE * chunkSize * 4,
+              IMAGE_SIZE * chunkSize);
+          ctx.drawImage(
+              img, 0, i * chunkSize, img.width, chunkSize, 0, 0, img.width,
+              chunkSize);
+
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+          for (let j = 0; j < imageData.data.length / 4; j++) {
+            // All channels hold an equal value since the image is grayscale, so
+            // just read the red channel.
+            datasetBytesView[j] = imageData.data[j * 4] / 255;
+          }
+        }
+        this.datasetImages = new Float32Array(datasetBytesBuffer);
+
+        resolve();
+      };
+      img.src = MNIST_IMAGES_SPRITE_PATH;
+    });
+
+    const labelsRequest = fetch(MNIST_LABELS_PATH);
+    const [imgResponse, labelsResponse] =
+        await Promise.all([imgRequest, labelsRequest]);
+
+    this.datasetLabels = new Uint8Array(await labelsResponse.arrayBuffer());
+
+    // Create shuffled indices into the train/test set for when we select a
+    // random dataset element for training / validation.
+    this.trainIndices = tf.util.createShuffledIndices(NUM_TRAIN_ELEMENTS);
+    this.testIndices = tf.util.createShuffledIndices(NUM_TEST_ELEMENTS);
+
+    // Slice the the images and labels into train and test sets.
+    this.trainImages =
+        this.datasetImages.slice(0, IMAGE_SIZE * NUM_TRAIN_ELEMENTS);
+    this.testImages = this.datasetImages.slice(IMAGE_SIZE * NUM_TRAIN_ELEMENTS);
+    this.trainLabels =
+        this.datasetLabels.slice(0, NUM_CLASSES * NUM_TRAIN_ELEMENTS);
+    this.testLabels =
+        this.datasetLabels.slice(NUM_CLASSES * NUM_TRAIN_ELEMENTS);
+  }
+
+  nextTrainBatch(batchSize) {
+    return this.nextBatch(
+        batchSize, [this.trainImages, this.trainLabels], () => {
+          this.shuffledTrainIndex =
+              (this.shuffledTrainIndex + 1) % this.trainIndices.length;
+          return this.trainIndices[this.shuffledTrainIndex];
+        });
+  }
+
+  nextTestBatch(batchSize) {
+    return this.nextBatch(batchSize, [this.testImages, this.testLabels], () => {
+      this.shuffledTestIndex =
+          (this.shuffledTestIndex + 1) % this.testIndices.length;
+      return this.testIndices[this.shuffledTestIndex];
+    });
+  }
+
+  nextBatch(batchSize, data, index) {
+    const batchImagesArray = new Float32Array(batchSize * IMAGE_SIZE);
+    const batchLabelsArray = new Uint8Array(batchSize * NUM_CLASSES);
+
+    for (let i = 0; i < batchSize; i++) {
+      const idx = index();
+
+      const image =
+          data[0].slice(idx * IMAGE_SIZE, idx * IMAGE_SIZE + IMAGE_SIZE);
+      batchImagesArray.set(image, i * IMAGE_SIZE);
+
+      const label =
+          data[1].slice(idx * NUM_CLASSES, idx * NUM_CLASSES + NUM_CLASSES);
+      batchLabelsArray.set(label, i * NUM_CLASSES);
+    }
+
+    const xs = tf.tensor2d(batchImagesArray, [batchSize, IMAGE_SIZE]);
+    const labels = tf.tensor2d(batchLabelsArray, [batchSize, NUM_CLASSES]);
+
+    return {xs, labels};
+  }
+}
+
+
+function getModel() {
+  const model = tf.sequential();
+
+  model.add(tf.layers.conv2d({
+    inputShape: [28, 28, 1],
+    kernelSize: 5,
+    filters: 8,
+    strides: 1,
+    activation: 'relu',
+    kernelInitializer: 'varianceScaling'
+  }));
+
+  model.add(tf.layers.maxPooling2d({poolSize: [2, 2], strides: [2, 2]}));
+  model.add(tf.layers.conv2d({
+    kernelSize: 5,
+    filters: 16,
+    strides: 1,
+    activation: 'relu',
+    kernelInitializer: 'varianceScaling'
+  }));
+
+  model.add(tf.layers.maxPooling2d({poolSize: [2, 2], strides: [2, 2]}));
+  model.add(tf.layers.flatten());
+
+  model.add(tf.layers.dense({
+    units: 10,
+    kernelInitializer: 'varianceScaling',
+    activation: 'softmax'
+  }));
+
+  const LEARNING_RATE = 0.15;
+  const optimizer = tf.train.sgd(LEARNING_RATE);
+
+  model.compile({
+    optimizer: optimizer,
+    loss: 'categoricalCrossentropy',
+    metrics: ['accuracy'],
+  });
+
+  return model;
+}
+
+async function loadData() {
+  const data = new MnistData();
+  await data.load();
+  return data;
+}
+
+
+class ImJoyPlugin {
+  async setup() {
+    this.surface = tfvis.visor().surface({name: 'MNIST-CNN Demo', tab: 'Input Data'});
+    //api.register({name: "show examples", ui: "hello", run: this.showExamples})
+
+    document.querySelector('#show-examples')
+          .addEventListener('click', async (e) => this.showExamples());
+    document.querySelector('#start-training')
+          .addEventListener('click', async (e) => this.watchTraining());
+
+    this.model = getModel()
+    this.data = await loadData()
+
+  }
+  async watchTraining() {
+    const metrics = ['loss', 'val_loss', 'acc', 'val_acc'];
+    const container = {
+    name: 'show.fitCallbacks', tab: 'Training', styles: { height: '1000px' }
+    };
+    const callbacks = tfvis.show.fitCallbacks(container, metrics);
+    return this.train(this.data, callbacks);
+  }
+  async showExamples() {
+    // Get a surface
+    const surface = this.surface;
+    const drawArea = surface.drawArea;
+    const data = this.data;
+    
+    // Get the examples
+    const examples = data.nextTestBatch(20);
+    const numExamples = examples.xs.shape[0];
+    for (let i = 0; i < numExamples; i++) {
+        const imageTensor = tf.tidy(() => {
+        return examples.xs.slice([i, 0], [1, examples.xs.shape[1]]).reshape([
+            28, 28, 1
+        ]);
+        });
+
+        // Create a canvas element to render each example
+        const canvas = document.createElement('canvas');
+        canvas.width = 28;
+        canvas.height = 28;
+        canvas.style = 'margin: 4px;';
+        await tf.toPixels(imageTensor, canvas);
+        drawArea.appendChild(canvas);
+
+        imageTensor.dispose();
+    }
+  }
+
+  async train(data, fitCallbacks) {
+    const BATCH_SIZE = 64;
+    const trainDataSize = 500;
+    const testDataSize = 100;
+
+    const [trainXs, trainYs] = tf.tidy(() => {
+    const d = data.nextTrainBatch(trainDataSize);
+    return [
+        d.xs.reshape([trainDataSize, 28, 28, 1]),
+        d.labels
+    ]
+    });
+
+    const [testXs, testYs] = tf.tidy(() => {
+    const d = data.nextTestBatch(testDataSize);
+    return [
+        d.xs.reshape([testDataSize, 28, 28, 1]),
+        d.labels
+    ]
+    });
+
+    return this.model.fit(trainXs, trainYs, {
+    batchSize: BATCH_SIZE,
+    validationData: [testXs, testYs],
+    epochs: 10,
+    shuffle: true,
+    callbacks: fitCallbacks
+    });
+  }
+  async run(){
+  }
+}
+api.export(new ImJoyPlugin())
+</script>
+
+
+<window lang="html">
+  <div>
+    <button id="show-examples">Show Examples</button>
+    <button id="start-training">Start Training</button>
+    <div id="tf-surface">
+    </div>
+  </div>
+</window>
+
+<style lang="css">
+.visor {
+    width: 100%!important;
+    right: 0px!important;
+    position: absolute!important;
+    top: 46px!important;
+}
+.visor-controls {
+    display: none!important;
+}
+.tf-surface{
+    top: 10px;
+    width: 100%!important;
+    height: 100%!important;
+    max-width: 100%!important;
+    max-height: 100%!important;
+}
+}
+</style>
