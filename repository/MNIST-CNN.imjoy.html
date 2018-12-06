@@ -253,8 +253,31 @@ class ImJoyPlugin {
     async  showConfusion() {
         const [preds, labels] = this.doPrediction();
         const confusionMatrix = await tfvis.metrics.confusionMatrix(labels, preds);
-        const container = { name: 'Confusion Matrix', tab: 'Evaluation' };
-        tfvis.show.confusionMatrix(container, confusionMatrix, this.classNames);
+
+        // Renormalize confusion matrix
+        const sums = [0, 0, 0,0,0,0,0,0,0,0 ]
+        for (let iCol = 0; iCol < 10; iCol++){
+            
+            for (let iRow = 0; iRow < 10; iRow++) {
+                sums[iCol] = sums[iCol] + confusionMatrix[iRow][iCol]
+          }
+        }
+        const confusionMatrixNorm = []
+        for (let iRow = 0; iRow < 10; iRow++){ 
+            confusionMatrixNorm[iRow] = []
+        }
+        for (let iCol = 0; iCol < 10; iCol++){ 
+
+            for (let iRow = 0; iRow < 10; iRow++) {
+                confusionMatrixNorm[iRow][iCol] = Math.round(100*(confusionMatrix[iRow][iCol] / sums[iCol]))
+            }
+        }
+
+        console.log(confusionMatrixNorm)
+
+        console.log(sums)
+        const container = { name: 'Normalized Confusion Matrix', tab: 'Evaluation' };
+        tfvis.show.confusionMatrix(container, confusionMatrixNorm, this.classNames);
 
         labels.dispose();
     }
