@@ -7,8 +7,8 @@
   "description": "A plugin for loading tif images.",
   "ui": "frame number:{id:'frame_num', type:'number', min:0, placeholder:0}",
   "tags": [],
-  "inputs": {"name": {"type": "string", "pattern":".*\\.tif|\\.tiff|\\.TIFF|\\.TIF", "required": true }},
-  "outputs": {"type": {"enum": ["image/grayscale"], "required": true}},
+  "inputs": {"name": { "pattern":".*\\.tif|\\.tiff|\\.TIFF|\\.TIF" }},
+  "outputs": {"type": { "enum": ["image/grayscale"] }},
   "icon": null,
   "requirements": ["https://cdn.rawgit.com/photopea/UTIF.js/4f1b10cb/UTIF.js"],
   "dependencies": ["oeway/ImJoy-Plugins:Image Window"]

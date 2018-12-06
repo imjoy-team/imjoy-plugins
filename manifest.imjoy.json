@@ -60,32 +60,26 @@
     "type": {
      "enum": [
       "localization/table"
-     ],
-     "required": true
+     ]
     },
     "table": {
-     "type": "object",
-     "required": true
+     "type": "object"
     }
    },
    "outputs": {
     "type": {
      "enum": [
       "image/grayscale"
-     ],
-     "required": true
+     ]
     },
     "array": {
-     "type": "object",
-     "required": true
+     "type": "object"
     },
     "height": {
-     "type": "integer",
-     "required": true
+     "type": "integer"
     },
     "width": {
-     "type": "integer",
-     "required": true
+     "type": "integer"
     }
    },
    "icon": null,
@@ -126,40 +120,32 @@
     "type": {
      "enum": [
       "image/grayscale"
-     ],
-     "required": true
+     ]
     },
     "array": {
-     "type": "object",
-     "required": true
+     "type": "object"
     },
     "height": {
-     "type": "integer",
-     "required": true
+     "type": "integer"
     },
     "width": {
-     "type": "integer",
-     "required": true
+     "type": "integer"
     }
    },
    "outputs": {
     "type": {
      "enum": [
       "image/grayscale"
-     ],
-     "required": true
+     ]
     },
     "array": {
-     "type": "object",
-     "required": true
+     "type": "object"
     },
     "height": {
-     "type": "integer",
-     "required": true
+     "type": "integer"
     },
     "width": {
-     "type": "integer",
-     "required": true
+     "type": "integer"
     }
    },
    "show_panel": true,
@@ -259,17 +245,14 @@
    "tags": [],
    "inputs": {
     "name": {
-     "type": "string",
-     "pattern": ".*\\.smlm|\\.SMLM",
-     "required": true
+     "pattern": ".*\\.smlm|\\.SMLM"
     }
    },
    "outputs": {
     "type": {
      "enum": [
       "image/grayscale"
-     ],
-     "required": true
+     ]
     }
    },
    "icon": "🙀",
@@ -297,21 +280,17 @@
    ],
    "inputs": {
     "name": {
-     "type": "string",
-     "pattern": ".*\\.csv|\\.xls",
-     "required": true
+     "pattern": ".*\\.csv|\\.xls"
     }
    },
    "outputs": {
     "type": {
      "enum": [
       "localization/table"
-     ],
-     "required": true
+     ]
     },
     "table": {
-     "type": "object",
-     "required": true
+     "type": "object"
     }
    },
    "icon": null,
@@ -331,17 +310,14 @@
    "tags": [],
    "inputs": {
     "name": {
-     "type": "string",
-     "pattern": ".*\\.tif|\\.tiff|\\.TIFF|\\.TIF",
-     "required": true
+     "pattern": ".*\\.tif|\\.tiff|\\.TIFF|\\.TIF"
     }
    },
    "outputs": {
     "type": {
      "enum": [
       "image/grayscale"
-     ],
-     "required": true
+     ]
     }
    },
    "icon": null,
