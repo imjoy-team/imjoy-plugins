@@ -1,9 +1,9 @@
 <config>
 {
   "name": "SMLM File IO",
-  "mode": "webworker",
+  "type": "web-worker",
   "version": "0.1.0",
-  "api_version": "0.1.1",
+  "api_version": "0.1.2",
   "description": "A plugin for loading and exporting SMLM images.",
   "ui": "Render a 2D histogram with: <br>pixel size={id:'pixel_size', type:'number', placeholder: 20}nm<br> width={id:'width', type:'number', placeholder: 2560} <br> height={id:'height', type:'number', placeholder: 2560}",
   "tags": [],
@@ -421,19 +421,19 @@ const supported_image_formats = {"png":{
     // Required
     "type": "image",
     "extension": ".png",
-    "mode": "binary",
+    "type": "binary",
   },
   "jpg":{
       // Required
       "type": "image",
       "extension": ".jpg",
-      "mode": "binary",
+      "type": "binary",
     },
   "jpeg":{
       // Required
       "type": "image",
       "extension": ".jpeg",
-      "mode": "binary",
+      "type": "binary",
     }
 
 }
@@ -442,7 +442,7 @@ const supported_text_formats = {"ThunderSTORM(csv)": {
     // Required
     "type": "table",
     "extension": ".csv",
-    "mode": "text",
+    "type": "text",
     "dtype": "float32",
     "delimiter": ",",
     "comments": "",
@@ -459,7 +459,7 @@ const supported_text_formats = {"ThunderSTORM(csv)": {
       // Required
       "type": "table",
       "extension": ".csv",
-      "mode": "text",
+      "type": "text",
       "dtype": "float32",
       "delimiter": "\t",
       "comments": "",
@@ -478,7 +478,7 @@ const native_formats = {
     // Required
     "name": "smlm-table(binary)",
     "type": "table",
-    "mode": "binary",
+    "type": "binary",
     "extension": ".bin",
     "columns": 0,
     "headers": [],
@@ -492,7 +492,7 @@ const native_formats = {
   "smlm-image(binary)": {
     // Required
     "type": "image",
-    "mode": "binary",
+    "type": "binary",
     "extension": ".raw",
     "dtype": "uint32",
     "shape": [512, 512, null],
@@ -504,7 +504,7 @@ const native_formats = {
   "smlm-table(csv)": {
     // Required
     "type": "table",
-    "mode": "text",
+    "type": "text",
     "extension": ".csv",
     "dtype": "float32",
     "delimiter": ",",
