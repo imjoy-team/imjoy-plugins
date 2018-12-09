@@ -57,29 +57,37 @@
    "tags": [],
    "ui": "Render a 2D histogram with: <br>pixel size={id:'pixel_size', type:'number', placeholder: 20}nm<br> width={id:'width', type:'number', placeholder: 2560} <br> height={id:'height', type:'number', placeholder: 2560}",
    "inputs": {
-    "type": {
-     "enum": [
-      "localization/table"
-     ]
-    },
-    "table": {
-     "type": "object"
+    "type": "object",
+    "properties": {
+     "type": {
+      "type": "string",
+      "enum": [
+       "localization/table"
+      ]
+     },
+     "table": {
+      "type": "object"
+     }
     }
    },
    "outputs": {
-    "type": {
-     "enum": [
-      "image/grayscale"
-     ]
-    },
-    "array": {
-     "type": "object"
-    },
-    "height": {
-     "type": "integer"
-    },
-    "width": {
-     "type": "integer"
+    "type": "object",
+    "properties": {
+     "type": {
+      "type": "string",
+      "enum": [
+       "image/grayscale"
+      ]
+     },
+     "array": {
+      "type": "object"
+     },
+     "height": {
+      "type": "integer"
+     },
+     "width": {
+      "type": "integer"
+     }
     }
    },
    "icon": null,
@@ -117,35 +125,43 @@
    "type": "window",
    "tags": [],
    "inputs": {
-    "type": {
-     "enum": [
-      "image/grayscale"
-     ]
-    },
-    "array": {
-     "type": "object"
-    },
-    "height": {
-     "type": "integer"
-    },
-    "width": {
-     "type": "integer"
+    "type": "object",
+    "properties": {
+     "type": {
+      "type": "string",
+      "enum": [
+       "image/grayscale"
+      ]
+     },
+     "array": {
+      "type": "object"
+     },
+     "height": {
+      "type": "integer"
+     },
+     "width": {
+      "type": "integer"
+     }
     }
    },
    "outputs": {
-    "type": {
-     "enum": [
-      "image/grayscale"
-     ]
-    },
-    "array": {
-     "type": "object"
-    },
-    "height": {
-     "type": "integer"
-    },
-    "width": {
-     "type": "integer"
+    "type": "object",
+    "properties": {
+     "type": {
+      "type": "string",
+      "enum": [
+       "image/grayscale"
+      ]
+     },
+     "array": {
+      "type": "object"
+     },
+     "height": {
+      "type": "integer"
+     },
+     "width": {
+      "type": "integer"
+     }
     }
    },
    "show_panel": true,
@@ -244,15 +260,22 @@
    "ui": "Render a 2D histogram with: <br>pixel size={id:'pixel_size', type:'number', placeholder: 20}nm<br> width={id:'width', type:'number', placeholder: 2560} <br> height={id:'height', type:'number', placeholder: 2560}",
    "tags": [],
    "inputs": {
-    "name": {
-     "pattern": ".*\\.smlm|\\.SMLM"
+    "type": "object",
+    "properties": {
+     "name": {
+      "pattern": ".*\\.smlm|\\.SMLM"
+     }
     }
    },
    "outputs": {
-    "type": {
-     "enum": [
-      "image/grayscale"
-     ]
+    "type": "object",
+    "properties": {
+     "type": {
+      "type": "string",
+      "enum": [
+       "image/grayscale"
+      ]
+     }
     }
    },
    "icon": "🙀",
@@ -279,18 +302,25 @@
     ".csv"
    ],
    "inputs": {
-    "name": {
-     "pattern": ".*\\.csv|\\.xls"
+    "type": "object",
+    "properties": {
+     "name": {
+      "pattern": ".*\\.csv|\\.xls"
+     }
     }
    },
    "outputs": {
-    "type": {
-     "enum": [
-      "localization/table"
-     ]
-    },
-    "table": {
-     "type": "object"
+    "type": "object",
+    "properties": {
+     "type": {
+      "type": "string",
+      "enum": [
+       "localization/table"
+      ]
+     },
+     "table": {
+      "type": "object"
+     }
     }
    },
    "icon": null,
@@ -309,15 +339,22 @@
    "ui": "frame number:{id:'frame_num', type:'number', min:0, placeholder:0}",
    "tags": [],
    "inputs": {
-    "name": {
-     "pattern": ".*\\.tif|\\.tiff|\\.TIFF|\\.TIF"
+    "type": "object",
+    "properties": {
+     "name": {
+      "pattern": ".*\\.tif|\\.tiff|\\.TIFF|\\.TIF"
+     }
     }
    },
    "outputs": {
-    "type": {
-     "enum": [
-      "image/grayscale"
-     ]
+    "type": "object",
+    "properties": {
+     "type": {
+      "type": "string",
+      "enum": [
+       "image/grayscale"
+      ]
+     }
     }
    },
    "icon": null,

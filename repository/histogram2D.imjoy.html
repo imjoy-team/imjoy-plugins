@@ -8,8 +8,8 @@
   "description": "A plugin for rendering 2D histogram from a localization table.",
   "tags": [],
   "ui": "Render a 2D histogram with: <br>pixel size={id:'pixel_size', type:'number', placeholder: 20}nm<br> width={id:'width', type:'number', placeholder: 2560} <br> height={id:'height', type:'number', placeholder: 2560}",
-  "inputs": {"type": {"enum": ["localization/table"]},"table": {"type":"object"}},
-  "outputs": {"type": {"enum": ["image/grayscale"]},"array": {"type":"object"},"height": {"type":"integer"},"width": {"type":"integer"}},
+  "inputs": {"type": "object", "properties": {"type": {"type": "string", "enum": ["localization/table"]},"table": {"type":"object"}}},
+  "outputs": {"type": "object", "properties": {"type": {"type": "string", "enum": ["image/grayscale"]},"array": {"type":"object"},"height": {"type":"integer"},"width": {"type":"integer"}}},
   "icon": null,
   "requirements": [],
   "dependencies": ["oeway/ImJoy-Plugins:Lookup Table"]

@@ -9,8 +9,8 @@
   "tags": [],
   "ui": "Load a table from the file: add {id:'append_header', type:'string', placeholder:''} to the first line {id:'header_row', type:'choose', options:['read headers from the first line','use index as the header'], placeholder:'read headers from the first line'} and use {id:'delimiter', type:'string', placeholder:','} to seperate columns.",
   "extensions": [".csv"],
-  "inputs": {"name": { "pattern":".*\\.csv|\\.xls" }},
-  "outputs":{"type": {"enum": ["localization/table"]},"table": {"type":"object"}},
+  "inputs": {"type": "object", "properties": {"name": { "pattern":".*\\.csv|\\.xls" }}},
+  "outputs":{"type": "object", "properties": {"type": { "type": "string", "enum": ["localization/table"]},"table": {"type":"object"}}},
   "icon": null,
   "requirements": ["https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"],
   "dependencies": []
