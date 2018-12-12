@@ -204,35 +204,109 @@ async function loadData() {
   return data;
 }
 
+function initDraw(surface, callback) {
+    const drawArea = surface.drawArea;
+    const sketch = document.createElement('div');
+    sketch.style = "height: 100%;";
+    var p = document.createElement("p");
+    var btn = document.createElement("button");
+    var t = document.createTextNode("clear");
+    btn.appendChild(t);
+    p.appendChild(btn);
+    sketch.appendChild(p)
+
+    
+
+    drawArea.appendChild(sketch);
+	
+    const canvas = document.createElement('canvas');
+    var ctx = canvas.getContext('2d');
+    canvas.style = 'margin: 4px; border: 3px solid gray; ';
+    canvas.width = 280;
+    canvas.height = 280;
+
+    btn.addEventListener('click', function(e){
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    })
+
+
+
+    sketch.appendChild(canvas);
+	var mouse = {x: 0, y: 0};
+	var last_mouse = {x: 0, y: 0};
+	
+	/* Mouse Capturing Work */
+	canvas.addEventListener('mousemove', function(e) {
+		last_mouse.x = mouse.x;
+		last_mouse.y = mouse.y;
+		
+		mouse.x = e.pageX - this.offsetLeft;
+		mouse.y = e.pageY - this.offsetTop -40;
+	}, false);
+	
+	
+	/* Drawing on Paint App */
+	ctx.lineWidth = 30;
+	ctx.lineJoin = 'round';
+	ctx.lineCap = 'round';
+	ctx.strokeStyle = 'blue';
+	
+	canvas.addEventListener('mousedown', function(e) {
+		canvas.addEventListener('mousemove', onPaint, false);
+	}, false);
+	
+	canvas.addEventListener('mouseup', function() {
+		canvas.removeEventListener('mousemove', onPaint, false);
+        try{
+            callback(canvas)
+        }
+        catch(e){
+            console.error(e)
+        }
+	}, false);
+	
+	var onPaint = function() {
+		ctx.beginPath();
+		ctx.moveTo(last_mouse.x, last_mouse.y);
+		ctx.lineTo(mouse.x, mouse.y);
+		ctx.closePath();
+		ctx.stroke();
+	};
+}
 
 class ImJoyPlugin {
-  async setup() {
-    this.surface = tfvis.visor().surface({name: 'MNIST-CNN Demo', tab: 'Input Data'});
-    //api.register({name: "show examples", ui: "hello", run: this.showExamples})
+    async setup() {
+        this.surface = tfvis.visor().surface({name: 'MNIST-CNN Demo', tab: 'Input Data'});
+        //api.register({name: "show examples", ui: "hello", run: this.showExamples})
 
-    document.querySelector('#show-examples')
-          .addEventListener('click', async (e) => this.showExamples());
-    document.querySelector('#start-training')
-          .addEventListener('click', async (e) => this.watchTraining());
+        document.querySelector('#show-examples')
+            .addEventListener('click', async (e) => this.showExamples());
+        document.querySelector('#start-training')
+            .addEventListener('click', async (e) => this.watchTraining());
 
-    this.model = getModel()
-    this.data = await loadData()
+        this.model = getModel()
+        this.data = await loadData()
 
-    this.classNames = ['Zero', 'One', 'Two', 'Three', 'Four', 'Five',
-            'Six', 'Seven', 'Eight', 'Nine'];
+        this.classNames = ['Zero', 'One', 'Two', 'Three', 'Four', 'Five',
+                'Six', 'Seven', 'Eight', 'Nine'];
+            document.querySelector('#show-accuracy')
+                .addEventListener('click', () => this.showAccuracy());
 
-          
+            document.querySelector('#show-confusion')
+                .addEventListener('click', () => this.showConfusion());
+        const psurface = tfvis.visor().surface({name: 'MNIST-CNN Demo', tab: 'Prediction'});
+        initDraw(psurface, (c)=>{this.predict(c)})
+    }
 
-          
+    async predict(c){
+        let testx = tf.fromPixels(c, 3)
+        testx = tf.image.resizeBilinear(testx, [28, 28])
+        testx = testx.slice([0, 0, 2],[28, 28, 1]).reshape([1, 28, 28, 1]);
+        const preds = this.model.predict(testx).argMax([-1]);
+        api.alert('prediction: ' + preds.dataSync())
+    }
 
-          document.querySelector('#show-accuracy')
-            .addEventListener('click', () => this.showAccuracy());
-
-          document.querySelector('#show-confusion')
-            .addEventListener('click', () => this.showConfusion());
-
-  }
-   doPrediction(testDataSize = 500) {
+    doPrediction(testDataSize = 500) {
         const testData = this.data.nextTestBatch(testDataSize);
         const testxs = testData.xs.reshape([testDataSize, 28, 28, 1]);
         const labels = testData.labels.argMax([-1]);
