@@ -211,8 +211,12 @@ function initDraw(surface, callback) {
     var p = document.createElement("p");
     var btn = document.createElement("button");
     var t = document.createTextNode("clear");
+    var result = document.createElement("span");
+    result.id= 'result';
     btn.appendChild(t);
     p.appendChild(btn);
+    p.appendChild(result);
+
     sketch.appendChild(p)
 
     
@@ -301,9 +305,11 @@ class ImJoyPlugin {
     async predict(c){
         let testx = tf.fromPixels(c, 3)
         testx = tf.image.resizeBilinear(testx, [28, 28])
-        testx = testx.slice([0, 0, 2],[28, 28, 1]).reshape([1, 28, 28, 1]);
+        testx = testx.slice([0, 0, 2],[28, 28, 1]).reshape([1, 28, 28, 1]).cast('float32').div(tf.scalar(255.0));
         const preds = this.model.predict(testx).argMax([-1]);
-        api.alert('prediction: ' + preds.dataSync())
+        // api.alert('prediction: ' + preds.dataSync())
+        const res = document.getElementById('result')
+        res.innerHTML = '  Prediction: ' + preds.dataSync()
     }
 
     doPrediction(testDataSize = 500) {
@@ -347,9 +353,6 @@ class ImJoyPlugin {
             }
         }
 
-        console.log(confusionMatrixNorm)
-
-        console.log(sums)
         const container = { name: 'Normalized Confusion Matrix', tab: 'Evaluation' };
         tfvis.show.confusionMatrix(container, confusionMatrixNorm, this.classNames);
 
