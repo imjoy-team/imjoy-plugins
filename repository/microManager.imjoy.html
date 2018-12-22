@@ -17,13 +17,14 @@ Describe your plugin here.
   "outputs": null,
   "icon": null,
   "env": "conda create -n python2 python=2.7",
-  "requirements": "conda config --add channels conda-forge && conda install -y ffmpeg nodejs && npm install ws && pip install numpy scikit-image Pillow",
+  "requirements": ["numpy", "scikit-image==0.14.0", "Pillow"],
   "cmd": "python",
-  "dependencies": ["oeway/ImJoy-Plugins:Live Stream Window"]
+  "dependencies": []
 }
 </config>
 
 <script lang="python">
+
 import numpy as np
 import subprocess
 import time
@@ -32,6 +33,13 @@ import threading
 import os
 import sys
 import traceback
+import base64
+from io import BytesIO
+from PIL import Image
+
+from skimage import data, io, filters
+
+from skimage.external.tifffile import imread
 from skimage.external.tifffile import TiffWriter
 import uuid
 
@@ -54,38 +62,28 @@ print( mmc.getVersionInfo() )
 mmc.loadSystemConfiguration(MMConfig)
 print('configuration file loaded: ', MMConfig)
 
-# prepare source code for the websocket relay.
-relay_code = '''var fs=require("fs"),http=require("http"),WebSocket=require("ws");process.argv.length<3&&(console.log("Usage: node websocket-relay.js <secret> [<stream-port> <websocket-port>]"),process.exit());var STREAM_SECRET=process.argv[2],STREAM_PORT=process.argv[3]||8081,WEBSOCKET_PORT=process.argv[4]||8082,RECORD_STREAM=!1,socketServer=new WebSocket.Server({port:WEBSOCKET_PORT,perMessageDeflate:!1});socketServer.connectionCount=0,socketServer.on("connection",function(e,o){socketServer.connectionCount++,console.log("New WebSocket Connection: ",(o||e.upgradeReq).socket.remoteAddress,(o||e.upgradeReq).headers["user-agent"],"("+socketServer.connectionCount+" total)"),e.on("close",function(e,o){socketServer.connectionCount--,console.log("Disconnected WebSocket ("+socketServer.connectionCount+" total)")})}),socketServer.broadcast=function(e){socketServer.clients.forEach(function(o){o.readyState===WebSocket.OPEN&&o.send(e)})};var streamServer=http.createServer(function(e,o){if(e.url.substr(1).split("/")[0]!==STREAM_SECRET&&(console.log("Failed Stream Connection: "+e.socket.remoteAddress+":"+e.socket.remotePort+" - wrong secret."),o.end()),o.connection.setTimeout(0),console.log("Stream Connected: "+e.socket.remoteAddress+":"+e.socket.remotePort),e.on("data",function(o){socketServer.broadcast(o),e.socket.recording&&e.socket.recording.write(o)}),e.on("end",function(){console.log("close"),e.socket.recording&&e.socket.recording.close()}),RECORD_STREAM){var t="recordings/"+Date.now()+".ts";e.socket.recording=fs.createWriteStream(t)}}).listen(STREAM_PORT);console.log("Listening for incomming MPEG-TS Stream on http://127.0.0.1:"+STREAM_PORT+"/<secret>"),console.log("Awaiting WebSocket connections on ws://127.0.0.1:"+WEBSOCKET_PORT+"/");'''
-with open('./__websocket_relay__.js', 'w') as f:
-    f.write(relay_code)
+def image_to_base64(img):
+    output_buffer = BytesIO()
+    img.save(output_buffer, format='JPEG')
+    byte_data = output_buffer.getvalue()
+    base64_str = base64.b64encode(byte_data).decode('ascii')
+    base64_str = 'data:image/jpeg;base64,' + base64_str
+    return base64_str
 
 currentImage = None
-
-def run_server(abort):
+def run_server(abort, window):
     global currentImage
     width = 512
     height = 512
-    frame_size = width * height  # 3 bytes for rgb24
-    frame_dim = '{}x{}'.format(width, height)
-    cmd = 'ffmpeg -f rawvideo -video_size {} -pixel_format gray16le -i pipe:0 -f mpegts -codec:v mpeg1video -s {} -b:v 1000k -bf 0 http://localhost:8081/micro-manager-L2J5F4S7LL2F'.format(frame_dim, frame_dim).split()
-    converter = subprocess.Popen(cmd, stdin=subprocess.PIPE) #, stdout=subprocess.PIPE)
+    def stop(e):
+        abort.set()
     while not abort.is_set():
         if mmc.getRemainingImageCount() > 0:
             image = mmc.getLastImage()
             currentImage = image
-            image = image.astype('float32')/image.max()*65535.0
-            in_data = image.astype('uint16').tobytes()
-            # in_data = np.random.bytes(frame_size)
-            try:
-                converter.stdin.write(in_data)
-                time.sleep(0.08)
-            except:
-                traceback.print_exc(file=sys.stdout)
-                if converter.poll() is not None:
-                    print('the converter has stopped.')
-                    break
-    converter.stdin.close()
-    converter.terminate()
+            image = image.astype('float32')/image.max()*255.0
+            in_data = image.astype('uint8')
+            window.run(data={'src':image_to_base64(Image.fromarray(in_data))}).catch(stop)
 
 class ImJoyPlugin():
   def setup(self):
@@ -93,18 +91,19 @@ class ImJoyPlugin():
     api.register(name="start live", run=self.start_live)
     api.register(name="stop live", run=self.stop_live)
     api.register(name="snap", run=self.snap)
-
+    self.window = None
     self.tiff_file_name = os.path.join(workdir, str(uuid.uuid4())+'.tiff')
     self.saver = TiffWriter(self.tiff_file_name, bigtiff=True)
-
-    print('starting the relay server')
-    self.relay = subprocess.Popen('node ./__websocket_relay__.js micro-manager-L2J5F4S7LL2F 8081 8082'.split(' '), shell=False)
-    time.sleep(3)
-    print('starting ffmpeg')
     self.abort = threading.Event()
-    t = threading.Thread(target=run_server, args=(self.abort, ))
-    t.daemon = True
-    t.start()
+    self.start()
+
+  def start(self):
+    def setWindow(w):
+        self.window = w
+        t = threading.Thread(target=run_server, args=(self.abort, self.window))
+        t.daemon = True
+        t.start()
+    api.createWindow(name='video', type='imjoy/image', data={}).then(setWindow)
 
   def snap(self, my):
     global currentImage
@@ -119,12 +118,18 @@ class ImJoyPlugin():
     image4save = image.reshape((1, 1, 1, image.shape[0], image.shape[1]))
     self.saver.save(image4save, compress=6)
     api.showSnackbar('image saved to ' + self.tiff_file_name )
+    
+    image = image.astype('float32')/image.max()*255.0
+    in_data = image.astype('uint8')
+    self.window.run(data={'src':image_to_base64(Image.fromarray(in_data))})
 
   def start_live(self, my):
     global currentImage
     currentImage = None
     print('start live')
-    api.run("Live Stream Window")
+    if self.abort.is_set():
+        self.abort.clear()
+        self.start()
     if not mmc.isSequenceRunning():
         mmc.startContinuousSequenceAcquisition(0)
 
@@ -150,15 +155,12 @@ class ImJoyPlugin():
     if self.saver:
         self.saver.close()
     mmc.stopSequenceAcquisition()
-    print('aborting servers...', self.relay.pid)
     self.abort = True
-    api.utils.kill(self.relay.pid)
 
   def run(self, my):
     api.run("Live Stream Window")
     if not mmc.isSequenceRunning():
         mmc.startContinuousSequenceAcquisition(0)
-
 
 api.export(ImJoyPlugin())
 </script>
