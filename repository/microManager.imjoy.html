@@ -154,6 +154,7 @@ class ImJoyPlugin():
         self.saver.close()
     mmc.stopSequenceAcquisition()
     self.abort = True
+    sys.exit(0)
 
   def run(self, my):
     api.run("Live Stream Window")
