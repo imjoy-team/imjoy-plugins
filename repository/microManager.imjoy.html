@@ -1,6 +1,6 @@
 
 <docs lang="markdown">
-Describe your plugin here.
+This plugin uses Micro-manager to acquire images, then send display it in a image window.
 </docs>
 
 <config lang="json">
@@ -71,10 +71,8 @@ def image_to_base64(img):
     return base64_str
 
 currentImage = None
-def run_server(abort, window):
+def update_video(abort, window):
     global currentImage
-    width = 512
-    height = 512
     def stop(e):
         abort.set()
     while not abort.is_set():
@@ -100,7 +98,7 @@ class ImJoyPlugin():
   def start(self):
     def setWindow(w):
         self.window = w
-        t = threading.Thread(target=run_server, args=(self.abort, self.window))
+        t = threading.Thread(target=update_video, args=(self.abort, self.window))
         t.daemon = True
         t.start()
     api.createWindow(name='video', type='imjoy/image', data={}).then(setWindow)
