@@ -157,9 +157,7 @@ class ImJoyPlugin():
     sys.exit(0)
 
   def run(self, my):
-    api.run("Live Stream Window")
-    if not mmc.isSequenceRunning():
-        mmc.startContinuousSequenceAcquisition(0)
+    self.start_live(my)
 
 api.export(ImJoyPlugin())
 </script>
