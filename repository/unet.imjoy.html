@@ -59,7 +59,7 @@ class UpdateUI(keras.callbacks.Callback):
 class ImJoyPlugin():
   def setup(self):
     print('setup in python')
-    self.workdir = None
+    self.workdir = os.path.join(os.getcwd(), 'data/membrane')
     self.model = unet()
     if os.path.exists('unet_membrane.hdf5'):
         self.model.load_weights("unet_membrane.hdf5")
@@ -80,7 +80,10 @@ class ImJoyPlugin():
     def callback(workdir):
         api.showStatus('set work directory to '+workdir)
         self.workdir = workdir
-    api.showFileDialog(title="Select a working directory", type="directory", root=os.getcwd()).then(callback).catch(print)
+        api.alert('You can now use Unet segmentation plugin by clicking `train` or `test`.')
+
+    api.showFileDialog(title="Select a working directory", type="directory", root=self.workdir or os.getcwd()).then(callback).catch(print)
+    
 
   def start_train(self, myGene, epochs, steps_per_epoch):
     updateUI = UpdateUI(epochs)
