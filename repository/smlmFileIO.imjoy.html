@@ -7,7 +7,7 @@
   "description": "A plugin for loading and exporting SMLM images.",
   "ui": "Render a 2D histogram with: <br>pixel size={id:'pixel_size', type:'number', placeholder: 20}nm<br> width={id:'width', type:'number', placeholder: 2560} <br> height={id:'height', type:'number', placeholder: 2560}",
   "tags": [],
-  "inputs": {"type": "object", "properties": {"name": { "pattern":".*\\.smlm|\\.SMLM" }}},
+  "inputs": {"type": "object", "properties": {"name": { "pattern":"(.*\\.smlm|\\.SMLM)$" }}},
   "outputs": {"type": "object", "properties": {"type": { "type": "string", "enum": ["image/grayscale"] }}},
   "icon": "🙀",
   "requirements": ["https://cdn.rawgit.com/Stuk/jszip/9fb481ac/dist/jszip.min.js","https://cdn.rawgit.com/satazor/js-spark-md5/bbd1624a/spark-md5.min.js"],
