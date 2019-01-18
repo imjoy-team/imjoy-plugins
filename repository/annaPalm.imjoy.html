@@ -7,7 +7,7 @@ Describe your plugin here.
 {
   "name": "ANNA-PALM",
   "type": "native-python",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "api_version": "0.1.2",
   "description": "A plugin for training models with ANNA-PALM.",
   "tags": [],
@@ -16,7 +16,7 @@ Describe your plugin here.
   "outputs": null,
   "icon": null,
   "env": ["conda create -n anet python=3.6", "git clone https://github.com/imodpasteur/ANNA-PALM"],
-  "requirements": "cd ANNA-PALM && pip install -r requirements.txt",
+  "requirements": "cd ANNA-PALM && pip install numpy == 1.15.0 && pip install -r requirements.txt",
   "dependencies": []
 }
 </config>
@@ -72,6 +72,8 @@ class ImJoyPlugin():
     def step_callback(model, details):
         self.step += 1
         api.showStatus('training: ' + str(details))
+        api.log(str(details))
+        api.progress(self.step/my.config.steps)
         print(str(details))
         sys.stdout.flush()
     model.train(d, step_callback=step_callback, verbose=1, max_steps=my.config.steps)
@@ -84,6 +86,7 @@ class ImJoyPlugin():
     def step_callback(model, details):
         api.showStatus('testing: ' + str(details))
         print(str(details))
+        api.log(str(details))
         sys.stdout.flush()
     model.predict(d, step_callback=step_callback, verbose=1)
 
