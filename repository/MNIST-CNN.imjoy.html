@@ -2,9 +2,9 @@
 <docs>
 # MINST Classification with CNN
 
-This plugin demonstrate using CNN to classify digits.
+This plugin demonstrates how to use a Convolutional Neural Network CNN to classify digits.
 
-[Reference](https://storage.googleapis.com/tfjs-vis/mnist/dist/index.html)
+Build with [tfjs-vis](https://github.com/tensorflow/tfjs-vis) - a small library for in browser visualization for use with TensorFlow.js.
 </docs>
 
 <config lang="json">
@@ -16,14 +16,17 @@ This plugin demonstrate using CNN to classify digits.
   "version": "0.1.0",
   "api_version": "0.1.2",
   "url": "",
-  "description": "This plugin demonstrate using CNN to classify digits.",
+  "description": "Convolutional Neural Network (CNN) to classify digits.",
   "icon": "extension",
   "inputs": null,
   "outputs": null,
   "env": null,
-  "requirements": ["https://cdn.jsdelivr.net/npm/@tensorflow/tfjs", "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis"],
+  "requirements": [
+        "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs", 
+        "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis"
+    ],
   "dependencies": [],
-  "defaults": {"w": 20, "h": 20}
+  "defaults": {"w": 30, "h": 20}
 }
 </config>
 
@@ -47,6 +50,7 @@ const MNIST_LABELS_PATH =
  * NOTE: This will get much easier. For now, we do data fetching and
  * manipulation manually.
  */
+
 class MnistData {
   constructor() {
     this.shuffledTrainIndex = 0;
@@ -219,8 +223,6 @@ function initDraw(surface, callback) {
 
     sketch.appendChild(p)
 
-    
-
     drawArea.appendChild(sketch);
 	
     const canvas = document.createElement('canvas');
@@ -232,8 +234,6 @@ function initDraw(surface, callback) {
     btn.addEventListener('click', function(e){
         ctx.clearRect(0, 0, canvas.width, canvas.height);
     })
-
-
 
     sketch.appendChild(canvas);
 	var mouse = {x: 0, y: 0};
@@ -250,7 +250,7 @@ function initDraw(surface, callback) {
 	
 	
 	/* Drawing on Paint App */
-	ctx.lineWidth = 30;
+	ctx.lineWidth = 10;
 	ctx.lineJoin = 'round';
 	ctx.lineCap = 'round';
 	ctx.strokeStyle = 'blue';
@@ -280,7 +280,11 @@ function initDraw(surface, callback) {
 
 class ImJoyPlugin {
     async setup() {
-        this.surface = tfvis.visor().surface({name: 'MNIST-CNN Demo', tab: 'Input Data'});
+
+        const psurface = tfvis.visor().surface({name: 'Predict a hand drawn digit. Train with more data to increase accuracy.', tab: 'Prediction'});
+        initDraw(psurface, (c)=>{this.predict(c)})
+
+        this.surface = tfvis.visor().surface({name: 'Add more training data to increase accuracy.', tab: 'Training Data'});
         //api.register({name: "show examples", ui: "hello", run: this.showExamples})
 
         document.querySelector('#show-examples')
@@ -298,8 +302,7 @@ class ImJoyPlugin {
 
             document.querySelector('#show-confusion')
                 .addEventListener('click', () => this.showConfusion());
-        const psurface = tfvis.visor().surface({name: 'MNIST-CNN Demo', tab: 'Prediction'});
-        initDraw(psurface, (c)=>{this.predict(c)})
+
     }
 
     async predict(c){
@@ -325,7 +328,7 @@ class ImJoyPlugin {
     async  showAccuracy() {
         const [preds, labels] = this.doPrediction();
         const classAccuracy = await tfvis.metrics.perClassAccuracy(labels, preds);
-        const container = { name: 'Accuracy', tab: 'Evaluation' };
+        const container = { name: 'Accuracy per digit', tab: 'Accuracy' };
         tfvis.show.perClassAccuracy(container, classAccuracy, this.classNames);
 
         labels.dispose();
@@ -353,7 +356,7 @@ class ImJoyPlugin {
             }
         }
 
-        const container = { name: 'Normalized Confusion Matrix', tab: 'Evaluation' };
+        const container = { name: 'Normalized Confusion Matrix', tab: 'Confusion Matrix' };
         tfvis.show.confusionMatrix(container, confusionMatrixNorm, this.classNames);
 
         labels.dispose();
@@ -361,7 +364,7 @@ class ImJoyPlugin {
   async watchTraining() {
     const metrics = ['loss', 'val_loss', 'acc', 'val_acc'];
     const container = {
-    name: 'show.fitCallbacks', tab: 'Training', styles: { height: '1000px' }
+    name: 'Training progress', tab: 'Training', styles: { height: '1000px' }
     };
     const callbacks = tfvis.show.fitCallbacks(container, metrics);
     return this.train(this.data, callbacks);
@@ -432,16 +435,27 @@ api.export(new ImJoyPlugin())
 
 <window lang="html">
   <div>
-    <button id="show-examples">Show Examples</button>
-    <button id="start-training">Start Training</button>
-    <button id="show-accuracy">Show Accuracy</button>
-    <button id="show-confusion">Show Confusion Matrix</button>
+    <button class="fs" id="show-examples">Add Training Data</button>
+    <button class="fs" id="start-training">Start Training</button>
+    <button class="fs" id="show-accuracy">Show Accuracy</button>
+    <button class="fs" id="show-confusion">Show Confusion Matrix</button>
     <div id="tf-surface">
     </div>
   </div>
 </window>
 
+
+
 <style lang="css">
+
+  /* Overwrite css defaults
+  /* https://css-tricks.com/when-using-important-is-the-right-choice/ */
+
+button.fs {
+  font-size: 14px;
+}
+
+
 .visor {
     width: 100%!important;
     right: 0px!important;
