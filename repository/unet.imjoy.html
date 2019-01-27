@@ -15,12 +15,12 @@ Describe your plugin here.
   "inputs": null,
   "outputs": null,
   "icon": null,
-  "env": {"CPU": ["conda config --add channels conda-forge", "conda create -n tf-cpu python=3.6 tensorflow==1.5", "git clone https://github.com/zhixuhao/unet"],
-          "GPU": ["conda config --add channels conda-forge", "conda create -n tf-gpu python=3.6 tensorflow-gpu==1.5", "git clone https://github.com/zhixuhao/unet"],
-          "Windows-CPU": ["conda config --add channels conda-forge", "conda create -n tf-cpu python=3.5 tensorflow==1.2.1", "git clone https://github.com/zhixuhao/unet"],
-          "Windows-GPU": ["conda config --add channels conda-forge", "conda create -n tf-gpu python=3.5 tensorflow-gpu==1.2.1", "git clone https://github.com/zhixuhao/unet"]
+  "env": {"CPU": ["conda config --add channels conda-forge", "conda create -n tf-cpu python=3.6 tensorflow==1.5"],
+          "GPU": ["conda config --add channels conda-forge", "conda create -n tf-gpu python=3.6 tensorflow-gpu==1.5"],
+          "Windows-CPU": ["conda config --add channels conda-forge", "conda create -n tf-cpu python=3.5 tensorflow==1.2.1"],
+          "Windows-GPU": ["conda config --add channels conda-forge", "conda create -n tf-gpu python=3.5 tensorflow-gpu==1.2.1"]
           },
-  "requirements": ["h5py", "scikit-image", "keras==2.1.4"],
+  "requirements": ["repo:https://github.com/zhixuhao/unet", "pip:h5py scikit-image keras==2.1.4"],
   "dependencies": []
 }
 </config>
@@ -83,7 +83,7 @@ class ImJoyPlugin():
         api.alert('You can now use Unet segmentation plugin by clicking `train` or `test`.')
 
     api.showFileDialog(title="Select a working directory", type="directory", root=self.workdir or os.getcwd()).then(callback).catch(print)
-    
+
 
   def start_train(self, myGene, epochs, steps_per_epoch):
     updateUI = UpdateUI(epochs)

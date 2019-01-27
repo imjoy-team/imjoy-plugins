@@ -40,10 +40,12 @@
    "outputs": null,
    "icon": null,
    "env": [
-    "conda create -n anet python=3.6",
-    "git clone https://github.com/imodpasteur/ANNA-PALM"
+    "conda create -n anet python=3.6"
    ],
-   "requirements": "cd ANNA-PALM && pip install -r requirements.txt",
+   "requirements": [
+    "repo:https://github.com/imodpasteur/ANNA-PALM",
+    "cmd:pip install -r ANNA-PALM/requirements.txt"
+   ],
    "dependencies": [],
    "uri": "repository/annaPalm.imjoy.html"
   },
@@ -386,29 +388,24 @@
    "env": {
     "CPU": [
      "conda config --add channels conda-forge",
-     "conda create -n tf-cpu python=3.6 tensorflow==1.5",
-     "git clone https://github.com/zhixuhao/unet"
+     "conda create -n tf-cpu python=3.6 tensorflow==1.5"
     ],
     "GPU": [
      "conda config --add channels conda-forge",
-     "conda create -n tf-gpu python=3.6 tensorflow-gpu==1.5",
-     "git clone https://github.com/zhixuhao/unet"
+     "conda create -n tf-gpu python=3.6 tensorflow-gpu==1.5"
     ],
     "Windows-CPU": [
      "conda config --add channels conda-forge",
-     "conda create -n tf-cpu python=3.5 tensorflow==1.2.1",
-     "git clone https://github.com/zhixuhao/unet"
+     "conda create -n tf-cpu python=3.5 tensorflow==1.2.1"
     ],
     "Windows-GPU": [
      "conda config --add channels conda-forge",
-     "conda create -n tf-gpu python=3.5 tensorflow-gpu==1.2.1",
-     "git clone https://github.com/zhixuhao/unet"
+     "conda create -n tf-gpu python=3.5 tensorflow-gpu==1.2.1"
     ]
    },
    "requirements": [
-    "h5py",
-    "scikit-image",
-    "keras==2.1.4"
+    "repo:https://github.com/zhixuhao/unet",
+    "pip:h5py scikit-image keras==2.1.4"
    ],
    "dependencies": [],
    "uri": "repository/unet.imjoy.html"
