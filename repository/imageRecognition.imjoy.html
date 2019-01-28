@@ -1,6 +1,5 @@
-
 <docs lang="markdown">
-A pretrained MobileNet image classifier built with Tensorflow.js.
+This plugin allows to perform image processing with a pretrained MobileNet image classifier built with Tensorflow.js.
 
 This plugin is ported from: [mobilenet example for Tensorflow.js](https://github.com/tensorflow/tfjs-models/tree/master/mobilenet).
 </docs>
@@ -20,16 +19,20 @@ This plugin is ported from: [mobilenet example for Tensorflow.js](https://github
   "env": "",
   "requirements": [
     "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@0.14.1",
-    "https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@0.2.2"
+    "https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@0.2.2",
+                       "https://unpkg.com/spectre.css/dist/spectre.min.css",
+                   "https://unpkg.com/spectre.css/dist/spectre-exp.min.css",
+                   "https://unpkg.com/spectre.css/dist/spectre-icons.min.css"
   ],
   "dependencies": [],
-  "defaults": {"w": 10, "h": 10}
+  "defaults": {"w": 15, "h": 20}
 }
 </config>
 
 <script lang="javascript">
 class ImJoyPlugin {
   async setup() {
+
     // bind predict() to the button
     const predictBtn = document.getElementById('predict-btn');
     predictBtn.onclick = ()=>{
@@ -52,6 +55,7 @@ class ImJoyPlugin {
         }
         img.src = url;
     }
+
     //load a preset image
     drawImage('https://static.imjoy.io/img/cat.jpg')
     
@@ -87,7 +91,9 @@ class ImJoyPlugin {
     const statusElement = document.getElementById("status");
     statusElement.innerHTML = 'Loading pretrained model...';
     this.model = await mobilenet.load();
-    statusElement.innerHTML = 'Model loaded, please open an image (.png/.jpg) and click `Predict`!';
+
+    document.getElementById("hero_title").innerHTML = 'Model loaded'
+    statusElement.innerHTML = '1. Open image (.png/.jpg) or use pre-loaded image. <br> 2. Click `Predict` for image recognition!';
     
     // Display the predict button and file selection
     predictBtn.style.display = "inline";
@@ -95,14 +101,25 @@ class ImJoyPlugin {
   }
 
   async predict(){    
+
     const canvas = document.getElementById('input-canvas');
+
     // Classify the image.
     const predictions = await this.model.classify(canvas)
-    // Output the result
-    console.log('Predictions: ', predictions);
-    const result_string = `Prediction: Top-1 ${predictions[0].className} (${Math.round(predictions[0].probability*100)}%); Top-2 ${predictions[1].className} (${Math.round(predictions[1].probability*100)}%);`;
-    document.getElementById("status").innerHTML = result_string
-    api.alert(result_string)
+
+    // Output result in console
+    console.log('Predictions', predictions);
+    
+    // Output results in interface
+    document.getElementById("hero_title").innerHTML = 'Predictions: '
+
+    const result_string_html = `Top-1: ${predictions[0].className} (${Math.round(predictions[0].probability*100)}%) <br> Top-2: ${predictions[1].className} (${Math.round(predictions[1].probability*100)}%)`;
+    document.getElementById("status").innerHTML = result_string_html
+
+    // Output results as ImJoy alert
+    //const result_string =  `Predictions: Top-1 ${predictions[0].className} (${Math.round(predictions[0].probability*100)}%); Top-2 ${predictions[1].className} (${Math.round(predictions[1].probability*100)}%);`;
+    //api.alert(result_string)
+    
   }
 
   run(my) {
@@ -115,9 +132,24 @@ api.export(new ImJoyPlugin())
 
 <window lang="html">
   <div>
-    <p id="status"></p>
-    <input class="form-input" id="file-input" style="display: none;" accept="image/*" capture="camera" type="file"/>
-    <button class="form-input btn" style="display: none;" id="predict-btn">Predict</button>
-    <canvas id="input-canvas" style="width: 100%; object-fit: cover;"></canvas>
+
+    <!–– Header bar ––>
+    <div class="hero hero-sm bg-secondary">
+        <div class="mx-2">
+            <h3 id="hero_title"></h3>
+            <p id="status"></p>
+        </div>
+    </div>
+
+   <!–– Buttons ––>
+   <div class="p-1">
+        <button class="btn btn-primary" style="display: none;" id="predict-btn">Predict</button>
+        <input  style="display: none;" id="file-input" accept="image/*" capture="camera" type="file"/>
+    </div>
+
+    <!–– canvas ––>
+    <div class="p-1">
+        <canvas id="input-canvas" style="width: 100%; object-fit: cover;"></canvas>
+    </div>
   </div>
 </window>
