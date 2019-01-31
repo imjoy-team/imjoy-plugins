@@ -7,7 +7,7 @@ Describe your plugin here.
 {
   "name": "ANNA-PALM",
   "type": "native-python",
-  "version": "0.1.2",
+  "version": "0.1.4",
   "api_version": "0.1.2",
   "description": "A plugin for training models with ANNA-PALM.",
   "tags": [],
@@ -17,12 +17,13 @@ Describe your plugin here.
   "icon": null,
   "env": ["conda create -n anet python=3.6"],
   "requirements": ["repo:https://github.com/imodpasteur/ANNA-PALM", "cmd:pip install -r ANNA-PALM/requirements.txt"],
-  "dependencies": []
+  "dependencies": ["oeway/ImJoy-Plugins:Im2Im-Dashboard"]
 }
 </config>
 
 <script lang="python">
 import sys
+
 sys.path.insert(0, './ANNA-PALM')
 
 import os
@@ -31,6 +32,12 @@ import tensorflow as tf
 from AnetLib.options.train_options import Options
 from AnetLib.models.models import create_model
 from smlm_datasets import create_data_sources
+import asyncio
+import base64
+from io import BytesIO
+from PIL import Image
+
+
 
 default_workdir = './workdir'
 opt = Options().parse(['--workdir=./tmp_test'])
@@ -50,11 +57,13 @@ opt.lambda_LR = 0
 opt.control_nc = 1
 opt.add_data_type_control = True
 opt.add_lr_channel = 'pseudo'
+opt.print_freq = 1
+opt.display_freq = 1
 
 class ImJoyPlugin():
-  def setup(self):
+  async def setup(self):
     self.step = 0
-    api.register(name="train", run=self.train, ui="steps:{id:'steps', type:'number', min:1, placeholder:2000}<br>"\
+    api.register(name="train", run=self.train, ui="steps:{id:'steps', type:'number', min:1, placeholder:3}<br>"\
                 "batch size:{id:'batchsize', type:'number', min:1, placeholder:1}<br>"
                 )
     api.register(name="test", run=self.test, ui="")
@@ -62,28 +71,67 @@ class ImJoyPlugin():
   def run(self, my):
     self.test(my)
 
-  def train(self, my):
+  def sendImages(self, images):
+    displays = {}
+    for k, v in images.items():
+        for b in range(v.shape[0]):
+            ima = v[b]
+            channels = ima.shape[2]
+            for i in range(channels):
+                im = ima[:, :, i]
+                im = Image.fromarray((im/im.max()*255).astype('uint8'))
+                buffered = BytesIO()
+                im.save(buffered, format="JPEG")
+                img_str = base64.b64encode(buffered.getvalue()).decode('ascii')
+                imgurl = 'data:image/png;base64,' + img_str
+                name = k
+                if v.shape[0]>1:
+                    name += '_b'+str(b)
+                if channels>1:
+                    name += '_c'+str(i)
+                displays[name] = imgurl
+                # api.createWindow(name=str(k)+str(b)+str(i) , type='imjoy/image', w=12, h=15, data={"src": imgurl})
+    self.dash.appendDisplay('Sample ' + str(self.step), displays)
+
+  async def train(self, my):
     api.showStatus('preparing data...')
+    self.dash = await api.createWindow(type="Im2Im-Dashboard", name="ANNA-PALM Training", data={'metrics': ["discrim_loss", "gen_loss_GAN", "gen_loss", "gen_loss_L2", "gen_loss_SSIM"], 'callbacks': ['onEpochEnd', 'onBatchEnd']})
     opt.batchSize = my.config.batchsize
     sources = create_data_sources(['TransformedTubulin001NB'], opt)
     d = sources['train']
     api.showStatus('start training...')
     model = create_model(opt)
+    self.step = 0
     def step_callback(model, details):
         self.step += 1
+        print(details.keys())
+        if 'display' in details:
+            images = details['display']
+            del details['display']
+            self.sendImages(images)
         api.showStatus('training: ' + str(details))
         api.log(str(details))
         api.progress(self.step/my.config.steps)
+        print(details)
+        self.dash.updateCallback('onEpochEnd', self.step, details)
         print(str(details))
         sys.stdout.flush()
+
     model.train(d, step_callback=step_callback, verbose=1, max_steps=my.config.steps)
 
-  def test(self, my):
+  async def test(self, my):
+    self.dash = await api.createWindow(type="Im2Im-Dashboard", name="ANNA-PALM prediction", data={'callbacks': ['onEpochEnd', 'onBatchEnd']})
     model = create_model(opt)
     sources = create_data_sources(['TransformedTubulin001NB'], opt)
     d = sources['test']
     api.showStatus('start testing...')
+    self.step = 0
     def step_callback(model, details):
+        self.step += 1
+        if 'display' in details:
+            images = details['display']
+            del details['display']
+            self.sendImages(images)
         api.showStatus('testing: ' + str(details))
         print(str(details))
         api.log(str(details))

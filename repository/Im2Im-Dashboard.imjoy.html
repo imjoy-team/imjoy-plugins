@@ -1,0 +1,144 @@
+﻿<docs lang="markdown">
+[TODO: write documentation for this plugin.]
+</docs>
+
+<config lang="json">
+{
+  "name": "Im2Im-Dashboard",
+  "type": "window",
+  "tags": [],
+  "ui": "",
+  "version": "0.1.0",
+  "api_version": "0.1.2",
+  "description": "The dashboard for deep learning based image-to-image translation",
+  "icon": "extension",
+  "inputs": null,
+  "outputs": null,
+  "env": "",
+  "requirements": ["https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis",
+                   "https://unpkg.com/spectre.css/dist/spectre.min.css",
+                   "https://unpkg.com/spectre.css/dist/spectre-exp.min.css",
+                   "https://unpkg.com/spectre.css/dist/spectre-icons.min.css",
+                   "https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.22/vue.min.js"
+  ],
+  "dependencies": [],
+  "defaults": {"w": 20, "h": 10}
+}
+</config>
+
+<attachment name="display_template">
+<div>
+    <h5>{{page?page_names[page]: ''}}</h5>
+    <input v-if="pages.length>0" class="slider" id="display-slider" type="range" min="0" :max="pages.length" v-model="page">
+    <ul class="tab tab-block">
+        <li :class="selected_display==d?'tab-item active':'tab-item'" v-for="d in Object.keys(pages[page])" :key="d">
+            <a @click="selected_display=d">{{d}}</a>
+        </li>
+    </ul>
+
+    <img v-if="page && selected_display && pages[page][selected_display]" :src="pages[page][selected_display]" style="max-width: 100%;"/>
+    
+</div>
+</attachment>
+
+<script lang="javascript">
+class ImJoyPlugin {
+  constructor(){
+    this._visor = tfvis.visor('#surface')
+    
+    this._display_surface = this._visor.surface({name: 'Display', tab: 'Display'});
+    //this._inference_surface = this._visor.surface({name: 'Prediction', tab: 'Inference'});
+
+    //const metrics = ['loss', 'val_loss', 'acc', 'val_acc'];
+    //const callbacks = tfvis.show.fitCallbacks(this._training_surface, metrics, {callbacks: ['onEpochEnd', 'onBatchEnd'] })
+    //this.onEpochEnd = callbacks.onEpochEnd
+    //this.onBatchEnd = callbacks.onBatchEnd
+    // "onEpochEnd", "onBatchEnd"
+  }
+
+  async setup() {
+    this.initDisplay()
+  }
+
+  async initDisplay(){
+    const drawArea = this._display_surface.drawArea;
+    drawArea.innerHTML = '';
+    //const label = drawArea.parentNode.querySelector(".tf-label");
+    //if(label) drawArea.parentNode.removeChild(label)
+    
+    const sketch = document.createElement('div');
+    sketch.style = "height: 100%;";
+    //sketch.innerHTML = '<ul class="tab tab-block"></ul> <input class="slider" id="display-slider" type="range" min="0" max="100" value="50">'
+    sketch.id = 'sketch'
+    drawArea.appendChild(sketch);
+    this.store = {displays: [], pages: [], page_names: [], page: 0, selected_display: null}
+    this.app = new Vue({
+        el: '#sketch',
+        template: await api.getAttachment('display_template'),
+        data: this.store,
+        methods: {
+            page(){
+            }
+        }
+    })
+  }
+  async appendDisplay(name, items){
+    this.store.pages.push(items)
+    this.store.page_names.push(name || '')
+    this.store.page = this.store.pages.length -1
+    this.app.$forceUpdate()
+  }
+
+  async updateCallback(callback_name, index, value){
+    this.callbacks[callback_name](index, value)
+  }
+
+  async run(my) {
+    if(my.data.metrics && my.data.metrics.length>0){
+        this._training_surface = this._visor.surface({name: 'Training', tab: 'Training'});
+        this.callbacks = tfvis.show.fitCallbacks(this._training_surface, my.data.metrics, {callbacks: my.data.callbacks })
+    }
+    //for(let i=0;i<100;i++){
+    //    await this.callbacks.onEpochEnd(i, {'loss': i*10})
+    //}
+    //api.log('done')
+  }
+}
+const a = new ImJoyPlugin()
+console.log(a)
+api.export(a)
+</script>
+
+<window lang="html">
+  <div>
+    <div id="surface">
+    </div>
+  </div>
+</window>
+
+<style lang="css">
+.tf-label {
+    display: none;
+}
+.visor {
+    width: 100%!important;
+    right: 0px!important;
+    height: 100%!important;
+    position: absolute!important;
+    top: 0px!important;
+}
+
+.visor-controls {
+    display: none!important;
+}
+
+.tf-surface{
+    top: 10px;
+    width: calc( 100% )!important;
+    height: calc( 100% - 50px )!important;
+    max-width: 100%!important;
+    max-height: 100%!important;
+}
+</style>
+
+
