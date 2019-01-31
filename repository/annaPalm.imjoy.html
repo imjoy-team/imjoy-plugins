@@ -10,13 +10,16 @@ Describe your plugin here.
   "version": "0.1.4",
   "api_version": "0.1.2",
   "description": "A plugin for training models with ANNA-PALM.",
-  "tags": [],
+  "tags": ["CPU", "GPU"],
   "ui": null,
   "inputs": null,
   "outputs": null,
   "icon": null,
   "env": ["conda create -n anet python=3.6"],
-  "requirements": ["repo:https://github.com/imodpasteur/ANNA-PALM", "cmd:pip install -r ANNA-PALM/requirements.txt"],
+  "requirements": {
+    "CPU": ["repo:https://github.com/imodpasteur/ANNA-PALM", "cmd:pip install -r ANNA-PALM/requirements.txt"],
+    "GPU": ["repo:https://github.com/imodpasteur/ANNA-PALM", "cmd:pip install -r ANNA-PALM/requirements-gpu.txt"]
+  },
   "dependencies": ["oeway/ImJoy-Plugins:Im2Im-Dashboard"]
 }
 </config>
