@@ -60,13 +60,13 @@ opt.lambda_LR = 0
 opt.control_nc = 1
 opt.add_data_type_control = True
 opt.add_lr_channel = 'pseudo'
-opt.print_freq = 1
-opt.display_freq = 1
+opt.print_freq = 3
+opt.display_freq = 10
 
 class ImJoyPlugin():
   async def setup(self):
     self.step = 0
-    api.register(name="train", run=self.train, ui="steps:{id:'steps', type:'number', min:1, placeholder:3}<br>"\
+    api.register(name="train", run=self.train, ui="steps:{id:'steps', type:'number', min:1, placeholder:1000}<br>"\
                 "batch size:{id:'batchsize', type:'number', min:1, placeholder:1}<br>"
                 )
     api.register(name="test", run=self.test, ui="")
@@ -107,18 +107,20 @@ class ImJoyPlugin():
     self.step = 0
     def step_callback(model, details):
         self.step += 1
-        print(details.keys())
-        if 'display' in details:
-            images = details['display']
-            del details['display']
-            self.sendImages(images)
-        api.showStatus('training: ' + str(details))
-        api.log(str(details))
-        api.progress(self.step/my.config.steps)
-        print(details)
-        self.dash.updateCallback('onEpochEnd', self.step, details)
-        print(str(details))
-        sys.stdout.flush()
+        try:
+            if 'display' in details:
+                images = details['display']
+                del details['display']
+                self.sendImages(images)
+            api.showStatus('training: ' + str(details))
+            api.log(str(details))
+            api.progress(self.step/my.config.steps)
+            print(details)
+            self.dash.updateCallback('onEpochEnd', self.step, details)
+            print(str(details))
+            sys.stdout.flush()
+        except:
+            print('step callback error')
 
     model.train(d, step_callback=step_callback, verbose=1, max_steps=my.config.steps)
 
@@ -131,14 +133,17 @@ class ImJoyPlugin():
     self.step = 0
     def step_callback(model, details):
         self.step += 1
-        if 'display' in details:
-            images = details['display']
-            del details['display']
-            self.sendImages(images)
-        api.showStatus('testing: ' + str(details))
-        print(str(details))
-        api.log(str(details))
-        sys.stdout.flush()
+        try:
+            if 'display' in details:
+                images = details['display']
+                del details['display']
+                self.sendImages(images)
+            api.showStatus('testing: ' + str(details))
+            print(str(details))
+            api.log(str(details))
+            sys.stdout.flush()
+        except:
+            print('step callback error')
     model.predict(d, step_callback=step_callback, verbose=1)
 
 api.export(ImJoyPlugin())
