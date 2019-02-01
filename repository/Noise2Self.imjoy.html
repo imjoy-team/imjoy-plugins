@@ -95,7 +95,7 @@ class ImJoyPlugin():
         api.log('Starting Noise2Self training for '+str(steps) + 'steps.')
         data_loader = DataLoader(noisy_mnist_train, batch_size=32, shuffle=True)
 
-        self.dash = await api.createWindow(type="Im2Im-Dashboard.", name="Noise2Self Training", w=25, h=10, data={'metrics': ["loss"], 'callbacks': ['onStep']})
+        self.dash = await api.createWindow(type="Im2Im-Dashboard", name="Noise2Self Training", w=25, h=10, data={'metrics': ["loss"], 'callbacks': ['onStep']})
 
         for i, batch in enumerate(data_loader):
             noisy_images, clean_images = batch
