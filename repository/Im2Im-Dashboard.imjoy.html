@@ -8,7 +8,7 @@
   "type": "window",
   "tags": [],
   "ui": "",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "api_version": "0.1.2",
   "description": "The dashboard for deep learning based image-to-image translation",
   "icon": "extension",
@@ -27,7 +27,7 @@
 </config>
 
 <attachment name="display_template">
-<div>
+<div style="text-align: center;">
     <h5>{{page?page_names[page]: ''}}</h5>
     <input v-if="pages.length>0" class="slider" id="display-slider" type="range" min="0" :max="pages.length-1" v-model="page">
     <ul class="tab tab-block">
@@ -36,7 +36,7 @@
         </li>
     </ul>
 
-    <img v-if="page && selected_display && pages[page][selected_display]" :src="pages[page][selected_display]" style="max-width: 100%;"/>
+    <img v-if="page && selected_display && pages[page][selected_display]" :src="pages[page][selected_display]" style="max-width: 100%; min-width: 100px;"/>
     
 </div>
 </attachment>
