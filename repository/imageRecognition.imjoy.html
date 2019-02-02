@@ -10,7 +10,7 @@ This plugin is ported from: [mobilenet example for Tensorflow.js](https://github
   "type": "window",
   "tags": [],
   "ui": "A pretrained MobileNet image classifier built with Tensorflow.js",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "api_version": "0.1.2",
   "description": "A pretrained MobileNet image classifier built with Tensorflow.js",
   "icon": "extension",
@@ -20,9 +20,9 @@ This plugin is ported from: [mobilenet example for Tensorflow.js](https://github
   "requirements": [
     "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@0.14.1",
     "https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@0.2.2",
-                       "https://unpkg.com/spectre.css/dist/spectre.min.css",
-                   "https://unpkg.com/spectre.css/dist/spectre-exp.min.css",
-                   "https://unpkg.com/spectre.css/dist/spectre-icons.min.css"
+    "https://unpkg.com/spectre.css/dist/spectre.min.css",
+    "https://unpkg.com/spectre.css/dist/spectre-exp.min.css",
+    "https://unpkg.com/spectre.css/dist/spectre-icons.min.css"
   ],
   "dependencies": [],
   "defaults": {"w": 15, "h": 20}
@@ -117,8 +117,8 @@ class ImJoyPlugin {
     document.getElementById("status").innerHTML = result_string_html
 
     // Output results as ImJoy alert
-    //const result_string =  `Predictions: Top-1 ${predictions[0].className} (${Math.round(predictions[0].probability*100)}%); Top-2 ${predictions[1].className} (${Math.round(predictions[1].probability*100)}%);`;
-    //api.alert(result_string)
+    const result_string =  `Predictions: Top-1 ${predictions[0].className} (${Math.round(predictions[0].probability*100)}%); Top-2 ${predictions[1].className} (${Math.round(predictions[1].probability*100)}%);`;
+    api.alert(result_string)
     
   }
 
@@ -132,7 +132,6 @@ api.export(new ImJoyPlugin())
 
 <window lang="html">
   <div>
-
     <!–– Header bar ––>
     <div class="hero hero-sm bg-secondary">
         <div class="mx-2">
@@ -143,8 +142,9 @@ api.export(new ImJoyPlugin())
 
    <!–– Buttons ––>
    <div class="p-1">
-        <button class="btn btn-primary" style="display: none;" id="predict-btn">Predict</button>
         <input  style="display: none;" id="file-input" accept="image/*" capture="camera" type="file"/>
+        <br>
+        <button class="btn btn-primary" style="display: none;" id="predict-btn">Predict</button>
     </div>
 
     <!–– canvas ––>
@@ -153,3 +153,20 @@ api.export(new ImJoyPlugin())
     </div>
   </div>
 </window>
+
+<style lang="css">
+
+.p-1 {
+    text-align: center;
+}
+
+.p-1 input{
+    width:90%;
+    margin:10px;
+}
+
+.p-1 button{
+    width:90%;
+    margin:10px;
+}
+</style>
