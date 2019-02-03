@@ -32,7 +32,7 @@
     <h5>{{page?page_names[page]: ''}}</h5>
     <input v-if="pages.length>0" class="slider" id="display-slider" type="range" min="0" :max="pages.length-1" v-model="page">
     <ul class="tab tab-block">
-        <li :class="selected_display==d?'tab-item active':'tab-item'" v-for="d in Object.keys(pages[page])" :key="d">
+        <li :class="selected_display==d && display_mode != 'all'?'tab-item active':'tab-item'" v-for="d in Object.keys(pages[page])" :key="d">
             <a @click="selected_display=d">{{d}}</a>
             <img v-if="display_mode == 'all' && page && d && pages[page][d]" :src="pages[page][d]" style="max-width: 100%; min-width: 100px;"/>
         </li>
