@@ -8,7 +8,7 @@
   "type": "window",
   "tags": [],
   "ui": "",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "api_version": "0.1.2",
   "description": "The dashboard for deep learning based image-to-image translation",
   "icon": "extension",
@@ -34,11 +34,10 @@
     <ul class="tab tab-block">
         <li :class="selected_display==d?'tab-item active':'tab-item'" v-for="d in Object.keys(pages[page])" :key="d">
             <a @click="selected_display=d">{{d}}</a>
+            <img v-if="display_mode == 'all' && page && d && pages[page][d]" :src="pages[page][d]" style="max-width: 100%; min-width: 100px;"/>
         </li>
     </ul>
-
-    <img v-if="page && selected_display && pages[page][selected_display]" :src="pages[page][selected_display]" style="max-width: 100%; min-width: 100px;"/>
-    
+    <img v-if="display_mode != 'all' && page && selected_display && pages[page][selected_display]" :src="pages[page][selected_display]" style="max-width: 100%; min-width: 100px;"/>
 </div>
 </attachment>
 
@@ -46,7 +45,7 @@
 class ImJoyPlugin {
   constructor(){
     this._visor = tfvis.visor('#surface')
-    
+
     this._display_surface = this._visor.surface({name: 'Display', tab: 'Display'});
     //this._inference_surface = this._visor.surface({name: 'Prediction', tab: 'Inference'});
 
@@ -66,13 +65,13 @@ class ImJoyPlugin {
     drawArea.innerHTML = '';
     //const label = drawArea.parentNode.querySelector(".tf-label");
     //if(label) drawArea.parentNode.removeChild(label)
-    
+
     const sketch = document.createElement('div');
     sketch.style = "height: 100%;";
     //sketch.innerHTML = '<ul class="tab tab-block"></ul> <input class="slider" id="display-slider" type="range" min="0" max="100" value="50">'
     sketch.id = 'sketch'
     drawArea.appendChild(sketch);
-    this.store = {displays: [], pages: [], page_names: [], page: 0, selected_display: null}
+    this.store = {display_mode: 'all', displays: [], pages: [], page_names: [], page: 0, selected_display: null}
     this.app = new Vue({
         el: '#sketch',
         template: await api.getAttachment('display_template'),
@@ -101,6 +100,9 @@ class ImJoyPlugin {
     if(my.data.metrics && my.data.metrics.length>0){
         this._training_surface = this._visor.surface({name: 'Training', tab: 'Training'});
         this.callbacks = tfvis.show.fitCallbacks(this._training_surface, my.data.metrics, {callbacks: my.data.callbacks })
+    }
+    if(my.data.display_mode){
+        this.store.display_mode = my.data.display_mode
     }
     //for(let i=0;i<100;i++){
     //    await this.callbacks.onEpochEnd(i, {'loss': i*10})

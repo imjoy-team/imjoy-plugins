@@ -98,7 +98,7 @@ class ImJoyPlugin():
 
   async def train(self, my):
     api.showStatus('preparing data...')
-    self.dash = await api.createWindow(type="Im2Im-Dashboard", name="ANNA-PALM Training", data={'metrics': ["discrim_loss", "gen_loss_GAN", "gen_loss", "gen_loss_L2", "gen_loss_SSIM"], 'callbacks': ['onEpochEnd', 'onBatchEnd']})
+    self.dash = await api.createWindow(type="Im2Im-Dashboard", name="ANNA-PALM Training", data={'display_mode':'one','metrics': ["discrim_loss", "gen_loss_GAN", "gen_loss", "gen_loss_L2", "gen_loss_SSIM"], 'callbacks': ['onEpochEnd', 'onBatchEnd']})
     opt.batchSize = my.config.batchsize
     sources = create_data_sources(['TransformedTubulin001NB'], opt)
     d = sources['train']
@@ -125,7 +125,7 @@ class ImJoyPlugin():
     model.train(d, step_callback=step_callback, verbose=1, max_steps=my.config.steps)
 
   async def test(self, my):
-    self.dash = await api.createWindow(type="Im2Im-Dashboard", name="ANNA-PALM prediction", data={'callbacks': ['onEpochEnd', 'onBatchEnd']})
+    self.dash = await api.createWindow(type="Im2Im-Dashboard", name="ANNA-PALM prediction", data={'display_mode':'one'})
     model = create_model(opt)
     sources = create_data_sources(['TransformedTubulin001NB'], opt)
     d = sources['test']
