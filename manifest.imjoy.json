@@ -58,10 +58,13 @@
   {
    "name": "Noise2Self",
    "type": "native-python",
-   "version": "0.1.5",
+   "version": "0.1.6",
+   "tags": [
+    "CPU",
+    "GPU"
+   ],
    "api_version": "0.1.2",
    "description": "A demo plugin for Noise2Self (Blind Denoising by Self-Supervision)",
-   "tags": [],
    "ui": "training steps:{id:'steps', type:'number', min:1, placeholder:1000}",
    "inputs": null,
    "outputs": null,

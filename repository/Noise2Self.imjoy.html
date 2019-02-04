@@ -15,10 +15,10 @@ Authors: Joshua Batson, Loic Royer
 {
   "name": "Noise2Self",
   "type": "native-python",
-  "version": "0.1.5",
+  "version": "0.1.6",
+  "tags": ["CPU", "GPU"],
   "api_version": "0.1.2",
   "description": "A demo plugin for Noise2Self (Blind Denoising by Self-Supervision)",
-  "tags": [],
   "ui": "training steps:{id:'steps', type:'number', min:1, placeholder:1000}",
   "inputs": null,
   "outputs": null,
@@ -68,6 +68,8 @@ masker = Masker(width = 4, mode='interpolate')
 net_input, mask = masker.mask(noisy.unsqueeze(0), 0)
 from models.babyunet import BabyUnet
 model = BabyUnet()
+if api.TAG == 'GPU':
+    model = model.cuda()
 from torch.nn import MSELoss
 from torch.optim import Adam
 from torch.utils.data import DataLoader
@@ -99,7 +101,10 @@ class ImJoyPlugin():
 
         for i, batch in enumerate(data_loader):
             noisy_images, clean_images = batch
+            if api.TAG == 'GPU':
+                noisy_images, clean_images = noisy_images.cuda(), clean_images.cuda()
             net_input, mask = masker.mask(noisy_images, i)
+
             net_output = model(net_input)
             loss = loss_function(net_output*mask, noisy_images*mask)
             optimizer.zero_grad()
