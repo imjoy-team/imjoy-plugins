@@ -37,9 +37,13 @@ import asyncio
 import base64
 from io import BytesIO
 from PIL import Image
+import torch
 from torchvision.datasets import MNIST
 from torchvision import transforms
 from torch.utils.data import Dataset
+
+gpu_available = torch.cuda.is_available()
+
 mnist_train = MNIST('../data/MNIST', download = True,
                     transform = transforms.Compose([
                         transforms.ToTensor(),
@@ -68,7 +72,8 @@ masker = Masker(width = 4, mode='interpolate')
 net_input, mask = masker.mask(noisy.unsqueeze(0), 0)
 from models.babyunet import BabyUnet
 model = BabyUnet()
-if api.TAG == 'GPU':
+
+if api.TAG == 'GPU' and gpu_available:
     model = model.cuda()
 from torch.nn import MSELoss
 from torch.optim import Adam
@@ -78,6 +83,7 @@ optimizer = Adam(model.parameters(), lr=0.001)
 class ImJoyPlugin():
     def setup(self):
         print('setup in python')
+
     async def plot_tensors(self, tensor_list, label, titles=None):
         image_list = [tensor.detach().cpu().numpy().reshape(tensor.shape[-2], tensor.shape[-1]) for tensor in tensor_list]
         displays = {}
@@ -92,6 +98,7 @@ class ImJoyPlugin():
             imgurl = 'data:image/png;base64,' + img_str
             displays[titles[i]] = imgurl
         await self.dash.appendDisplay(label, displays)
+
     async def run(self, my):
         steps =  my.config.steps
         api.log('Starting Noise2Self training for '+str(steps) + 'steps.')
@@ -101,7 +108,7 @@ class ImJoyPlugin():
 
         for i, batch in enumerate(data_loader):
             noisy_images, clean_images = batch
-            if api.TAG == 'GPU':
+            if api.TAG == 'GPU' and gpu_available:
                 noisy_images, clean_images = noisy_images.cuda(), clean_images.cuda()
             net_input, mask = masker.mask(noisy_images, i)
 
@@ -117,8 +124,8 @@ class ImJoyPlugin():
                 await self.dash.updateCallback('onStep', i, {'loss': float(str(loss.item()))})
                 label = 'Step ' + str(i)
                 invariant_output = masker.infer_full_image(noisy_images, model)
-                await self.plot_tensors([net_output[0], clean_images[0], noisy_images[0], invariant_output[0]], label,
-                            ["Single Pass Inference", "Ground Truth", "Noisy Image", "J-invariant Inference"])
+                await self.plot_tensors([noisy_images[0], net_output[0], clean_images[0], invariant_output[0]], label,
+                            ["Noisy Image", "Single Pass Inference", "Ground Truth", "J-invariant Inference"])
             if i == steps:
                 break
 api.export(ImJoyPlugin())
