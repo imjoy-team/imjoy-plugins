@@ -1,4 +1,4 @@
-﻿<docs lang="markdown">
+<docs lang="markdown">
 #CARE
 
 Weigert et. al, Content-aware image restoration: pushing the limits of fluorescence microscopy, Nature Methods, 2018
@@ -22,7 +22,7 @@ This is a demo plugin ported from https://github.com/CSBDeep/CSBDeep/blob/master
   "outputs": null,
   "flags": [],
   "icon": "extension",
-  "env": "conda create -n care python=3.6",
+  "env": {"CPU": "conda create -n care-cpu python=3.6", "GPU": "conda create -n care-gpu python=3.6"},
   "requirements": {"CPU": ["pip: tensorflow==1.8.0 Pillow csbdeep"], "GPU": ["pip: tensorflow-gpu==1.8.0 Pillow csbdeep"]},
   "dependencies": ["oeway/ImJoy-Plugins:Im2Im-Dashboard"]
 }

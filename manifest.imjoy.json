@@ -19,7 +19,10 @@
    "outputs": null,
    "flags": [],
    "icon": "extension",
-   "env": "conda create -n care python=3.6",
+   "env": {
+    "CPU": "conda create -n care-cpu python=3.6",
+    "GPU": "conda create -n care-gpu python=3.6"
+   },
    "requirements": {
     "CPU": [
      "pip: tensorflow==1.8.0 Pillow csbdeep"
@@ -123,9 +126,14 @@
    "inputs": null,
    "outputs": null,
    "icon": null,
-   "env": [
-    "conda create -n annapalm python=3.6"
-   ],
+   "env": {
+    "CPU": [
+     "conda create -n annapalm-cpu python=3.6"
+    ],
+    "GPU": [
+     "conda create -n annapalm-gpu python=3.6"
+    ]
+   },
    "requirements": {
     "CPU": [
      "repo:https://github.com/imodpasteur/ANNA-PALM",

@@ -15,7 +15,7 @@ Describe your plugin here.
   "inputs": null,
   "outputs": null,
   "icon": null,
-  "env": ["conda create -n annapalm python=3.6"],
+  "env": {"CPU": ["conda create -n annapalm-cpu python=3.6"], "GPU": ["conda create -n annapalm-gpu python=3.6"]},
   "requirements": {
     "CPU": ["repo:https://github.com/imodpasteur/ANNA-PALM", "cmd:pip install -r ANNA-PALM/requirements.txt"],
     "GPU": ["repo:https://github.com/imodpasteur/ANNA-PALM", "pip: Pillow numpy==1.15.0 scipy matplotlib scikit-image tensorflow-gpu==1.8.0"]
