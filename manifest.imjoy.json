@@ -5,6 +5,33 @@
  "uri_root": "",
  "plugins": [
   {
+   "name": "CARE",
+   "type": "native-python",
+   "version": "0.1.0",
+   "api_version": "0.1.2",
+   "description": "This plugin demonstrate denoising using CARE",
+   "tags": [
+    "CPU",
+    "GPU"
+   ],
+   "ui": "",
+   "inputs": null,
+   "outputs": null,
+   "flags": [],
+   "icon": "extension",
+   "env": "conda create -n care python=3.6",
+   "requirements": {
+    "CPU": [
+     "pip: tensorflow==1.8.0 Pillow csbdeep"
+    ],
+    "GPU": [
+     "pip: tensorflow-gpu==1.8.0 Pillow csbdeep"
+    ]
+   },
+   "dependencies": [],
+   "uri": "repository/CARE.imjoy.html"
+  },
+  {
    "name": "Im2Im-Dashboard",
    "type": "window",
    "tags": [],

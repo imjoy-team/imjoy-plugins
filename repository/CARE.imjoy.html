@@ -1,0 +1,141 @@
+﻿<docs lang="markdown">
+#CARE
+
+Weigert et. al, Content-aware image restoration: pushing the limits of fluorescence microscopy, Nature Methods, 2018
+
+[Paper on Nature Methods](https://www.nature.com/articles/s41592-018-0216-7)
+
+This is a demo plugin ported from https://github.com/CSBDeep/CSBDeep/blob/master/examples/denoising2D_probabilistic/1_training.ipynb
+
+</docs>
+
+<config lang="json">
+{
+  "name": "CARE",
+  "type": "native-python",
+  "version": "0.1.0",
+  "api_version": "0.1.2",
+  "description": "This plugin demonstrate denoising using CARE",
+  "tags": ["CPU", "GPU"],
+  "ui": "",
+  "inputs": null,
+  "outputs": null,
+  "flags": [],
+  "icon": "extension",
+  "env": "conda create -n care python=3.6",
+  "requirements": {"CPU": ["pip: tensorflow==1.8.0 Pillow csbdeep"], "GPU": ["pip: tensorflow-gpu==1.8.0 Pillow csbdeep"]},
+  "dependencies": []
+}
+</config>
+
+<script lang="python">
+from __future__ import print_function, unicode_literals, absolute_import, division
+import numpy as np
+
+from tifffile import imread
+from csbdeep.utils import download_and_extract_zip_file, axes_dict, plot_some, plot_history
+from csbdeep.utils.tf import limit_gpu_memory
+from csbdeep.io import load_training_data
+from csbdeep.models import Config, CARE
+
+from keras.callbacks import Callback
+import asyncio
+import random
+
+download_and_extract_zip_file (
+    url       = 'http://csbdeep.bioimagecomputing.com/example_data/synthetic_disks.zip',
+    targetdir = 'data',
+)
+
+(X,Y), (X_val,Y_val), axes = load_training_data('data/synthetic_disks/data.npz', validation_split=0.1, verbose=True)
+
+c = axes_dict(axes)['C']
+n_channel_in, n_channel_out = X.shape[c], Y.shape[c]
+
+#plt.figure(figsize=(12,5))
+#plot_some(X_val[:5],Y_val[:5])
+#plt.suptitle('5 example validation patches (top row: source, bottom row: target)');
+
+
+import base64
+from io import BytesIO
+from PIL import Image
+
+from csbdeep.utils.plot_utils import to_color
+
+def plot_tensors(dash, tensor_list, label, titles):
+    image_list = [tensor[:,:,:,:1].reshape(tensor.shape[1], tensor.shape[2], 1) for tensor in tensor_list]
+    displays = {}
+    titles = titles or [ 'Tensor '+str(i) for i in range(len(image_list))]
+    for i in range(len(image_list)):
+        im = image_list[i]
+        api.log(str(im.shape))
+        if im.shape[2] == 1:
+            im = im[:,:,0]
+            min = im.min()
+            normalized_im = ((im-min)/(im.max()-min)*255)
+            im = Image.fromarray(normalized_im.astype('uint8'))
+        else:
+            redchannel = (im[:,:,0]-im[:,:,0].min())/(im[:,:,0].max()-im[:,:,0].min())*255
+            greenchannel = (im[:,:,1]-im[:,:,1].min())/(im[:,:,1].max()-im[:,:,1].min())*255
+            bluechannel = np.zeros_like(greenchannel)
+            normalized_im = np.stack((redchannel,greenchannel,bluechannel), axis=2)
+            im = Image.fromarray(normalized_im.astype('uint8'), 'RGB')
+        buffered = BytesIO()
+        im.save(buffered, format="JPEG")
+        img_str = base64.b64encode(buffered.getvalue()).decode('ascii')
+        imgurl = 'data:image/png;base64,' + img_str
+        displays[titles[i]] = imgurl
+    dash.appendDisplay(label, displays)
+
+class UpdateUI(Callback):
+    def __init__(self, total_epoch, dash):
+        self.total_epoch = total_epoch
+        self.epoch = 0
+        self.logs = {}
+        self.dash = dash
+        self.step = 0
+        #self.gen = gen
+    def on_batch_end(self, batch, logs):
+        if batch % 10 == 0:
+            self.logs = logs
+            api.showStatus('training epoch:'+str(self.epoch)+'/'+str(self.total_epoch) + ' ' + str(logs))
+            self.dash.updateCallback('onStep', self.step, {'loss': np.asscalar(logs['loss']), 'mse': np.asscalar(logs['mse'])})
+        self.step += 1
+
+    def on_epoch_end(self, epoch, logs):
+        self.epoch = epoch
+        self.logs = logs
+        self.dash.updateCallback('onStep', self.step, {'val_loss': np.asscalar(logs['val_loss'])})
+        api.showProgress(self.epoch/self.total_epoch*100)
+        api.showStatus('training epoch:'+str(self.epoch)+'/'+str(self.total_epoch) + ' '+ str(logs))
+        idx = random.randint(0, len(X_val))
+        xbatch, ybatch = X_val[idx:idx+1],Y_val[idx:idx+1]
+        ypbatch = self.model.predict(xbatch, batch_size=1)
+        tensor_list = [ypbatch, xbatch, ybatch]
+        label = 'Step '+ str(self.step)
+        titles = ["output", 'input', 'target']
+        plot_tensors(self.dash, tensor_list, label, titles)
+
+
+class ImJoyPlugin():
+    def setup(self):
+        print('setup in python')
+
+    async def run(self, my):
+        epochs = 30
+        config = Config(axes, n_channel_in, n_channel_out, probabilistic=True, train_steps_per_epoch=epochs)
+        print(config)
+        model = CARE(config, 'my_model', basedir='models')
+
+        api.log('start training')
+        self.dash = await api.createWindow(type="Im2Im-Dashboard", name="CARE Training", w=25, h=10, data={"display_mode": "all", 'metrics': ['loss', 'val_loss', 'mse'], 'callbacks': ['onStep']})
+        updateUI = UpdateUI(epochs, self.dash)
+        model.prepare_for_training()
+        model.callbacks.append(updateUI)
+        history = model.train(X,Y, validation_data=(X_val,Y_val))
+        print(sorted(list(history.history.keys())))
+        api.log('training stoped')
+
+api.export(ImJoyPlugin())
+</script>
