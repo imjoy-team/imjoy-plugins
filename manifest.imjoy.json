@@ -28,7 +28,9 @@
      "pip: tensorflow-gpu==1.8.0 Pillow csbdeep"
     ]
    },
-   "dependencies": [],
+   "dependencies": [
+    "oeway/ImJoy-Plugins:Im2Im-Dashboard"
+   ],
    "uri": "repository/CARE.imjoy.html"
   },
   {
