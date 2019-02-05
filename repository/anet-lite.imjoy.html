@@ -243,8 +243,7 @@ class ImJoyPlugin():
         opt = self._opt
         export_model_to_js(self.model, opt.work_dir+'/__js_model__')
     async def run(self, my):
-        lastPath = await api.getConfig('work_dir')
-        work_dir = await api.showFileDialog(title="Please select a working directory (with data)", root=lastPath)
+        work_dir = await api.showFileDialog(title="Please select a working directory (with data)")
         api.setConfig('work_dir', work_dir)
         config = my.config
         print(config)
