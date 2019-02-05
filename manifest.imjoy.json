@@ -102,7 +102,7 @@
    "outputs": null,
    "flags": [],
    "icon": "extension",
-   "env": "conda create -n pytorch python=3.6.2",
+   "env": "conda create -n noise2self python=3.6.2",
    "requirements": [
     "repo:https://github.com/czbiohub/noise2self.git",
     "conda: -c pytorch six pillow numpy scipy pytorch=1.0 torchvision"
