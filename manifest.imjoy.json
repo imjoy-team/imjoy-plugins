@@ -113,6 +113,82 @@
    "uri": "repository/Noise2Self.imjoy.html"
   },
   {
+   "name": "Anet-Lite",
+   "mode": "pyworker",
+   "version": "0.1.2",
+   "api_version": "0.1.1",
+   "description": "A generic plugin for image-to-image translation with A-net.",
+   "tags": [
+    "CPU",
+    "GPU",
+    "Windows-CPU",
+    "Window-GPU"
+   ],
+   "ui": [
+    "Generic Image-to-Image Translation",
+    "input identifiers: {id:'input_ids', type: 'string', placeholder: 'EM=EM*.png'}",
+    "target identifiers: {id:'target_ids', type: 'string', placeholder: 'Mask=Mask*.png'}",
+    "base filter num: {id:'base_filter_num', type: 'number', min: 8, placeholder: 16}",
+    "input size: {id:'input_size', type: 'number', min: 256, placeholder: 256}"
+   ],
+   "inputs": null,
+   "outputs": null,
+   "icon": null,
+   "env": {
+    "CPU": [
+     "conda create -n anet-cpu python=3.6"
+    ],
+    "GPU": [
+     "conda create -n anet-gpu python=3.6"
+    ],
+    "Windows-CPU": [
+     "conda create -n anet-win-cpu python=3.6"
+    ],
+    "Windows-GPU": [
+     "conda create -n anet-win-gpu python=3.6"
+    ]
+   },
+   "requirements": {
+    "CPU": [
+     "repo: https://github.com/oeway/Anet-Lite",
+     "tensorflow==1.5",
+     "keras==2.2.1",
+     "Pillow",
+     "git+https://www.github.com/keras-team/keras-contrib.git",
+     "pytest"
+    ],
+    "GPU": [
+     "repo: https://github.com/oeway/Anet-Lite",
+     "tensorflow-gpu==1.5",
+     "keras==2.2.1",
+     "Pillow",
+     "git+https://www.github.com/keras-team/keras-contrib.git",
+     "pytest"
+    ],
+    "Windows-CPU": [
+     "repo: https://github.com/oeway/Anet-Lite",
+     "tensorflow==1.2",
+     "keras==2.2.1",
+     "Pillow",
+     "git+https://www.github.com/keras-team/keras-contrib.git",
+     "pytest"
+    ],
+    "Windows-GPU": [
+     "repo: https://github.com/oeway/Anet-Lite",
+     "tensorflow-gpu==1.2",
+     "keras==2.2.1",
+     "Pillow",
+     "git+https://www.github.com/keras-team/keras-contrib.git",
+     "pytest"
+    ]
+   },
+   "flags": [],
+   "dependencies": [
+    "oeway/ImJoy-Plugins:Im2Im-Dashboard"
+   ],
+   "uri": "repository/anet-lite.imjoy.html"
+  },
+  {
    "name": "ANNA-PALM",
    "type": "native-python",
    "version": "0.1.4",
