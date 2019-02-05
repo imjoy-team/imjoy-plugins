@@ -109,7 +109,7 @@ class UpdateUI(Callback):
         self.dash.updateCallback('onStep', self.step, {'val_loss': np.asscalar(logs['val_loss'])})
         api.showProgress(self.epoch/self.total_epoch*100)
         api.showStatus('training epoch:'+str(self.epoch)+'/'+str(self.total_epoch) + ' '+ str(logs))
-        idx = random.randint(0, len(X_val))
+        idx = random.randint(0, len(X_val)-1)
         xbatch, ybatch = X_val[idx:idx+1],Y_val[idx:idx+1]
         ypbatch = self.model.predict(xbatch, batch_size=1)
         tensor_list = [ypbatch, xbatch, ybatch]
