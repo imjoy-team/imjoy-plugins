@@ -16,13 +16,13 @@ This is a demo plugin ported from https://github.com/CSBDeep/CSBDeep/blob/master
   "version": "0.1.0",
   "api_version": "0.1.2",
   "description": "This plugin demonstrate denoising using CARE",
-  "tags": ["CPU", "GPU", "macOS GPU"],
+  "tags": ["CPU", "GPU", "macOS CPU"],
   "ui": "",
   "inputs": null,
   "outputs": null,
   "flags": [],
   "icon": "extension",
-  "env": {"CPU": "conda create -n care-cpu python=3.6", "GPU": "conda create -n care-gpu python=3.6", "macOS GPU": "conda create -n care-mac-cpu python=3.6"},
+  "env": {"CPU": "conda create -n care-cpu python=3.6", "GPU": "conda create -n care-gpu python=3.6", "macOS CPU": "conda create -n care-mac-cpu python=3.6"},
   "requirements": {"CPU": ["pip: tensorflow==1.8.0 Pillow csbdeep"], "GPU": ["pip: tensorflow-gpu==1.8.0 Pillow csbdeep", "macOS CPU": ["pip: tensorflow==1.5.0 Pillow csbdeep"]]},
   "dependencies": ["oeway/ImJoy-Plugins:Im2Im-Dashboard"]
 }
