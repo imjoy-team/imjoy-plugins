@@ -29,8 +29,8 @@ This is a demo plugin ported from https://github.com/CSBDeep/CSBDeep/blob/master
   },
   "requirements": {
       "CPU": ["pip: tensorflow==1.8.0 Pillow csbdeep tifffile"], 
-      "GPU": ["pip: tensorflow-gpu==1.8.0 Pillow csbdeep tifffile", 
-      "macOS CPU": ["pip: tensorflow==1.5.0 Pillow csbdeep tifffile"]]
+      "GPU": ["pip: tensorflow-gpu==1.8.0 Pillow csbdeep tifffile"], 
+      "macOS CPU": ["pip: tensorflow==1.5.0 Pillow csbdeep tifffile"]
   },
   "dependencies": ["oeway/ImJoy-Plugins:Im2Im-Dashboard"]
 }
@@ -39,36 +39,27 @@ This is a demo plugin ported from https://github.com/CSBDeep/CSBDeep/blob/master
 <script lang="python">
 from __future__ import print_function, unicode_literals, absolute_import, division
 import numpy as np
-
 from tifffile import imread
 from csbdeep.utils import download_and_extract_zip_file, axes_dict, plot_some, plot_history
 from csbdeep.utils.tf import limit_gpu_memory
 from csbdeep.io import load_training_data
 from csbdeep.models import Config, CARE
-
 from keras.callbacks import Callback
 import asyncio
 import random
-
 download_and_extract_zip_file (
     url       = 'http://csbdeep.bioimagecomputing.com/example_data/synthetic_disks.zip',
     targetdir = 'data',
 )
-
 (X,Y), (X_val,Y_val), axes = load_training_data('data/synthetic_disks/data.npz', validation_split=0.1, verbose=True)
-
 c = axes_dict(axes)['C']
 n_channel_in, n_channel_out = X.shape[c], Y.shape[c]
-
 #plt.figure(figsize=(12,5))
 #plot_some(X_val[:5],Y_val[:5])
 #plt.suptitle('5 example validation patches (top row: source, bottom row: target)');
-
-
 import base64
 from io import BytesIO
 from PIL import Image
-
 from csbdeep.utils.plot_utils import to_color
 
 def plot_tensors(dash, tensor_list, label, titles):
@@ -110,7 +101,6 @@ class UpdateUI(Callback):
             api.showStatus('training epoch:'+str(self.epoch)+'/'+str(self.total_epoch) + ' ' + str(logs))
             self.dash.updateCallback('onStep', self.step, {'loss': np.asscalar(logs['loss']), 'mse': np.asscalar(logs['mse'])})
         self.step += 1
-
     def on_epoch_end(self, epoch, logs):
         self.epoch = epoch
         self.logs = logs
@@ -124,18 +114,15 @@ class UpdateUI(Callback):
         label = 'Step '+ str(self.step)
         titles = ["output", 'input', 'target']
         plot_tensors(self.dash, tensor_list, label, titles)
-
-
+ 
 class ImJoyPlugin():
     def setup(self):
         print('setup in python')
-
     async def run(self, my):
         epochs = 30
         config = Config(axes, n_channel_in, n_channel_out, probabilistic=True, train_steps_per_epoch=epochs)
         print(config)
         model = CARE(config, 'my_model', basedir='models')
-
         api.log('start training')
         self.dash = await api.createWindow(type="Im2Im-Dashboard", name="CARE Training", w=25, h=10, data={"display_mode": "all", 'metrics': ['loss', 'val_loss', 'mse'], 'callbacks': ['onStep']})
         updateUI = UpdateUI(epochs, self.dash)
@@ -144,6 +131,6 @@ class ImJoyPlugin():
         history = model.train(X,Y, validation_data=(X_val,Y_val))
         print(sorted(list(history.history.keys())))
         api.log('training stoped')
-
+ 
 api.export(ImJoyPlugin())
 </script>
