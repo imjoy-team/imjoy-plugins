@@ -15,7 +15,7 @@ Authors: Joshua Batson, Loic Royer
 {
   "name": "Noise2Self",
   "type": "native-python",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "tags": ["CPU", "GPU"],
   "api_version": "0.1.2",
   "description": "A demo plugin for Noise2Self (Blind Denoising by Self-Supervision)",
@@ -43,6 +43,11 @@ from torchvision import transforms
 from torch.utils.data import Dataset
 
 gpu_available = torch.cuda.is_available()
+
+if api.TAG == 'GPU' and gpu_available:
+    REPORT_INTERVAL = 5
+else:
+    REPORT_INTERVAL = 1
 
 mnist_train = MNIST('../data/MNIST', download = True,
                     transform = transforms.Compose([
@@ -101,6 +106,9 @@ class ImJoyPlugin():
 
     async def run(self, my):
         steps =  my.config.steps
+        if api.TAG == 'GPU' and not gpu_available:
+            api.alert('Running with CPU')
+
         api.log('Starting Noise2Self training for '+str(steps) + 'steps.')
         data_loader = DataLoader(noisy_mnist_train, batch_size=32, shuffle=True)
 
@@ -117,7 +125,7 @@ class ImJoyPlugin():
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-            if i % 5 == 0:
+            if i % REPORT_INTERVAL  == 0:
                 info =  "Loss (" + str(i) + "): " + str(loss.item())
                 api.log(info)
                 api.showStatus(info)
