@@ -1,17 +1,17 @@
-<config>
+﻿<config>
 {
   "name": "SMLM File IO",
   "type": "web-worker",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "api_version": "0.1.2",
   "description": "A plugin for loading and exporting SMLM images.",
-  "ui": "Render a 2D histogram with: <br>pixel size={id:'pixel_size', type:'number', placeholder: 20}nm<br> width={id:'width', type:'number', placeholder: 2560} <br> height={id:'height', type:'number', placeholder: 2560}",
+  "ui": "",
   "tags": [],
   "inputs": {"type": "object", "properties": {"name": { "pattern":"(.*\\.smlm|\\.SMLM)$" }}},
   "outputs": {"type": "object", "properties": {"type": { "type": "string", "enum": ["image/grayscale"] }}},
   "icon": "🙀",
   "requirements": ["https://cdn.rawgit.com/Stuk/jszip/9fb481ac/dist/jszip.min.js","https://cdn.rawgit.com/satazor/js-spark-md5/bbd1624a/spark-md5.min.js"],
-  "dependencies": ["oeway/ImJoy-Plugins:Image Window", "oeway/ImJoy-Plugins:2D Histogram"]
+  "dependencies": ["oeway/ImJoy-Plugins:Image Window", "oeway/ImJoy-Plugins:2D Histogram", "oeway/ImJoy-Plugins:3D Histogram"]
 }
 </config>
 <script lang="javascript">
@@ -125,23 +125,23 @@ class smlmFile {
                           file_info.max = {}
                           file_info.avg = {}
                           rows = tableArrays[0].length
-                        //   for(let c=0;c<columns;c++){
-                        //     const cn = format.headers[c]
-                        //     file_info.min[cn] = Number.POSITIVE_INFINITY;
-                        //     file_info.max[cn] = Number.NEGATIVE_INFINITY;
-                        //     file_info.avg[cn] = 0;
-                        //     for(let r=0;r<rows;r++){
-                        //         if(file_info.min[cn]>tableArrays[c][r]){
-                        //           file_info.min[cn] = tableArrays[c][r]
-                        //           if(tableArrays[c][r] == 0){
-                        //             console.log(cn, c, r)
-                        //           }
-                        //         }
-                        //         if(file_info.max[cn]<tableArrays[c][r])
-                        //         file_info.max[cn] = tableArrays[c][r]
-                        //         file_info.avg[cn] +=tableArrays[c][r]/rows
-                        //     }
-                        //   }
+                           for(let c=0;c<columns;c++){
+                             const cn = format.headers[c]
+                             file_info.min[cn] = Number.POSITIVE_INFINITY;
+                             file_info.max[cn] = Number.NEGATIVE_INFINITY;
+                             file_info.avg[cn] = 0;
+                             for(let r=0;r<rows;r++){
+                                 if(file_info.min[cn]>tableArrays[c][r]){
+                                   file_info.min[cn] = tableArrays[c][r]
+                                   if(tableArrays[c][r] == 0){
+                                     console.log(cn, c, r)
+                                   }
+                                 }
+                                 if(file_info.max[cn]<tableArrays[c][r])
+                                 file_info.max[cn] = tableArrays[c][r]
+                                 file_info.avg[cn] +=tableArrays[c][r]/rows
+                             }
+                           }
                           data.headers = format.headers
                           for(let h=0;h<data.headers.length;h++){
                             data.headers[h] = data.headers[h].replace(/[^a-zA-Z0-9]+/g,'_').trim()
@@ -561,6 +561,51 @@ class ImJoyPlugin {
   setup(){
     new smlmFile();
   }
+  async render2d(file){
+    try {
+        const ret = await api.showDialog({name: 'rendering 2d', type: 'joy', ui: "Render a 2D histogram with: <br>pixel size={id:'pixel_size', type:'number', placeholder: 20}nm<br> width={id:'width', type:'number', placeholder: 2560} <br> height={id:'height', type:'number', placeholder: 2560}"})
+
+        api.showStatus("rendering...")
+        var width = ret.width
+        var height = ret.height
+        var canvas_data = new Uint16Array(new ArrayBuffer(width*height*2)); //uint16
+        var pixel_size = ret.pixel_size
+        var data = file.data
+        var xx = data.tableDict.x
+        var yy = data.tableDict.y
+        var ff = data.tableDict.frame
+        var rows = data.rows
+        var table_dict = data.tableDict
+        var isFiltered = data.isFiltered
+        var progress = 0
+        for (var line = 0; line < rows; line++) {
+            var newProgress = Math.floor(100 * line / (rows+0.5));
+            if(newProgress != progress){
+                progress = newProgress
+                api.showProgress(progress)
+            }
+            if(isFiltered && !isFiltered[line]) continue
+            var f = parseInt(ff[line])
+            var x = parseInt(xx[line]/pixel_size)
+            var y = parseInt(yy[line]/pixel_size)
+            if(!f || !x || !y ){
+                continue
+            }
+            if(y>height || x>width) continue
+            var s =y * width + x;  // calculate the index in the array
+            canvas_data[s] = canvas_data[s]+1
+        }
+        api.showStatus("histogram rendered.")
+        const image = {type: 'image/grayscale', array: canvas_data, height: height, width: width} // table: files[0].data
+        await api.createWindow({name: 'Histogram', type: 'Image Window', data: image, w: 10, h: 10, config: {}})
+        console.timeEnd('plot histogram')
+        //return my
+        } catch (e) {
+        console.error(e)
+        throw e
+        }
+
+  }
   async run(my){
     console.log('running in the plugin', my)
     if(!my.data.name || !my.data.size){
@@ -578,53 +623,16 @@ class ImJoyPlugin {
     console.time('plot histogram')
     console.log('smlm file loaded: ', files)
     console.log('manifest: ', smlm.manifest)
-    // const tables = {}
-    // for(let f of files){
-    //     tables[f.name] = {type:'localization/table', table: f.data}
-    // }
-    // return {type:'localization/table', table: files[0].data}
 
-    my.data = {type:'localization/table', table: files[0].data}
-   try {
-      api.showStatus("rendering...")
-      var width = my.config.width
-      var height = my.config.height
-      var canvas_data = new Uint16Array(new ArrayBuffer(width*height*2)); //uint16
-      var pixel_size = my.config.pixel_size
-      var data = my.data.table
-      var xx = data.tableDict.x
-      var yy = data.tableDict.y
-      var ff = data.tableDict.frame
-      var rows = data.rows
-      var table_dict = data.tableDict
-      var isFiltered = data.isFiltered
-      var progress = 0
-      for (var line = 0; line < rows; line++) {
-          var newProgress = Math.floor(100 * line / (rows+0.5));
-          if(newProgress != progress){
-              progress = newProgress
-              api.showProgress(progress)
-          }
-          if(isFiltered && !isFiltered[line]) continue
-          var f = parseInt(ff[line])
-          var x = parseInt(xx[line]/pixel_size)
-          var y = parseInt(yy[line]/pixel_size)
-          if(!f || !x || !y ){
-            continue
-          }
-          if(y>height || x>width) continue
-          var s =y * width + x;  // calculate the index in the array
-          canvas_data[s] = canvas_data[s]+1
-      }
-      api.showStatus("histogram rendered.")
-      const image = {type: 'image/grayscale', array: canvas_data, height: height, width: width} // table: files[0].data
-      api.createWindow({name: 'Histogram', type: 'Image Window', data: image, w: 10, h: 10, config: {}})
-      console.timeEnd('plot histogram')
-      //return my
-    } catch (e) {
-      console.error(e)
-      throw e
+    for(let f of files){
+        if(!f.data.headers.includes('z')) {
+            await this.render2d(f)
+        }
+        else{
+            await api.createWindow({name: '3d visualization', type:'3D Histogram', data:{options: f.data} })
+        }
     }
+    
   }
 }
 

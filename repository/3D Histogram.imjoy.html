@@ -1,21 +1,21 @@
-
+﻿
 <docs lang="markdown">
 Describe your plugin here.
 </docs>
 
 <config lang="json">
 {
-  "name": "Localization3D",
+  "name": "3D Histogram",
   "type": "window",
   "tags": [],
   "ui": null,
-  "version": "0.1.0",
+  "version": "0.1.2",
   "api_version": "0.1.2",
   "description": "display localization table in 3D",
   "icon": "extension",
   "inputs": null,
   "outputs": null,
-  "requirements": ["https://cdnjs.cloudflare.com/ajax/libs/three.js/r49/Three.min.js"],
+  "requirements": ["https://cdnjs.cloudflare.com/ajax/libs/three.js/r49/Three.min.js", "https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.2/dat.gui.min.js"],
   "dependencies": []
 }
 </config>
@@ -665,7 +665,7 @@ var ScopeParams = function () {
   this.scaleX = 1;
   this.scaleY = 1;
   this.scaleZ = 1;
-  this.pointSize = 1;
+  this.pointSize = 5;
 
   this.distance = 4.0;
   this.fov = 16.;
@@ -746,7 +746,7 @@ function load3DViewer(canvasElement, update_callback) {
     scopeParams['x'] = 1;
     scopeParams['y'] = 1;
     scopeParams['z'] = 1;
-    scopeParams['point size'] = 3;
+    scopeParams['point size'] = 6;
     rerender = true;
   };
 
@@ -1119,12 +1119,6 @@ function addFile(file){
 }
 
 function show3DLocalizations(options, update_status_callback){
-  // var fileid = createFileID({hash: options.file_hash, name: options.file_name, size: options.file_size})
-  // if(fileIDs.indexOf(fileid)>=0){
-  //   console.log('already added to the 3d view.')
-  //   update_status_callback({rendering_status:"3D view rendered(loc.:"+options.filteredRows+", file:"+options.file_name+").", rendering_progress: 100, rendering: false})
-  //   return false
-  // }
   const bufferLength = (512 * 512); // defaulting to 2M
   const before = Date.now();
   const strideTitles = ["x", "y", "z"]
@@ -1258,14 +1252,18 @@ function mousewheel(event) {
 
 class ImJoyPlugin {
   async setup() {
-    importScripts("https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.2/dat.gui.min.js").then(()=>{
-        load3DViewer(document.getElementById("histogram_canvas_3d"), console.log)
-    })
+
+    await load3DViewer(document.getElementById("histogram_canvas_3d"), console.log)
+
   }
 
   run(my) {
-    console.log('running in the plugin ', my)
-
+    try {
+        show3DLocalizations(my.data.options, ()=>{})
+    } catch (e) {
+        console.error(e)
+        api.showStatus(e.toString())
+    }
   }
 }
 

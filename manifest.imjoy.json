@@ -5,6 +5,24 @@
  "uri_root": "",
  "plugins": [
   {
+   "name": "3D Histogram",
+   "type": "window",
+   "tags": [],
+   "ui": null,
+   "version": "0.1.2",
+   "api_version": "0.1.2",
+   "description": "display localization table in 3D",
+   "icon": "extension",
+   "inputs": null,
+   "outputs": null,
+   "requirements": [
+    "https://cdnjs.cloudflare.com/ajax/libs/three.js/r49/Three.min.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.2/dat.gui.min.js"
+   ],
+   "dependencies": [],
+   "uri": "repository/3D Histogram.imjoy.html"
+  },
+  {
    "name": "CARE",
    "type": "native-python",
    "version": "0.1.0",
@@ -12,7 +30,8 @@
    "description": "This plugin demonstrate denoising using CARE",
    "tags": [
     "CPU",
-    "GPU"
+    "GPU",
+    "macOS CPU"
    ],
    "ui": "",
    "inputs": null,
@@ -21,14 +40,18 @@
    "icon": "extension",
    "env": {
     "CPU": "conda create -n care-cpu python=3.6",
-    "GPU": "conda create -n care-gpu python=3.6"
+    "GPU": "conda create -n care-gpu python=3.6",
+    "macOS CPU": "conda create -n care-mac-cpu python=3.6"
    },
    "requirements": {
     "CPU": [
-     "pip: tensorflow==1.8.0 Pillow csbdeep"
+     "pip: tensorflow==1.8.0 Pillow csbdeep tifffile"
     ],
     "GPU": [
-     "pip: tensorflow-gpu==1.8.0 Pillow csbdeep"
+     "pip: tensorflow-gpu==1.8.0 Pillow csbdeep tifffile"
+    ],
+    "macOS CPU": [
+     "pip: tensorflow==1.5.0 Pillow csbdeep tifffile"
     ]
    },
    "dependencies": [
@@ -90,7 +113,7 @@
   {
    "name": "Noise2Self",
    "type": "native-python",
-   "version": "0.1.6",
+   "version": "0.1.8",
    "tags": [
     "CPU",
     "GPU"
@@ -102,11 +125,20 @@
    "outputs": null,
    "flags": [],
    "icon": "extension",
-   "env": "conda create -n noise2self python=3.6.2",
-   "requirements": [
-    "repo:https://github.com/czbiohub/noise2self.git",
-    "conda: -c pytorch six pillow numpy scipy pytorch=1.0 torchvision"
-   ],
+   "env": {
+    "CPU": "conda create -n noise2self-cpu python=3.6.2",
+    "GPU": "conda create -n noise2self-gpu python=3.6.2"
+   },
+   "requirements": {
+    "CPU": [
+     "repo:https://github.com/czbiohub/noise2self.git",
+     "conda: -c pytorch six pillow numpy scipy pytorch=1.0 torchvision"
+    ],
+    "GPU": [
+     "repo:https://github.com/czbiohub/noise2self.git",
+     "conda: -c pytorch six pillow numpy scipy cudatoolkit=9.0 pytorch=1.0 torchvision"
+    ]
+   },
    "dependencies": [
     "oeway/ImJoy-Plugins:Im2Im-Dashboard"
    ],
@@ -269,6 +301,9 @@
     }
    },
    "icon": null,
+   "flags": [
+    "functional"
+   ],
    "requirements": [],
    "dependencies": [],
    "uri": "repository/histogram2D.imjoy.html"
@@ -395,26 +430,9 @@
    "uri": "repository/liveStreamWindow.imjoy.html"
   },
   {
-   "name": "Localization3D",
-   "type": "window",
-   "tags": [],
-   "ui": null,
-   "version": "0.1.0",
-   "api_version": "0.1.2",
-   "description": "display localization table in 3D",
-   "icon": "extension",
-   "inputs": null,
-   "outputs": null,
-   "requirements": [
-    "https://cdnjs.cloudflare.com/ajax/libs/three.js/r49/Three.min.js"
-   ],
-   "dependencies": [],
-   "uri": "repository/localization3D.imjoy.html"
-  },
-  {
    "name": "MicroManager",
    "type": "native-python",
-   "version": "0.1.3",
+   "version": "0.1.4",
    "api_version": "0.1.2",
    "createdAt": "Mon Jun 26 2018 15:45:30",
    "description": "A plugin for controlling MicroManager in Python.",
@@ -425,7 +443,7 @@
    "icon": null,
    "env": "conda create -n python2 python=2.7",
    "requirements": [
-    "numpy",
+    "numpy==1.15.0",
     "scikit-image==0.14.0",
     "Pillow"
    ],
@@ -436,10 +454,10 @@
   {
    "name": "SMLM File IO",
    "type": "web-worker",
-   "version": "0.1.0",
+   "version": "0.1.2",
    "api_version": "0.1.2",
    "description": "A plugin for loading and exporting SMLM images.",
-   "ui": "Render a 2D histogram with: <br>pixel size={id:'pixel_size', type:'number', placeholder: 20}nm<br> width={id:'width', type:'number', placeholder: 2560} <br> height={id:'height', type:'number', placeholder: 2560}",
+   "ui": "",
    "tags": [],
    "inputs": {
     "type": "object",
@@ -467,7 +485,8 @@
    ],
    "dependencies": [
     "oeway/ImJoy-Plugins:Image Window",
-    "oeway/ImJoy-Plugins:2D Histogram"
+    "oeway/ImJoy-Plugins:2D Histogram",
+    "oeway/ImJoy-Plugins:3D Histogram"
    ],
    "uri": "repository/smlmFileIO.imjoy.html"
   },
