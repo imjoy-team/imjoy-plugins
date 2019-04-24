@@ -57,6 +57,7 @@ class TifFile {
     this.buffer = null
     this.ifds = null
     this.frame_num == 0
+    this._current_frame = 0
   }
   load(){
     return new Promise((resolve, reject) => {
@@ -71,13 +72,21 @@ class TifFile {
       }
     })
   }
-  read(frame){
-    const ifd = this.ifds[frame]
+  seek(num){
+    if(this.ifds[num]){
+      this._current_frame = num
+    }
+    else{
+      throw `frame {num} does not exists`
+    }
+  }
+  read(){
+    const ifd = this.ifds[this._current_frame]
     UTIF.decodeImages(this.buffer, [ifd])
     const h = ifd.height
     const w = ifd.width
     let ret = null
-    let min=Number.POSITIVE_INFINITY, max=Number.NEGATIVE_INFINITY, sticky_min=Number.POSITIVE_INFINITY, sticky_max = Number.NEGATIVE_INFINITY
+    let min=Number.POSITIVE_INFINITY, max=Number.NEGATIVE_INFINITY
     //ifd.t262 --> 0: WhiteIsZero, 1: BlackIsZero, 2: RGB, 3: Palette color, 4: Transparency mask, 5: CMYK
     if(ifd.t258 == 16 && ifd.t262 <= 1){
       const raw = new Uint16Array(ifd.data.buffer)
@@ -95,8 +104,7 @@ class TifFile {
         if(v>max) max=v
         if(v<min) min=v
       }
-      ret = [data, w, h, max, min, sticky_max, sticky_min]
-      console.log('min, max',sticky_min, sticky_max)
+      ret = [data, w, h, max, min]
     }
     else if(ifd.t258 == 32 && ifd.t262 <= 1){
       const raw = new Uint32Array(ifd.data.buffer)
@@ -115,13 +123,12 @@ class TifFile {
         if(v>max) max=v
         if(v<min) min=v
       }
-      ret = [data, w, h, max, min, sticky_max, sticky_min]
-      console.log('min, max',sticky_min, sticky_max)
+      ret = [data, w, h, max, min]
     }
     else if(ifd.t258 == 8 && ifd.t262 <= 1){
       const data = new Uint8Array(ifd.data.buffer)
       console.assert(data.length == w*h, 'data length mismatch')
-      ret = [data, w, h, max, min, sticky_max, sticky_min]
+      ret = [data, w, h, max, min]
     }
     else{
       api.showStatus('unsupported bitdepth: ' + ifd.t258 + ' bits ' + ifd.t262 )
@@ -132,23 +139,61 @@ class TifFile {
 
 }
 
+
 class ImJoyPlugin {
   setup(){
+    this.opened = {}
+    this._count = 0
   }
+
+  async open(file){
+    const id = this._count
+    this._count = this._count + 1
+    this.opened[id] = new TifFile(file)
+    await this.opened[id].load()
+    return {id: id, 
+      read: ()=>{
+        if(this.opened[id]){
+          const [canvas_data, w, h, max, min] = this.opened[id].read()
+          const image = {type: 'image/grayscale', array: canvas_data, height: h, width: w, max: max, min: min}
+          return image
+        }
+        else{
+          throw "file does not exisits or beining closed"
+        }
+      },
+      seek: (num)=>{
+        if(this.opened[id]){
+          this.opened[id].seek(num)
+        }
+        else{
+          throw "file does not exisits or beining closed"
+        }
+      },
+      close: ()=>{
+        if(this.opened[id]){
+          delete this.opened[id] 
+        }
+        else{
+          throw "file does not exisits or beining closed already"
+        }
+      }}
+  }
+
   async run(my){
     console.log('running in the plugin', my)
     if(!my.data.type || !my.data.size){
         api.showStatus('Error: you need to select your tif file first.')
         return
     }
-
     const file = my.data
     const brightness = 0
     const current_frame = my.config.frame_num
     const fileObj = new TifFile(file)
     fileObj.load().then(() => {
       const frame_num = fileObj.frame_num
-      const [canvas_data, w, h, max, min, sticky_max, sticky_min] = fileObj.read(current_frame)
+      fileObj.seek(current_frame)
+      const [canvas_data, w, h, max, min] = fileObj.read()
       const image = {type: 'image/grayscale', array: canvas_data, height: h, width: w, select_frame:this.run, my: my}
       api.createWindow({name: file.name, type: 'Image Window', w:7, h:7, data: image, config: {}})
     })
