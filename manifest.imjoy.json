@@ -534,7 +534,7 @@
   {
    "name": "Tif File Importer",
    "type": "web-worker",
-   "version": "0.1.2",
+   "version": "0.1.3",
    "api_version": "0.1.0",
    "description": "A plugin for loading tif images.",
    "ui": "frame number:{id:'frame_num', type:'number', min:0, placeholder:0}",
