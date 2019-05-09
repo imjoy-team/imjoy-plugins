@@ -15,11 +15,13 @@
   "inputs": null,
   "outputs": null,
   "env": "",
-  "requirements": ["https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis",
-                   "https://unpkg.com/spectre.css/dist/spectre.min.css",
-                   "https://unpkg.com/spectre.css/dist/spectre-exp.min.css",
-                   "https://unpkg.com/spectre.css/dist/spectre-icons.min.css",
-                   "https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.22/vue.min.js"
+  "requirements": [
+        "https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.22/vue.min.js",
+        "https://static.imjoy.io/spectre.css/spectre.min.css",
+        "https://static.imjoy.io/spectre.css/spectre-exp.min.css",
+        "https://static.imjoy.io/spectre.css/spectre-icons.min.css",
+        "https://cdn.jsdelivr.net/npm/apexcharts",
+        "https://cdn.jsdelivr.net/npm/vue-apexcharts"
   ],
   "dependencies": [],
   "defaults": {"w": 20, "h": 10},
@@ -27,8 +29,149 @@
 }
 </config>
 
-<attachment name="display_template">
-<div style="text-align: center;">
+<script lang="javascript">
+
+const series = []
+const dataObj = {}
+
+const app = new Vue({
+    el: '#app',
+    components: {
+      apexchart: VueApexCharts,
+    },
+    data: {
+      display_mode: 'all',
+      displays: [],
+      pages: [],
+      page_names: [],
+      page: 0,
+      selected_display: null,
+      series: series,
+      chartOptions: {
+        chart: {
+          animations: {
+            enabled: true,
+            easing: 'linear',
+            dynamicAnimation: {
+              speed: 2000
+            }
+          },
+          toolbar: {
+            show: true
+          },
+          zoom: {
+            enabled: true
+          }
+        },
+        dataLabels: {
+          enabled: false
+        },
+        stroke: {
+          curve: 'smooth',
+          width: 2
+        },
+        title: {
+          text: 'Training',
+          align: 'center'
+        },
+        markers: {
+          size: 0
+        },
+        xaxis: {
+          min: 0,
+          labels: {
+            formatter: function (value) {
+              return value.toFixed(0);
+            }
+          }
+        },
+        yaxis: {
+          labels: {
+            formatter: function (value) {
+              return value.toFixed(4);
+            }
+          }
+        },
+        legend: {
+          show: false
+        }
+      }
+    },
+    mounted: function () {
+      this.intervals()
+    },
+    methods: {
+      intervals() {
+        // this.$refs.realtimeChart.updateSeries([{
+        //   data: data
+        // }])
+      }
+    }
+})
+
+function generateCallbacks(metrics, callbacks){
+  const cbs = {}
+  for(let m of metrics){
+    dataObj[m] = {name: m, data: []}
+    series.push(dataObj[m])
+  }
+  for(let c of callbacks){
+    cbs[c] = (i, values)=>{
+      for(let k in values){
+        dataObj[k].data.push([i, values[k]])
+      }
+      app.$forceUpdate()
+    }
+  }
+  return cbs
+}
+
+class ImJoyPlugin {
+  async setup() {
+
+  }
+
+  async appendDisplay(name, items){
+    app.pages.push(items)
+    app.page_names.push(name || '')
+    app.page = app.pages.length -1
+    if(!app.selected_display){
+        app.selected_display = Object.keys(items)[0]
+    }
+    app.$forceUpdate()
+  }
+
+  async updateCallback(callback_name, index, value){
+    this.callbacks[callback_name](index, value)
+  }
+
+  async run(my) {
+    if(my.data.metrics && my.data.metrics.length>0){
+        this.callbacks = generateCallbacks(my.data.metrics, my.data.callbacks)
+    }
+    if(my.data.display_mode){
+        app.display_mode = my.data.display_mode
+    }
+    //for(let i=0;i<100;i++){
+    //    await this.callbacks.onEpochEnd(i, {'loss': i*10})
+    //}
+    //api.log('done')
+  }
+}
+api.export(new ImJoyPlugin())
+</script>
+
+<window lang="html">
+<div style="text-align: center;" id="app">
+  <div class="card">
+    <div class="card-image">
+      <div id="chart">
+        <apexchart ref="realtimeChart" type=line height=350 :options="chartOptions" :series="series" />
+      </div>
+    </div>
+  </div>
+  <br>
+  <div class="card">
     <h5>{{page?page_names[page]: ''}}</h5>
     <input v-if="pages.length>0" class="slider" id="display-slider" type="range" min="0" :max="pages.length-1" v-model="page">
     <ul class="tab tab-block">
@@ -38,111 +181,10 @@
         </li>
     </ul>
     <img v-if="display_mode != 'all' && page && selected_display && pages[page][selected_display]" :src="pages[page][selected_display]" style="max-width: 100%; min-width: 100px;"/>
-</div>
-</attachment>
-
-<script lang="javascript">
-class ImJoyPlugin {
-  constructor(){
-    this._visor = tfvis.visor('#surface')
-
-    this._display_surface = this._visor.surface({name: 'Display', tab: 'Display'});
-    //this._inference_surface = this._visor.surface({name: 'Prediction', tab: 'Inference'});
-
-    //const metrics = ['loss', 'val_loss', 'acc', 'val_acc'];
-    //const callbacks = tfvis.show.fitCallbacks(this._training_surface, metrics, {callbacks: ['onEpochEnd', 'onBatchEnd'] })
-    //this.onEpochEnd = callbacks.onEpochEnd
-    //this.onBatchEnd = callbacks.onBatchEnd
-    // "onEpochEnd", "onBatchEnd"
-  }
-
-  async setup() {
-    this.initDisplay()
-  }
-
-  async initDisplay(){
-    const drawArea = this._display_surface.drawArea;
-    drawArea.innerHTML = '';
-    //const label = drawArea.parentNode.querySelector(".tf-label");
-    //if(label) drawArea.parentNode.removeChild(label)
-
-    const sketch = document.createElement('div');
-    sketch.style = "height: 100%;";
-    //sketch.innerHTML = '<ul class="tab tab-block"></ul> <input class="slider" id="display-slider" type="range" min="0" max="100" value="50">'
-    sketch.id = 'sketch'
-    drawArea.appendChild(sketch);
-    this.store = {display_mode: 'all', displays: [], pages: [], page_names: [], page: 0, selected_display: null}
-    this.app = new Vue({
-        el: '#sketch',
-        template: await api.getAttachment('display_template'),
-        data: this.store,
-        methods: {
-            page(){
-            }
-        }
-    })
-  }
-  async appendDisplay(name, items){
-    this.store.pages.push(items)
-    this.store.page_names.push(name || '')
-    this.store.page = this.store.pages.length -1
-    if(!this.store.selected_display){
-        this.store.selected_display = Object.keys(items)[0]
-    }
-    this.app.$forceUpdate()
-  }
-
-  async updateCallback(callback_name, index, value){
-    this.callbacks[callback_name](index, value)
-  }
-
-  async run(my) {
-    if(my.data.metrics && my.data.metrics.length>0){
-        this._training_surface = this._visor.surface({name: 'Training', tab: 'Training'});
-        this.callbacks = tfvis.show.fitCallbacks(this._training_surface, my.data.metrics, {callbacks: my.data.callbacks })
-    }
-    if(my.data.display_mode){
-        this.store.display_mode = my.data.display_mode
-    }
-    //for(let i=0;i<100;i++){
-    //    await this.callbacks.onEpochEnd(i, {'loss': i*10})
-    //}
-    //api.log('done')
-  }
-}
-const a = new ImJoyPlugin()
-console.log(a)
-api.export(a)
-</script>
-
-<window lang="html">
-  <div>
-    <div id="surface">
-    </div>
   </div>
+  
+</div>
 </window>
 
 <style lang="css">
-.tf-label {
-    display: none;
-}
-.visor {
-    width: 100%!important;
-    right: 0px!important;
-    height: 100%!important;
-    position: absolute!important;
-    top: 0px!important;
-}
-
-.visor-controls {
-    display: none!important;
-}
-
-.tf-surface{
-    top: 10px;
-    width: calc( 100% )!important;
-    height: calc( 100% - 50px )!important;
-    max-width: 100%!important;
-    max-height: 100%!important;
-}
 </style>
