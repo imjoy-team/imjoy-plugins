@@ -11,8 +11,8 @@ Paper on Nature Biotechnology: https://rdcu.be/LGtc
 {
   "name": "ANNA-PALM",
   "type": "native-python",
-  "version": "0.1.4",
-  "api_version": "0.1.2",
+  "version": "0.1.5",
+  "api_version": "0.1.5",
   "description": "A plugin for training models with ANNA-PALM.",
   "tags": ["CPU", "GPU"],
   "ui": null,
@@ -24,7 +24,7 @@ Paper on Nature Biotechnology: https://rdcu.be/LGtc
     "CPU": ["repo:https://github.com/imodpasteur/ANNA-PALM", "cmd:pip install -r ANNA-PALM/requirements.txt"],
     "GPU": ["repo:https://github.com/imodpasteur/ANNA-PALM", "pip: Pillow numpy==1.15.0 scipy matplotlib scikit-image tensorflow-gpu==1.8.0"]
   },
-  "dependencies": ["oeway/ImJoy-Plugins:Im2Im-Dashboard"]
+  "dependencies": ["oeway/ImJoy-Plugins:Im2Im-Dashboard", "https://gist.githubusercontent.com/oeway/39c1be6303c21bde8dc78a4d437124cd/raw/Start-ANNA-PALM.imjoy.html"]
 }
 </config>
 
@@ -43,11 +43,14 @@ import asyncio
 import base64
 from io import BytesIO
 from PIL import Image
+import concurrent.futures
+from imjoy import api
+
 
 
 
 default_workdir = './workdir'
-opt = Options().parse(['--workdir=./tmp_test'])
+opt = Options().parse(['--workdir=./tmp_predict'])
 opt.model = 'a_net_tensorflow'
 opt.fineSize = 512
 opt.batchSize = 1
@@ -65,18 +68,42 @@ opt.control_nc = 1
 opt.add_data_type_control = True
 opt.add_lr_channel = 'pseudo'
 opt.print_freq = 3
-opt.display_freq = 10
+opt.display_freq = 1
 
 class ImJoyPlugin():
   async def setup(self):
     self.step = 0
-    api.register(name="train", run=self.train, ui="steps:{id:'steps', type:'number', min:1, placeholder:1000}<br>"\
-                "batch size:{id:'batchsize', type:'number', min:1, placeholder:1}<br>"
-                )
-    api.register(name="test", run=self.test, ui="")
+    self.dialog = None
+    self.executor = concurrent.futures.ThreadPoolExecutor(
+        max_workers=1,
+    )
+    self.loop = asyncio.get_event_loop()
 
-  def run(self, my):
-    self.test(my)
+  def resume(self):
+    api.alert('plugin process resumed')
+
+  async def run(self, my):
+    self.dialog = await api.showDialog(type='Start-ANNA-PALM', data= {
+        'options': {
+            'Simulated Microtubules': {'callback': self.train_sim_tubulin, 'src': 'https://img.icons8.com/color/52/000000/processor.png'},
+            'predict': {'callback': self.predict, 'src': 'https://img.icons8.com/color/52/000000/processor.png'}
+            }
+        }
+    )
+    
+  async def train_sim_tubulin(self):
+    if self.dialog is not None:
+        self.dialog.close()
+    opt.batchSize = 1
+    api.showStatus('preparing data...')
+    self.dash = await api.createWindow(type="Im2Im-Dashboard", name="ANNA-PALM Training", data={'display_mode':'one','metrics': ["discrim_loss", "gen_loss_GAN", "gen_loss", "gen_loss_L2", "gen_loss_SSIM", "squirrel_discrim_loss", "gen_loss_squirrel"], 'callbacks': ['onEpochEnd', 'onBatchEnd']})
+    await self.dash.setLoading({'status_text': 'Preparing data...', 'loading': True})
+    sources = create_data_sources(['TransformedTubulin001NB'], opt)
+    d = sources['train']
+    
+    #await self.loop.run_in_executor(self.executor, self.train, d, opt)
+    await self.dash.setLoading({'status_text': 'Start Training...', 'loading': True})
+    await self.train(d, opt)
 
   def sendImages(self, images):
     displays = {}
@@ -98,19 +125,19 @@ class ImJoyPlugin():
                     name += '_c'+str(i)
                 displays[name] = imgurl
                 # api.createWindow(name=str(k)+str(b)+str(i) , type='imjoy/image', w=12, h=15, data={"src": imgurl})
-    self.dash.appendDisplay('Sample ' + str(self.step), displays)
+    self.dash.appendDisplay('Training Step ' + str(self.step), displays)
 
-  async def train(self, my):
-    api.showStatus('preparing data...')
-    self.dash = await api.createWindow(type="Im2Im-Dashboard", name="ANNA-PALM Training", data={'display_mode':'one','metrics': ["discrim_loss", "gen_loss_GAN", "gen_loss", "gen_loss_L2", "gen_loss_SSIM"], 'callbacks': ['onEpochEnd', 'onBatchEnd']})
-    opt.batchSize = my.config.batchsize
-    sources = create_data_sources(['TransformedTubulin001NB'], opt)
-    d = sources['train']
+  async def train(self, dataset, opt, steps=1000):
+    asyncio.set_event_loop(self.loop)
+
+    
     api.showStatus('start training...')
     model = create_model(opt)
     self.step = 0
     def step_callback(model, details):
         self.step += 1
+        if self.step<3:
+            self.dash.setLoading({'status_text': 'Start Training...', 'loading': False})
         try:
             if 'display' in details:
                 images = details['display']
@@ -118,7 +145,7 @@ class ImJoyPlugin():
                 self.sendImages(images)
             api.showStatus('training: ' + str(details))
             api.log(str(details))
-            api.progress(self.step/my.config.steps)
+            api.progress(self.step/steps)
             print(details)
             self.dash.updateCallback('onEpochEnd', self.step, details)
             print(str(details))
@@ -126,14 +153,14 @@ class ImJoyPlugin():
         except:
             print('step callback error')
 
-    model.train(d, step_callback=step_callback, verbose=1, max_steps=my.config.steps)
+    model.train(dataset, step_callback=step_callback, verbose=1, max_steps=steps)
 
-  async def test(self, my):
+  async def predict(self, my=None):
     self.dash = await api.createWindow(type="Im2Im-Dashboard", name="ANNA-PALM prediction", data={'display_mode':'one'})
     model = create_model(opt)
     sources = create_data_sources(['TransformedTubulin001NB'], opt)
-    d = sources['test']
-    api.showStatus('start testing...')
+    d = sources['predict']
+    api.showStatus('start predicting...')
     self.step = 0
     def step_callback(model, details):
         self.step += 1
@@ -142,7 +169,7 @@ class ImJoyPlugin():
                 images = details['display']
                 del details['display']
                 self.sendImages(images)
-            api.showStatus('testing: ' + str(details))
+            api.showStatus('predicting: ' + str(details))
             print(str(details))
             api.log(str(details))
             sys.stdout.flush()
