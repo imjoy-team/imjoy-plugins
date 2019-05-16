@@ -8,7 +8,7 @@
   "type": "window",
   "tags": [],
   "ui": "",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "api_version": "0.1.2",
   "description": "The dashboard for deep learning based image-to-image translation",
   "icon": "extension",
@@ -40,6 +40,8 @@ const app = new Vue({
       apexchart: VueApexCharts,
     },
     data: {
+      loading: false,
+      status_text: 'loading',
       display_mode: 'all',
       displays: [],
       pages: [],
@@ -69,10 +71,6 @@ const app = new Vue({
         stroke: {
           curve: 'smooth',
           width: 2
-        },
-        title: {
-          text: 'Training',
-          align: 'center'
         },
         markers: {
           size: 0
@@ -118,7 +116,11 @@ function generateCallbacks(metrics, callbacks){
   for(let c of callbacks){
     cbs[c] = (i, values)=>{
       for(let k in values){
+        if(dataObj[k])
         dataObj[k].data.push([i, values[k]])
+        else{
+          console.log(k, ' is not registered.')
+        }
       }
       app.$forceUpdate()
     }
@@ -135,9 +137,16 @@ class ImJoyPlugin {
     app.pages.push(items)
     app.page_names.push(name || '')
     app.page = app.pages.length -1
+    app.status_text = name
     if(!app.selected_display){
         app.selected_display = Object.keys(items)[0]
     }
+    app.$forceUpdate()
+  }
+
+  async setLoading(options){
+    app.loading = options.loading
+    app.status_text = options.status_text
     app.$forceUpdate()
   }
 
@@ -163,6 +172,8 @@ api.export(new ImJoyPlugin())
 
 <window lang="html">
 <div style="text-align: center;" id="app">
+  <h3 v-if="status_text">{{status_text}}</h3>
+  <div class="loading loading-lg floating" v-show="loading"></div>
   <div class="card">
     <div class="card-image">
       <div id="chart">
@@ -176,11 +187,11 @@ api.export(new ImJoyPlugin())
     <input v-if="pages.length>0" class="slider" id="display-slider" type="range" min="0" :max="pages.length-1" v-model="page">
     <ul class="tab tab-block">
         <li :class="selected_display==d && display_mode != 'all'?'tab-item active':'tab-item'" v-for="d in Object.keys(pages[page] || {})" :key="d">
-            <a @click="selected_display=d">{{d}}</a>
-            <img v-if="display_mode == 'all' && page && d && pages[page][d]" :src="pages[page][d]" style="max-width: 100%; min-width: 100px;"/>
+            <a href="#" @click="selected_display=d">{{d}}</a>
+            <img class="img-fit-contain" v-if="display_mode == 'all' && page && d && pages[page][d]" :src="pages[page][d]" style="max-width: 100%; min-width: 100px;"/>
         </li>
     </ul>
-    <img v-if="display_mode != 'all' && page && selected_display && pages[page][selected_display]" :src="pages[page][selected_display]" style="max-width: 100%; min-width: 100px;"/>
+    <img class="img-fit-contain" v-if="display_mode != 'all' && page && selected_display && pages[page][selected_display]" :src="pages[page][selected_display]" style="max-width: 100%; min-width: 100px;"/>
   </div>
   
 </div>
@@ -189,5 +200,20 @@ api.export(new ImJoyPlugin())
 <style lang="css">
 .tab {
   align-items: flex-end!important;
+}
+
+
+.floating {
+  position: absolute !important;
+  left: calc(50% - 1.5rem) !important;
+  top: calc(39% - 1.5rem) !important;
+  z-index: 999;
+}
+
+.loading.loading-lg::after {
+  height: 3rem !important;
+  margin-left: -0.8rem;
+  margin-top: -0.8rem;
+  width: 3rem !important;
 }
 </style>
