@@ -11,7 +11,7 @@ Paper on Nature Biotechnology: https://rdcu.be/LGtc
 {
   "name": "ANNA-PALM",
   "type": "native-python",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "api_version": "0.1.5",
   "description": "A plugin for training models with ANNA-PALM.",
   "tags": ["CPU", "GPU"],
@@ -72,9 +72,9 @@ class ImJoyPlugin():
   async def setup(self):
     self.step = 0
     self.dialog = None
-    self.executor = concurrent.futures.ThreadPoolExecutor(
-        max_workers=3,
-    )
+    #self.executor = concurrent.futures.ThreadPoolExecutor(
+    #    max_workers=3,
+    #)
 
   def resume(self):
     api.alert('plugin process resumed')
@@ -84,9 +84,8 @@ class ImJoyPlugin():
         'options': {
             'Simulated Microtubules': {'callback': self.train_sim_tubulin, 'src': 'https://img.icons8.com/color/52/000000/processor.png'},
             'predict': {'callback': self.predict, 'src': 'https://img.icons8.com/color/52/000000/processor.png'}
-            }
         }
-    )
+    })
   def abort(self):
     self.__abort = True
 
@@ -129,7 +128,7 @@ class ImJoyPlugin():
     self.dash.appendDisplay('Training Step ' + str(self.step), displays)
 
   async def train(self, dataset, opt, steps=1000):
-    asyncio.set_event_loop(self.loop)
+    #asyncio.set_event_loop(self.loop)
     self.__abort = False
     
     api.showStatus('start training...')
