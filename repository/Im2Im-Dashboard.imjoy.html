@@ -8,7 +8,7 @@
   "type": "window",
   "tags": [],
   "ui": "",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "api_version": "0.1.2",
   "description": "The dashboard for deep learning based image-to-image translation",
   "icon": "extension",
@@ -46,7 +46,7 @@ const app = new Vue({
       displays: [],
       pages: [],
       page_names: [],
-      page: 0,
+      page: null,
       selected_display: null,
       series: series,
       chartOptions: {
@@ -182,16 +182,16 @@ api.export(new ImJoyPlugin())
     </div>
   </div>
   <br>
-  <div class="card">
-    <h5>{{page?page_names[page]: ''}}</h5>
+  <div class="card" v-if="pages && pages.length>0">
+    <h5>{{page!==null?page_names[page]: ''}}</h5>
     <input v-if="pages.length>0" class="slider" id="display-slider" type="range" min="0" :max="pages.length-1" v-model="page">
-    <ul class="tab tab-block">
+    <ul class="tab tab-block" v-if="page!==null">
         <li :class="selected_display==d && display_mode != 'all'?'tab-item active':'tab-item'" v-for="d in Object.keys(pages[page] || {})" :key="d">
             <a href="#" @click="selected_display=d">{{d}}</a>
-            <img class="img-fit-contain" v-if="display_mode == 'all' && page && d && pages[page][d]" :src="pages[page][d]" style="max-width: 100%; min-width: 100px;"/>
+            <img class="img-fit-contain" v-if="display_mode == 'all' && page !==null && d && pages[page][d]" :src="pages[page][d]" style="max-width: 100%; min-width: 100px;"/>
         </li>
     </ul>
-    <img class="img-fit-contain" v-if="display_mode != 'all' && page && selected_display && pages[page][selected_display]" :src="pages[page][selected_display]" style="max-width: 100%; min-width: 100px;"/>
+    <img class="img-fit-contain" v-if="display_mode != 'all' && page !==null && selected_display && pages[page][selected_display]" :src="pages[page][selected_display]" style="max-width: 100%; min-width: 100px;"/>
   </div>
   
 </div>
