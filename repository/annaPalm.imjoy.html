@@ -1,219 +1,181 @@
+
 <docs lang="markdown">
-[TODO: write documentation for this plugin.]
+# ANNA-PALM: deep learning massively accelerates super-resolution localization microscopy
+
+Ouyang et al., Nat. Biotechnol. 2018, doi:10.1038/nbt.4106
+  
+Paper on Nature Biotechnology: https://rdcu.be/LGtc
 </docs>
 
 <config lang="json">
 {
-  "name": "Im2Im-Dashboard",
-  "type": "window",
-  "tags": [],
-  "ui": "",
-  "version": "0.1.7",
-  "api_version": "0.1.2",
-  "description": "The dashboard for deep learning based image-to-image translation",
-  "icon": "extension",
+  "name": "ANNA-PALM",
+  "type": "native-python",
+  "version": "0.1.5",
+  "api_version": "0.1.5",
+  "description": "A plugin for training models with ANNA-PALM.",
+  "tags": ["CPU", "GPU"],
+  "ui": null,
   "inputs": null,
   "outputs": null,
-  "env": "",
-  "requirements": [
-        "https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.22/vue.min.js",
-        "https://static.imjoy.io/spectre.css/spectre.min.css",
-        "https://static.imjoy.io/spectre.css/spectre-exp.min.css",
-        "https://static.imjoy.io/spectre.css/spectre-icons.min.css",
-        "https://cdn.jsdelivr.net/npm/apexcharts",
-        "https://cdn.jsdelivr.net/npm/vue-apexcharts"
-  ],
-  "dependencies": [],
-  "defaults": {"w": 20, "h": 10},
-  "runnable": true
+  "icon": null,
+  "env": {"CPU": ["conda create -n annapalm-cpu python=3.6"], "GPU": ["conda create -n annapalm-gpu python=3.6"]},
+  "requirements": {
+    "CPU": ["repo:https://github.com/imodpasteur/ANNA-PALM", "cmd:pip install -r ANNA-PALM/requirements.txt"],
+    "GPU": ["repo:https://github.com/imodpasteur/ANNA-PALM", "pip: Pillow numpy==1.15.0 scipy matplotlib scikit-image tensorflow-gpu==1.8.0"]
+  },
+  "dependencies": ["oeway/ImJoy-Plugins:Im2Im-Dashboard", "https://gist.githubusercontent.com/oeway/39c1be6303c21bde8dc78a4d437124cd/raw/Start-ANNA-PALM.imjoy.html"]
 }
 </config>
 
-<script lang="javascript">
+<script lang="python">
+import sys
 
-const series = []
-const dataObj = {}
+sys.path.insert(0, './ANNA-PALM')
 
-const app = new Vue({
-    el: '#app',
-    components: {
-      apexchart: VueApexCharts,
-    },
-    data: {
-      loading: false,
-      status_text: 'loading',
-      display_mode: 'all',
-      displays: [],
-      pages: [],
-      page_names: [],
-      page: null,
-      selected_display: null,
-      series: series,
-      chartOptions: {
-        chart: {
-          animations: {
-            enabled: true,
-            easing: 'linear',
-            dynamicAnimation: {
-              speed: 2000
+import os
+import sys
+import tensorflow as tf
+from AnetLib.options.train_options import Options
+from AnetLib.models.models import create_model
+from smlm_datasets import create_data_sources
+import asyncio
+import base64
+from io import BytesIO
+from PIL import Image
+import concurrent.futures
+from imjoy import api
+
+
+
+
+default_workdir = './workdir'
+opt = Options().parse(['--workdir=./tmp_predict'])
+opt.model = 'a_net_tensorflow'
+opt.fineSize = 512
+opt.batchSize = 1
+opt.dim_ordering = 'channels_last'
+opt.display_freq = 500
+opt.use_resize_conv = True
+opt.norm_A = 'mean_std'
+opt.norm_B = 'min_max[0,1]'
+opt.lambda_A = 50
+opt.input_nc = 2
+opt.lr_nc = 1
+opt.lr_scale = 1.0/4.0
+opt.lambda_LR = 0
+opt.control_nc = 1
+opt.add_data_type_control = True
+opt.add_lr_channel = 'pseudo'
+opt.print_freq = 3
+opt.display_freq = 1
+
+class ImJoyPlugin():
+  async def setup(self):
+    self.step = 0
+    self.dialog = None
+    self.executor = concurrent.futures.ThreadPoolExecutor(
+        max_workers=1,
+    )
+    self.loop = asyncio.get_event_loop()
+
+  def resume(self):
+    api.alert('plugin process resumed')
+
+  async def run(self, my):
+    self.dialog = await api.showDialog(type='Start-ANNA-PALM', data= {
+        'options': {
+            'Simulated Microtubules': {'callback': self.train_sim_tubulin, 'src': 'https://img.icons8.com/color/52/000000/processor.png'},
+            'predict': {'callback': self.predict, 'src': 'https://img.icons8.com/color/52/000000/processor.png'}
             }
-          },
-          toolbar: {
-            show: true
-          },
-          zoom: {
-            enabled: true
-          }
-        },
-        dataLabels: {
-          enabled: false
-        },
-        stroke: {
-          curve: 'smooth',
-          width: 2
-        },
-        markers: {
-          size: 0
-        },
-        xaxis: {
-          min: 0,
-          labels: {
-            formatter: function (value) {
-              return value.toFixed(0);
-            }
-          }
-        },
-        yaxis: {
-          labels: {
-            formatter: function (value) {
-              return value.toFixed(4);
-            }
-          }
-        },
-        legend: {
-          show: false
         }
-      }
-    },
-    mounted: function () {
-      this.intervals()
-    },
-    methods: {
-      intervals() {
-        // this.$refs.realtimeChart.updateSeries([{
-        //   data: data
-        // }])
-      }
-    }
-})
+    )
+    
+  async def train_sim_tubulin(self):
+    if self.dialog is not None:
+        self.dialog.close()
+    opt.batchSize = 1
+    api.showStatus('preparing data...')
+    self.dash = await api.createWindow(type="Im2Im-Dashboard", name="ANNA-PALM Training", standalone=True, data={'display_mode':'one','metrics': ["discrim_loss", "gen_loss_GAN", "gen_loss", "gen_loss_L2", "gen_loss_SSIM", "squirrel_discrim_loss", "gen_loss_squirrel"], 'callbacks': ['onEpochEnd', 'onBatchEnd']})
+    await self.dash.setLoading({'status_text': 'Preparing data...', 'loading': True})
+    sources = create_data_sources(['TransformedTubulin001NB'], opt)
+    d = sources['train']
+    
+    #await self.loop.run_in_executor(self.executor, self.train, d, opt)
+    await self.dash.setLoading({'status_text': 'Start Training...', 'loading': True})
+    await self.train(d, opt)
 
-function generateCallbacks(metrics, callbacks){
-  const cbs = {}
-  for(let m of metrics){
-    dataObj[m] = {name: m, data: []}
-    series.push(dataObj[m])
-  }
-  for(let c of callbacks){
-    cbs[c] = (i, values)=>{
-      for(let k in values){
-        if(dataObj[k])
-        dataObj[k].data.push([i, values[k]])
-        else{
-          console.log(k, ' is not registered.')
-        }
-      }
-      app.$forceUpdate()
-    }
-  }
-  return cbs
-}
+  def sendImages(self, images):
+    displays = {}
+    for k, v in images.items():
+        for b in range(v.shape[0]):
+            ima = v[b]
+            channels = ima.shape[2]
+            for i in range(channels):
+                im = ima[:, :, i]
+                im = Image.fromarray((im/im.max()*255).astype('uint8'))
+                buffered = BytesIO()
+                im.save(buffered, format="JPEG")
+                img_str = base64.b64encode(buffered.getvalue()).decode('ascii')
+                imgurl = 'data:image/png;base64,' + img_str
+                name = k
+                if v.shape[0]>1:
+                    name += '_b'+str(b)
+                if channels>1:
+                    name += '_c'+str(i)
+                displays[name] = imgurl
+                # api.createWindow(name=str(k)+str(b)+str(i) , type='imjoy/image', w=12, h=15, data={"src": imgurl})
+    self.dash.appendDisplay('Training Step ' + str(self.step), displays)
 
-class ImJoyPlugin {
-  async setup() {
+  async def train(self, dataset, opt, steps=1000):
+    asyncio.set_event_loop(self.loop)
 
-  }
+    
+    api.showStatus('start training...')
+    model = create_model(opt)
+    self.step = 0
+    def step_callback(model, details):
+        self.step += 1
+        if self.step<3:
+            self.dash.setLoading({'status_text': 'Start Training...', 'loading': False})
+        try:
+            if 'display' in details:
+                images = details['display']
+                del details['display']
+                self.sendImages(images)
+            api.showStatus('training: ' + str(details))
+            api.log(str(details))
+            api.progress(self.step/steps)
+            print(details)
+            self.dash.updateCallback('onEpochEnd', self.step, details)
+            print(str(details))
+            sys.stdout.flush()
+        except:
+            print('step callback error')
 
-  async appendDisplay(name, items){
-    app.pages.push(items)
-    app.page_names.push(name || '')
-    app.page = app.pages.length -1
-    app.status_text = name
-    if(!app.selected_display){
-        app.selected_display = Object.keys(items)[0]
-    }
-    app.$forceUpdate()
-  }
+    model.train(dataset, step_callback=step_callback, verbose=1, max_steps=steps)
 
-  async setLoading(options){
-    app.loading = options.loading
-    app.status_text = options.status_text
-    app.$forceUpdate()
-  }
+  async def predict(self, my=None):
+    self.dash = await api.createWindow(type="Im2Im-Dashboard", name="ANNA-PALM prediction", data={'display_mode':'one'})
+    model = create_model(opt)
+    sources = create_data_sources(['TransformedTubulin001NB'], opt)
+    d = sources['predict']
+    api.showStatus('start predicting...')
+    self.step = 0
+    def step_callback(model, details):
+        self.step += 1
+        try:
+            if 'display' in details:
+                images = details['display']
+                del details['display']
+                self.sendImages(images)
+            api.showStatus('predicting: ' + str(details))
+            print(str(details))
+            api.log(str(details))
+            sys.stdout.flush()
+        except:
+            print('step callback error')
+    model.predict(d, step_callback=step_callback, verbose=1)
 
-  async updateCallback(callback_name, index, value){
-    this.callbacks[callback_name](index, value)
-  }
-
-  async run(my) {
-    if(my.data.metrics && my.data.metrics.length>0){
-        this.callbacks = generateCallbacks(my.data.metrics, my.data.callbacks)
-    }
-    if(my.data.display_mode){
-        app.display_mode = my.data.display_mode
-    }
-    //for(let i=0;i<100;i++){
-    //    await this.callbacks.onEpochEnd(i, {'loss': i*10})
-    //}
-    //api.log('done')
-  }
-}
-api.export(new ImJoyPlugin())
+api.export(ImJoyPlugin())
 </script>
-
-<window lang="html">
-<div style="text-align: center;" id="app">
-  <h3 v-if="status_text">{{status_text}}</h3>
-  <div class="loading loading-lg floating" v-show="loading"></div>
-  <div class="card">
-    <div class="card-image">
-      <div id="chart">
-        <apexchart ref="realtimeChart" type=line height=350 :options="chartOptions" :series="series" />
-      </div>
-    </div>
-  </div>
-  <br>
-  <div class="card" v-if="pages && pages.length>0">
-    <h5>{{page!==null?page_names[page]: ''}}</h5>
-    <input v-if="pages.length>0" class="slider" id="display-slider" type="range" min="0" :max="pages.length-1" v-model="page">
-    <ul class="tab tab-block" v-if="page!==null">
-        <li :class="selected_display==d && display_mode != 'all'?'tab-item active':'tab-item'" v-for="d in Object.keys(pages[page] || {})" :key="d">
-            <a href="#" @click="selected_display=d">{{d}}</a>
-            <img class="img-fit-contain" v-if="display_mode == 'all' && page !==null && d && pages[page][d]" :src="pages[page][d]" style="max-width: 100%; min-width: 100px;"/>
-        </li>
-    </ul>
-    <img class="img-fit-contain" v-if="display_mode != 'all' && page !==null && selected_display && pages[page][selected_display]" :src="pages[page][selected_display]" style="max-width: 100%; min-width: 100px;"/>
-  </div>
-  
-</div>
-</window>
-
-<style lang="css">
-.tab {
-  align-items: flex-end!important;
-}
-
-
-.floating {
-  position: absolute !important;
-  left: calc(50% - 1.5rem) !important;
-  top: calc(39% - 1.5rem) !important;
-  z-index: 999;
-}
-
-.loading.loading-lg::after {
-  height: 3rem !important;
-  margin-left: -0.8rem;
-  margin-top: -0.8rem;
-  width: 3rem !important;
-}
-</style>
