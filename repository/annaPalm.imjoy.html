@@ -11,7 +11,7 @@ Paper on Nature Biotechnology: https://rdcu.be/LGtc
 {
   "name": "ANNA-PALM",
   "type": "native-python",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "api_version": "0.1.5",
   "description": "A plugin for training models with ANNA-PALM.",
   "tags": ["CPU", "GPU"],
@@ -34,7 +34,6 @@ import os
 
 sys.path.insert(0, 'ANNA-PALM')
 
-os.environ["CUDA_VISIBLE_DEVICES"]="0"
 api.log(str(os.environ))
 
 
