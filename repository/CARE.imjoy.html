@@ -13,7 +13,7 @@ This is a demo plugin ported from https://github.com/CSBDeep/CSBDeep/blob/master
 {
   "name": "CARE",
   "type": "native-python",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "api_version": "0.1.2",
   "description": "This plugin demonstrate denoising using CARE",
   "tags": ["CPU", "GPU", "macOS CPU"],
@@ -28,9 +28,9 @@ This is a demo plugin ported from https://github.com/CSBDeep/CSBDeep/blob/master
       "macOS CPU": "conda create -n care-mac-cpu python=3.6"
   },
   "requirements": {
-      "CPU": ["pip: tensorflow==1.8.0 Pillow csbdeep tifffile"], 
-      "GPU": ["pip: tensorflow-gpu==1.8.0 Pillow csbdeep tifffile"], 
-      "macOS CPU": ["pip: tensorflow==1.5.0 Pillow csbdeep tifffile"]
+      "CPU": ["pip: tensorflow==1.8.0 Pillow csbdeep tifffile six"], 
+      "GPU": ["pip: tensorflow-gpu==1.8.0 Pillow csbdeep tifffile six"], 
+      "macOS CPU": ["pip: tensorflow==1.5.0 Pillow csbdeep tifffile six"]
   },
   "dependencies": ["oeway/ImJoy-Plugins:Im2Im-Dashboard"]
 }
@@ -38,29 +38,77 @@ This is a demo plugin ported from https://github.com/CSBDeep/CSBDeep/blob/master
 
 <script lang="python">
 from __future__ import print_function, unicode_literals, absolute_import, division
+import os
+import asyncio
+import random
 import numpy as np
 from tifffile import imread
+from keras.callbacks import Callback
+import concurrent.futures
+from imjoy import api
+
+import tensorflow as tf
+import base64
+from io import BytesIO
+from PIL import Image
+
+from csbdeep.utils.plot_utils import to_color
 from csbdeep.utils import download_and_extract_zip_file, axes_dict, plot_some, plot_history
 from csbdeep.utils.tf import limit_gpu_memory
 from csbdeep.io import load_training_data
 from csbdeep.models import Config, CARE
-from keras.callbacks import Callback
-import asyncio
-import random
-download_and_extract_zip_file (
-    url       = 'http://csbdeep.bioimagecomputing.com/example_data/synthetic_disks.zip',
-    targetdir = 'data',
-)
-(X,Y), (X_val,Y_val), axes = load_training_data('data/synthetic_disks/data.npz', validation_split=0.1, verbose=True)
+from csbdeep.data import RawData, create_patches
+
+
+api.log(str(os.environ))
+
+if tf.test.gpu_device_name():
+    api.log('Default GPU Devices: {}'.format(tf.test.gpu_device_name()))
+else:
+    api.log("No GPU device is avilable")
+
+if not os.path.exists('data/tribolium.npz'):
+    api.showStatus('Downloading files')
+    download_and_extract_zip_file (
+        url       = 'http://csbdeep.bioimagecomputing.com/example_data/tribolium.zip',
+        targetdir = 'data',
+    )
+
+    raw_data = RawData.from_folder (
+        basepath    = 'data/tribolium/train',
+        source_dirs = ['low'],
+        target_dir  = 'GT',
+        axes        = 'ZYX',
+    )
+
+    api.showStatus('Creating patches')
+    X, Y, XY_axes = create_patches (
+        raw_data            = raw_data,
+        patch_size          = (16,64,64),
+        n_patches_per_image = 1024,
+        save_file           = 'data/tribolium.npz',
+    )
+
+    api.log('patches:'+str(X.shape))
+
+(X,Y), (X_val,Y_val), axes = load_training_data('data/tribolium.npz', validation_split=0.1, verbose=True)
+
+api.log(str(X.shape))
+
+
+y = imread('data/tribolium/test/GT/nGFP_0.1_0.2_0.5_20_14_late.tif')
+x = imread('data/tribolium/test/low/nGFP_0.1_0.2_0.5_20_14_late.tif')
+
+
+api.log('image size ='+ str(x.shape))
+api.log('image axes ='+str(axes))
+
 c = axes_dict(axes)['C']
 n_channel_in, n_channel_out = X.shape[c], Y.shape[c]
 #plt.figure(figsize=(12,5))
 #plot_some(X_val[:5],Y_val[:5])
 #plt.suptitle('5 example validation patches (top row: source, bottom row: target)');
-import base64
-from io import BytesIO
-from PIL import Image
-from csbdeep.utils.plot_utils import to_color
+
 
 def plot_tensors(dash, tensor_list, label, titles):
     image_list = [tensor[:,:,:,:1].reshape(tensor.shape[1], tensor.shape[2], 1) for tensor in tensor_list]
@@ -88,12 +136,13 @@ def plot_tensors(dash, tensor_list, label, titles):
     dash.appendDisplay(label, displays)
 
 class UpdateUI(Callback):
-    def __init__(self, total_epoch, dash):
+    def __init__(self, total_epoch, dash, config):
         self.total_epoch = total_epoch
         self.epoch = 0
         self.logs = {}
         self.dash = dash
         self.step = 0
+        self.config = config
         #self.gen = gen
     def on_batch_end(self, batch, logs):
         if batch % 10 == 0:
@@ -107,30 +156,42 @@ class UpdateUI(Callback):
         self.dash.updateCallback('onStep', self.step, {'val_loss': np.asscalar(logs['val_loss'])})
         api.showProgress(self.epoch/self.total_epoch*100)
         api.showStatus('training epoch:'+str(self.epoch)+'/'+str(self.total_epoch) + ' '+ str(logs))
-        idx = random.randint(0, len(X_val)-1)
-        xbatch, ybatch = X_val[idx:idx+1],Y_val[idx:idx+1]
-        ypbatch = self.model.predict(xbatch, batch_size=1)
-        tensor_list = [ypbatch, xbatch, ybatch]
+        
+        axes = 'ZYX'
+        restored = self.model.predict(x, axes)
+        # restored = self.model.predict(x, axes, n_tiles=(1,4,4))
+        
+        api.log(str(restored.shape) + str(x.shape))
+        tensor_list = [restored, x, y]
         label = 'Step '+ str(self.step)
         titles = ["output", 'input', 'target']
         plot_tensors(self.dash, tensor_list, label, titles)
- 
+
+loop = asyncio.get_event_loop()
 class ImJoyPlugin():
     def setup(self):
         print('setup in python')
-    async def run(self, my):
+
+    def train(self, updateUI):
+        asyncio.set_event_loop(loop)
+        api.alert('start training')
+        api.log('running in thellop...')
         epochs = 30
         config = Config(axes, n_channel_in, n_channel_out, probabilistic=True, train_steps_per_epoch=epochs)
         print(config)
         model = CARE(config, 'my_model', basedir='models')
         api.log('start training')
-        self.dash = await api.createWindow(type="Im2Im-Dashboard", name="CARE Training", w=25, h=10, data={"display_mode": "all", 'metrics': ['loss', 'val_loss', 'mse'], 'callbacks': ['onStep']})
-        updateUI = UpdateUI(epochs, self.dash)
+        
         model.prepare_for_training()
         model.callbacks.append(updateUI)
         history = model.train(X,Y, validation_data=(X_val,Y_val))
         print(sorted(list(history.history.keys())))
         api.log('training stoped')
- 
+
+    async def run(self, ctx):
+        updateUI = UpdateUI(epochs, self.dash, config)
+        self.dash = await api.createWindow(type="Im2Im-Dashboard", name="CARE Training", w=25, h=10, data={"display_mode": "all", 'metrics': ['loss', 'val_loss', 'mse'], 'callbacks': ['onStep']})
+        await loop.run_in_executor(None, self.train, updateUI)
+
 api.export(ImJoyPlugin())
 </script>
