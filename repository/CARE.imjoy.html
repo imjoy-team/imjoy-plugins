@@ -13,7 +13,7 @@ This is a demo plugin ported from https://github.com/CSBDeep/CSBDeep/blob/master
 {
   "name": "CARE",
   "type": "native-python",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "api_version": "0.1.2",
   "description": "This plugin demonstrate denoising using CARE",
   "tags": ["CPU", "GPU", "macOS CPU"],
@@ -124,8 +124,8 @@ def plot_tensors(dash, tensor_list, label, titles):
         api.log(str(im.shape))
 
         im = im[ :,:]
-        min = im.min()
-        normalized_im = ((im-min)/(im.max()-min)*255)
+        min = 0 # im.min()
+        normalized_im = np.clip(((im-min)/(im.max()-min)*255), 0, 255)
         im = Image.fromarray(normalized_im.astype('uint8'))
 
         buffered = BytesIO()
@@ -162,9 +162,9 @@ class UpdateUI(Callback):
         restored = self.m.predict(x, axes)
         # restored = self.m.predict(x, axes, n_tiles=(1,4,4))
         api.log(str(restored.shape) + str(x.shape))
-        tensor_list = [restored, x, y]
+        tensor_list = [x, restored, y]
         label = 'Step '+ str(self.step)
-        titles = ["output", 'input', 'target']
+        titles = ['input', "output", 'target']
         plot_tensors(self.dash, tensor_list, label, titles)
 
 loop = asyncio.get_event_loop()
@@ -192,7 +192,7 @@ class ImJoyPlugin():
         epochs = 30
         config = Config(axes, n_channel_in, n_channel_out, probabilistic=True, train_steps_per_epoch=epochs)
         print(config)
-        self.dash = await api.createWindow(type="Im2Im-Dashboard", name="CARE Training", w=25, h=10, data={"display_mode": "all", 'metrics': ['loss', 'val_loss', 'mse'], 'callbacks': ['onStep']})
+        self.dash = await api.createWindow(type="Im2Im-Dashboard", name="CARE Training", w=25, h=20, data={"display_mode": "all", 'metrics': ['loss', 'val_loss', 'mse'], 'callbacks': ['onStep']})
         await loop.run_in_executor(None, self.train, config)
 
 api.export(ImJoyPlugin())
