@@ -8,7 +8,7 @@
   "type": "window",
   "tags": [],
   "ui": "",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "api_version": "0.1.2",
   "description": "The dashboard for deep learning based image-to-image translation",
   "icon": "extension",
@@ -49,6 +49,7 @@ const app = new Vue({
       page: null,
       selected_display: null,
       series: series,
+      show_chart: true,
       chartOptions: {
         chart: {
           animations: {
@@ -141,6 +142,17 @@ class ImJoyPlugin {
     if(!app.selected_display){
         app.selected_display = Object.keys(items)[0]
     }
+    for(let k in items){
+      if(items[k].startsWith('http')){
+        //download the image
+        var downloadingImage = new Image();
+        downloadingImage.onload = function(){
+            items[k] = this.src;   
+        };
+        downloadingImage.src = items[k]
+        console.log('downloading ' + items[k])
+      }
+    }
     app.$forceUpdate()
   }
 
@@ -157,6 +169,10 @@ class ImJoyPlugin {
   async run(my) {
     if(my.data.metrics && my.data.metrics.length>0){
         this.callbacks = generateCallbacks(my.data.metrics, my.data.callbacks)
+        app.show_chart= true
+    }
+    else{
+      app.show_chart= false
     }
     if(my.data.display_mode){
         app.display_mode = my.data.display_mode
@@ -174,7 +190,7 @@ api.export(new ImJoyPlugin())
 <div style="text-align: center;" id="app">
   <h3 v-if="status_text">{{status_text}}</h3>
   <div class="loading loading-lg floating" v-show="loading"></div>
-  <div class="card">
+  <div class="card" v-show="show_chart">
     <div class="card-image">
       <div id="chart">
         <apexchart ref="realtimeChart" type=line height=350 :options="chartOptions" :series="series" />
