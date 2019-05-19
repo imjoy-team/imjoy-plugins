@@ -13,7 +13,7 @@ This is a demo plugin ported from https://github.com/CSBDeep/CSBDeep/blob/master
 {
   "name": "CARE",
   "type": "native-python",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "api_version": "0.1.2",
   "description": "This plugin demonstrate denoising using CARE",
   "tags": ["CPU", "GPU", "macOS CPU"],
@@ -291,9 +291,9 @@ class ImJoyPlugin():
         await api.showStatus('Reading test files from ' + data_dir + '/test' )
         source_file = None
         target_file = None
-        if os.path.isdir(os.path.join(data_dir, name, 'test')):
-            source_path = os.path.join(data_dir, name, 'test', source_dirs[0])
-            target_path = os.path.join(data_dir, name, 'test', target_dir)
+        if os.path.isdir(os.path.join(data_dir, 'test')):
+            source_path = os.path.join(data_dir, 'test', source_dirs[0])
+            target_path = os.path.join(data_dir, 'test', target_dir)
             if os.path.exists(source_path):
                 source_files = os.listdir(source_path)
                 if len(source_files) > 0:
