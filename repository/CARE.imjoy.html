@@ -13,7 +13,7 @@ This is a demo plugin ported from https://github.com/CSBDeep/CSBDeep/blob/master
 {
   "name": "CARE",
   "type": "native-python",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "api_version": "0.1.2",
   "description": "This plugin demonstrate denoising using CARE",
   "tags": ["CPU", "GPU", "macOS CPU"],
@@ -79,7 +79,7 @@ from csbdeep.data import RawData, create_patches
 import json
 
 
-api.log(str(os.environ))
+# api.log(str(os.environ))
 
 if os.path.exists('/imjoy/imjoy-paper'):
     ROOT_DIR = '/imjoy/imjoy-paper'
@@ -199,7 +199,7 @@ class ImJoyPlugin():
         c = axes_dict(axes)['C']
         n_channel_in, n_channel_out = X.shape[c], Y.shape[c]
 
-        config = Config(axes, n_channel_in, n_channel_out, probabilistic=True, train_steps_per_epoch=epochs)
+        config = Config(axes, n_channel_in, n_channel_out, probabilistic=True, train_epochs=epochs, train_steps_per_epoch=20)
         print(config)
     
         api.showStatus('creating model ...')
@@ -324,12 +324,19 @@ class ImJoyPlugin():
         data_config = {}
         data_config['source_dirs'] = source_dirs
         data_config['target_dir'] = target_dir
-        ret = await self.prepare_data(data_file, source_dirs, target_dir)
-        if not ret:
-            api.error('failed to prepare data.')
+        self.dash = await api.createWindow(type="Im2Im-Dashboard", name="CARE Training", w=25, h=20, data={"display_mode": "all", 'metrics': ['loss', 'val_loss', 'mse'], 'callbacks': ['onStep']})
+        await self.dash.setLoading({'status_text': 'Preparing data...', 'loading': True})
+        try:
+            ret = await self.prepare_data(data_file, source_dirs, target_dir)
+            if not ret:
+                api.error('failed to prepare data.')
+                await self.dash.setLoading({'status_text': 'Failed to prepare data', 'loading': False})
+                return
+        except:
+            await self.dash.setLoading({'status_text': 'Failed to prepare data', 'loading': False})
             return
         npz_file, val_files = ret
-        self.dash = await api.createWindow(type="Im2Im-Dashboard", name="CARE Training", w=25, h=20, data={"display_mode": "all", 'metrics': ['loss', 'val_loss', 'mse'], 'callbacks': ['onStep']})
+        await self.dash.setLoading({'status_text': 'Start training', 'loading': True})
         await loop.run_in_executor(None, self.train, npz_file, epochs, model_name, data_config, val_files)
 
     async def train_with_url(self):
