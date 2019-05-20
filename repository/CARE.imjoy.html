@@ -23,16 +23,16 @@ This is a demo plugin ported from https://github.com/CSBDeep/CSBDeep/blob/master
   "flags": [],
   "icon": "extension",
   "env": {
-      "CPU": "conda create -n care-cpu python=3.6.7", 
-      "GPU":  "conda create -n care-gpu python=3.6.7", 
+      "CPU": "conda create -n care-cpu python=3.6.7",
+      "GPU":  "conda create -n care-gpu python=3.6.7",
       "macOS CPU": "conda create -n care-mac-cpu python=3.6.7"
   },
   "requirements": {
-      "CPU": ["pip: tensorflow==1.8.0 Pillow csbdeep tifffile six"], 
-      "GPU": ["pip: tensorflow-gpu==1.8.0 Pillow csbdeep tifffile six gputil"], 
+      "CPU": ["pip: tensorflow==1.8.0 Pillow csbdeep tifffile six"],
+      "GPU": ["pip: tensorflow-gpu==1.8.0 Pillow csbdeep tifffile six gputil"],
       "macOS CPU": ["pip: tensorflow==1.5.0 Pillow csbdeep tifffile six"]
   },
-  "dependencies": ["oeway/ImJoy-Plugins:Im2Im-Dashboard", "https://gist.githubusercontent.com/oeway/961c8d7abe24383d3ad6312669fe1d7c/raw/launchpad.imjoy.html"],
+  "dependencies": ["oeway/ImJoy-Plugins:Im2Im-Dashboard", "oeway/ImJoy-Plugins:CARE-docs","https://gist.githubusercontent.com/oeway/961c8d7abe24383d3ad6312669fe1d7c/raw/launchpad.imjoy.html"],
   "cover": ["https://dl.dropbox.com/s/bo8timmql033xy1/CARE-0.1.8.gif", "https://dl.dropbox.com/s/rq5ikbben3xbxge/CARE-0.1.8-2.gif"]
  }
 </config>
@@ -116,7 +116,7 @@ def plot_tensors(dash, tensor_list, label, titles):
 
 async def plot_all_tensors(dash, result_dir, result_url, tensor_list, label, titles):
     # randomly select a Z
-    
+
     for slice in range(tensor_list[0].shape[0]):
         image_list = [tensor[slice, :,:] for tensor in tensor_list]
         displays = {}
@@ -202,7 +202,7 @@ class ImJoyPlugin():
 
         config = Config(axes, n_channel_in, n_channel_out, probabilistic=True, train_epochs=epochs, train_steps_per_epoch=20)
         print(config)
-    
+
         api.showStatus('creating model ...')
         self.dash.setLoading({'status_text': 'Creating model...', 'loading': True})
         basedir = 'models'
@@ -223,7 +223,7 @@ class ImJoyPlugin():
         axes = val_axes
 
         updateUI = UpdateUI(model, config.train_steps_per_epoch, self.dash, config, (val_x, val_y, axes))
-        
+
         api.showStatus('start training')
         self.dash.setLoading({'status_text': 'Start training...', 'loading': False})
         model.prepare_for_training()
@@ -242,7 +242,7 @@ class ImJoyPlugin():
                 ret = await api.confirm(content='It seem the file you try to download already exists, do you want to downlaoad and process again?', confirm_text='Yes, download', cancel_text= 'No')
                 if not ret:
                     skip_download =True
-    
+
             if not skip_download:
                 await api.showStatus('Downloading data ' + filename + '...')
                 download_and_extract_zip_file (
@@ -250,12 +250,12 @@ class ImJoyPlugin():
                     targetdir = 'data',
                 )
                 await api.showStatus('Downloaded ' + filename )
-            
+
             if not os.path.isdir(os.path.join('data', name, 'train')):
                 api.error('Failed to detect train folder.')
                 await api.alert('You zip file must contain a folder called `train`')
                 return
-            
+
             data_file = os.path.join('data', name)
         elif data_file.startswith('http'):
             api.alert('only zip file can be downloaded and used for now.')
@@ -278,7 +278,7 @@ class ImJoyPlugin():
             axes        = 'ZYX',
         )
 
-        npz_path = data_dir+ '.npz'       
+        npz_path = data_dir+ '.npz'
         await api.showStatus('Creating patches for ' + data_dir + '/train' )
         X, Y, XY_axes = create_patches (
             raw_data            = raw_data,
@@ -315,13 +315,13 @@ class ImJoyPlugin():
             "Source folder name { id: 'source_dir', type:'string', placeholder: 'low'}",
             "Target folder name { id: 'target_dir', type:'string', placeholder: 'GT'}",
             ]))
-    
+
         model_name = ret.model_name
         epochs = int(ret.epochs)
         source_dir = ret.source_dir
         target_dir = ret.target_dir
         source_dirs = [s.strip() for s in source_dir.split(',') if s.strip() != '']
-        
+
         data_config = {}
         data_config['source_dirs'] = source_dirs
         data_config['target_dir'] = target_dir
@@ -349,7 +349,7 @@ class ImJoyPlugin():
         self.dialog.close()
         data_dir = await api.showFileDialog(title="Please select a folder with trianing data (subfolder: train and test)", root=os.path.join(ROOT_DIR, "CARE", "tribolium"), type= 'directory', engine= api.ENGINE_URL)
         await self.start_train(data_dir)
-    
+
     async def train_with_npz(self):
         self.dialog.close()
         data_file = await api.showFileDialog(type= 'file', engine= api.ENGINE_URL)
@@ -404,7 +404,7 @@ class ImJoyPlugin():
             await self.dash.setLoading({'status_text': f'Prediction finished, {sample_count} sample processed', 'loading': False})
         api.log('image size ='+ str(x.shape))
         api.alert('Prediction done.')
-        
+
     async def select_model(self):
         self.dialog.close()
         model_dir = await api.showFileDialog(title="Please select a folder with trained CARE model", root=os.path.join(ROOT_DIR, "CARE", "models"), type="directory", engine=api.ENGINE_URL)
@@ -414,8 +414,22 @@ class ImJoyPlugin():
 
         with open(os.path.join(model_dir, "care_data_config.json"), "r") as read_file:
             care_data_config = json.load(read_file)
-    
+
         return model_dir, care_data_config
+
+    async def show_docs(self):
+        self.dialog.close()
+        try:
+            await this.win_docs.run({'data': {}})
+
+        except:
+            this.win_docs = await api.createWindow({
+                'name': 'Documentation - CARE',
+                'type': 'CARE-docs',
+                'w':30, 'h':20,
+                'data': {}
+                })
+
 
     async def export_model(self):
         self.dialog.close()
@@ -423,9 +437,10 @@ class ImJoyPlugin():
 
     async def run(self, ctx):
         self.dialog = await api.showDialog(type='launchpad', data= [
-                {'name': 'Train with URL', 'description': 'load a pretrained model', 'callback': self.train_with_url, 'img': 'https://img.icons8.com/color/52/000000/processor.png'},
-                {'name': 'Train with Folder', 'description': '', 'callback': self.train_with_folder, 'img': 'https://img.icons8.com/color/52/000000/processor.png'},
-                {'name': 'Predict Folder', 'description': '', 'callback': self.predict_folder, 'img': 'https://img.icons8.com/color/52/000000/processor.png'},
+                {'name': 'Train with data from the web', 'description': 'Use training data stored as zip provided with an url.', 'callback': self.train_with_url, 'img': 'https://img.icons8.com/color/96/000000/download-2.png'},
+                {'name': 'Train with data from the engine', 'description': 'Use training data stored on a (local or remote) plugin engine.', 'callback': self.train_with_folder, 'img': 'https://img.icons8.com/color/96/000000/opened-folder.png'},
+                {'name': 'Predict', 'description': 'Perform denoising on new images.', 'callback': self.predict_folder, 'img': 'https://img.icons8.com/color/96/000000/double-right.png'},
+                {'name': 'Documentation', 'description': 'Show documentation.', 'callback': self.show_docs, 'img': 'https://img.icons8.com/color/96/000000/help.png'},
             ]
         )
 

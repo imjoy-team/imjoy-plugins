@@ -1,0 +1,404 @@
+﻿<docs lang="markdown">
+This plugin renders the documentation for the CARE demo plugin. 
+</docs>
+
+<config lang="json">
+{
+  "name": "CARE-docs",
+  "type": "window",
+  "tags": [],
+  "ui": "",
+  "version": "0.1.0",
+  "cover": "",
+  "description": "Documentation for CARE plugin.",
+  "icon": "extension",
+  "inputs": null,
+  "outputs": null,
+  "api_version": "0.1.5",
+  "env": "",
+  "requirements": [
+        "https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.10/vue.min.js",
+        "https://cdnjs.cloudflare.com/ajax/libs/marked/0.6.2/marked.js",
+        "https://static.imjoy.io/spectre.css/spectre.min.css",
+        "https://static.imjoy.io/spectre.css/spectre-exp.min.css",
+        "https://static.imjoy.io/spectre.css/spectre-icons.min.css"],
+  "dependencies": [],
+  "defaults": {"w": 30, "h": 20}
+}
+</config>
+
+
+<attachment name="summary">
+<br>
+<p id="care-summary"> 
+  The CARE framework allows to perform  content-aware restoration of fluorescence microscopy images
+  In this documentation, we describe the ImJoy implementation of an CARE example to perform 3D denoising.
+ </p>
+ 
+More details about CARE can be found here:
+
+* **Publication**: Weigert et. al, <a onclick="api.utils.openUrl('https://www.nature.com/articles/s41592-018-0216-7')">Content-aware image restoration: pushing the limits of fluorescence microscopy</a>, 
+Nature Methods, 2018
+* **GitHub**: <a onclick="api.utils.openUrl('https://github.com/CSBDeep/CSBDeep')">https://github.com/CSBDeep/CSBDeep</a>
+
+The ImJoy plugins are ported from an **example code** to 
+<a onclick="api.utils.openUrl('https://github.com/CSBDeep/CSBDeep/tree/master/examples/denoising3D')">perform denoising of 3D images.</a>
+
+<figure>
+    <img src="https://www.dropbox.com/s/aramdvankqxh9h9/care-dashboard-results.png?dl=1" class="img-responsive p-centered" alt="care-3d-results">
+    <figcaption>Example of 3D denoising traing: input image, target image, predicted image.</figcaption>
+</figure>
+
+
+## Installing the plugin and main features
+
+If you don't already have the plugin, you can install it from this <a onclick="api.utils.openUrl('https://imjoy.io/#/app?plugin=https://raw.githubusercontent.com/oeway/ImJoy-Plugins/master/repository/CARE.imjoy.html@GPU')">**link.**</a>
+
+When starting the CARE plugin, you will find a **central launch pad** allowing to select the task to be performed:
+
+<figure>
+    <img src="https://www.dropbox.com/s/rja3lvzwvihm6wz/care-launchpad.png?dl=1" class="img-responsive p-centered" alt="care-launchpad">
+    <figcaption>Screen shot of CARE plugin launchpad.</figcaption>
+</figure>
+
+
+Some of the **main features** are:   
+* Training can be performed either on a provided remote plugin engine or a local plugin engine. 
+* Training data can be provided either directly on the plugin engine or downloaded from the web.
+* Training can be performe either on example data or own data.
+* Prediction can be performed once the model is trained. 
+
+</attachment> 
+
+
+<attachment name="gettingStarted">
+Here we describe how to quickly getting started with CARE plugin
+
+## Select plugin engine and computational mode
+Below we show how to select a remote engine (`imjoy.pasteur.cloud`) and the GPU computation (`TAG: GPU`)for fast training and prediction.
+
+<figure>
+    <img src="https://www.dropbox.com/s/m4hssh4dr2x4frg/care-gs-engine-tag.gif?dl=1" width="250" class="img-responsive p-centered" alt="gs-setting-up">
+    <figcaption>Select remote engine and GPU tag.</figcaption>
+</figure>
+
+## Training
+Below we show to perform training on the example data on the plugin engine. We set the model name to `CARE_demo_v1` 
+and train for 60 epoches.
+
+<figure>
+    <img src="https://www.dropbox.com/s/0bv9mjm8gszmg5e/care-gs-training.gif?dl=1" class="img-responsive p-centered" alt="getting-started-training">
+    <figcaption>Training with CARE.</figcaption>
+</figure>
+
+While the network is training, you observe progress in the **dashboard**. Here you see how loss evolves and how
+the trained model performs on the validation data. 
+
+<figure>
+    <img src="https://www.dropbox.com/s/4hqxua2764qpx04/care-gs-training-progress.gif?dl=1" width="500" class="img-responsive p-centered" alt="getting-started-training">
+    <figcaption>Monitiorin training with CARE.</figcaption>
+</figure>
+
+## Prediction
+Below we show to perform prediction with the trained model:
+1. Select trained model `CARE_demo_v1`
+2. Select test data `test` of provided example on the remote server. 
+3. This will open a dedicate interface where prediction progress is shown. 
+
+<figure>
+    <img src="https://www.dropbox.com/s/i1rpi9ja84zcdxa/care-gs-prediction.gif?dl=1" class="img-responsive p-centered" alt="getting-started-training">
+    <figcaption>Training with CARE.</figcaption>
+</figure>
+
+Once the prediction is done, you can inspect the prediction results and scroll through the z-stack of the sample.
+
+<figure>
+    <img src="https://www.dropbox.com/s/1sjose7hwbpm883/care-gs-prediction-inspection.gif?dl=1" width="500" class="img-responsive p-centered" alt="getting-started-training">
+    <figcaption>Monitiorin training with CARE.</figcaption>
+</figure>
+
+
+
+</attachment> 
+
+<attachment name="data">
+<br>
+<p id="data-requirements">
+Here we describe briefly how the training images have to be provided: image format, naming scheme, and data organization. 
+</p>
+
+A detailed description for how to generate the training data can be found 
+<a onclick="api.utils.openUrl('https://github.com/CSBDeep/CSBDeep/blob/master/examples/denoising3D/1_datagen.ipynb.')">here.</a>
+
+In short the data has to be provided in this format:
+* Data for the 3D denoising corresponds to **pairs of low and high quality stacks**. 
+  Images are 3D TIFF with identical filenames and are stored in two folders "low" and "GT", corresponding 
+  to low and high-SNR stacks.  
+* The training data for this demo corresponds to **one Tribolium stack pair**, whereas in an actual 
+  application the authors recommend to acquire at least 10-50 stacks from different developmental timepoints.
+* Training and validation are in separate folders `train` and `test`.
+
+For instance, the provided example data looks looks like this:
+```
+├─ tribolium/
+│  ├─ test/
+│  │  ├─ GT
+│  │  │  ├─ nGFP_0.1_0.2_0.5_20_14_late.tif
+│  │  ├─ low
+│  │  │  ├─ nGFP_0.1_0.2_0.5_20_14_late.tif
+│  ├─ train/
+│  │  ├─ GT
+│  │  │  ├─ nGFP_0.1_0.2_0.5_20_13_late.tif
+│  │  ├─ low
+│  │  │  ├─ nGFP_0.1_0.2_0.5_20_13_late.tif
+│  │  ├─ img58
+```
+
+
+</attachment>
+
+<attachment name="training">
+<br>
+<p id="training">
+Here we describe how to select a plugin engine, a computationan environment, and the training data. 
+</p>
+
+## Where to perform training: plugin engines
+Training is performed on an ImJoy plugin engine, such a plugin engine can either run remotely or on your 
+own local workstation. This install a local plugin engine, please install the plugin engines from 
+<a onclick="api.utils.openUrl('https://github.com/oeway/ImJoy-App/releases')">**here**</a> and follow 
+the provided instructions.
+
+Once your ImJoy app is connected to one (or more) plugin engine(s), you can choose on which engine the CARE 
+plugin should run. For this press on the icon next to the plugin name in the plugin menu. 
+
+<figure>
+    <img src="https://www.dropbox.com/s/6c7eze7eidabdz8/care_plugin_menu.png?dl=1" class="img-responsive p-centered" alt="screen-shot-care">
+    <figcaption>CARE plugin in the plugin menu.</figcaption>
+</figure>
+This will show a dropdown menu, where you can determine how and where the plugin is running.  
+In the lower part of the dropdown menu you can then choose on which of the the available plugin engines the plugin should run. 
+<figure>
+    <img src="https://www.dropbox.com/s/06wgxikauwv3lmk/care-plugin-engines.png?dl=1" class="img-responsive p-centered" alt="plugin-engines">
+    <figcaption>Choosing the plugin engine.</figcaption>
+</figure>
+
+## GPU or CPU computation
+Training can be performed on CPUs or (preferentially GPUs). The latter is substantially faster. To switch 
+between these computational modes, you can select the corresponding "tag". Currently supported are
+<figure>
+    <img src="https://www.dropbox.com/s/k1ruchskrqtmqak/care-tags.png?dl=1" class="img-responsive p-centered" alt="tags">
+    <figcaption>Choosing between GPU and CPU computing.</figcaption>
+</figure>
+
+## Providing training data
+Two options exist to provide the training, which can be selected from the CARE launchpad prior to start training.
+For either option, we provide the **CARE example data** as a default.
+
+* `Train with data from the web`: here you can specify an URl containing data as a zip archive. 
+The default points the zipped example data-set. 
+* `Train with data from the engine`: here you can select data from a plugin engine. More preciscely, you have to select the folder
+ containing the training data, e.g. the folder `tribolium` for the example data. 
+
+<figure>
+    <img src="https://www.dropbox.com/s/zm59g9tsp1t55vx/care-select-folder.png?dl=1" class="img-responsive  p-centered" alt="selecting-training-data">
+    <figcaption>Selecting training data from the plugin engine.</figcaption>
+</figure>
+
+  
+You can also provide **your own data**. Data has to be organized as explained in the dedicated section **Data**. 
+* You can upload your data to the Plugin engine (local or remote) by drag and drop: In the ImJoy interface, select `Files` and `Open Engine files`.
+  In the dialog, select to which engine you want to load your files, navigate to the folder where you want to store your data, 
+  drag and drop your folder containing the training data. 
+* You can create a zip archive of your data, upload it to the web, and use an URL
+
+## Configure training for CARE
+Once you specified the data, a dialog will be shown to configure the training. Here you have to specify
+* Under which name the trained model should be stored
+* For how many epochs the training should be performed. There are 20 training steps per epoche. Longer training 
+ might improve the prediction but can also lead to overfitting.
+* The name of the folder containing the source images, e.g. the folder `low` containing the low SNR images. 
+* The name of the folder containing the target images, e.g. the folder `GT` containing the high SNR images. 
+
+<figure>
+    <img src="https://www.dropbox.com/s/e50qi8y5tz4ri4c/care-configure-training.png?dl=1" class="img-responsive p-centered" alt="training-configuration">
+    <figcaption>Configuration parameters to train the CARE network.</figcaption>
+</figure>
+
+
+## Monitoring training progress
+After launch the training a dashboard will be shown that allows you to inspect training progress.
+
+* In the upper part the dashboard shows the loss functions for the training and validation data. You can hoover
+over the curves to see the current value and what loss function it is. 
+* In the lower part it shows the prediction results on a randomly selected z-slices of the validation data.
+* The slider allows you to scroll through the different training steps and inspect how the quality
+ of the prediction changes.
+
+If you want to **terminate the training** click on the icon next to the plugin name, and select `Terminate` and close
+the window.
+
+## Trained model
+Once training is finished, the trained model is stored in folder with the specified name in the configuration. 
+This folder can found in the current ImJoy workspace in a folder called `models`. You can find the name of your current workspace, 
+but hoovering over the four squares in the upper left part of the interface, e.g. `default` for the example below. 
+
+<figure>
+    <img src="https://www.dropbox.com/s/cwz7j8nfhc14mkw/care-workspace.gif?dl=1" class="img-responsive p-centered" alt="screen-shot-care">
+    <figcaption>How to identify the current workspace.</figcaption>
+</figure>
+
+To find the trained model, 
+1. Click `Files` in the ImJoy interface, and `Open Engine files`. 
+2. Select the plugin engine where you performed training. 
+3. Navigate to your workspace name. The dialog will initiate for the `default` workspace, if you are in another 
+workspace, you have to move up one folder and select your workspace name.
+4. The folder `models` contains all trained models
+
+<figure>
+    <img src="https://www.dropbox.com/s/hpfnr09yrs1wq5t/care-find-models.gif?dl=0" class="img-responsive p-centered" alt="screen-shot-care">
+    <figcaption>How to find a trained model.</figcaption>
+</figure>
+
+
+</attachment>
+
+<attachment name="prediction">
+Once a model is trained, you can use it for prediction. 
+
+Data for prediction has to be stored in a folder with same name as the input images, e.g. `low` in the example data. 
+Prediction will then be performed for each image in this folder. 
+Results are stored in folder `CARE_results`, where one folder for each data-set with the same name is created. Predictions
+for each z-slice are stored as separate PNGs.
+
+1. Press on `Predict`
+2. Specify the folder containing the trained model. 
+3. Specify the folder containg the images you want to process. 
+
+This will then open a new interface, where progress on prediction is reported
+
+<figure>
+    <img src="https://www.dropbox.com/s/yybco7e2fz8ue3g/care-prediction.gif?dl=1" class="img-responsive p-centered" alt="screen-shot-care">
+    <figcaption>CARE prediction interface.</figcaption>
+</figure>
+
+</attachment>
+
+
+<attachment name="faq">
+Here we provide answer to frequenty asked questions and encountered problems.
+
+### Example training data is not available on the remote engine
+In case the example data is not available anymore, you can either train with data by specyfing the URL or
+download the data and upload to the remote engine again. 
+
+</attachment>
+
+
+<script lang="javascript">
+class ImJoyPlugin {
+  async setup() {
+    // For vue
+    this.app = new Vue({
+      el: '#app',
+      data: {
+        active_tab: 'summary'
+      },
+      methods: {
+        activateTab(name){
+          this.active_tab = name
+        },
+        focus(tab_name, section_id){
+          if(tab_name && section_id){
+            this.active_tab = tab_name
+            this.nextTick(()=>{
+              document.getElementById(section_id).scrollIntoView()
+            })
+          }
+        }
+      }
+    })
+    api.log('initialized')
+  }
+  async run(ctx) {
+      
+      document.getElementById('cont_summary').innerHTML =
+      marked(await api.getAttachment('summary'));
+      document.getElementById('cont_getting_started').innerHTML =
+      marked(await api.getAttachment('gettingStarted')); 
+      document.getElementById('cont_data').innerHTML =
+      marked(await api.getAttachment('data')); 
+      document.getElementById('cont_training').innerHTML =
+      marked(await api.getAttachment('training')); 
+      document.getElementById('cont_prediction').innerHTML =
+      marked(await api.getAttachment('prediction')); 
+      document.getElementById('cont_faq').innerHTML =
+      marked(await api.getAttachment('faq')); 
+      try {
+        console.log(ctx.data.tab, ctx.data.section)
+        this.app.focus(ctx.data.tab, ctx.data.section)
+        this.app.$forceUpdate()
+      }
+      catch(err) {
+      console.log(err)
+      }
+  }
+}
+api.export(new ImJoyPlugin())
+</script>
+
+<window lang="html">
+  <div id="app">
+    
+    <ul class="tab tab-block">
+      <li class="tab-item" v-bind:class="{ active: active_tab=='summary' }">
+        <a href="#" @click="active_tab='summary'">Summary</a>
+      </li>
+      <li class="tab-item" v-bind:class="{ active: active_tab=='getting-started' }">
+         <a href="#" @click="active_tab='getting-started'">Getting started</a>
+      </li>
+      <li class="tab-item" v-bind:class="{ active: active_tab=='data' }">
+         <a href="#" @click="active_tab='data'">Data</a>
+      </li>
+      <li class="tab-item" v-bind:class="{ active: active_tab=='training' }">
+        <a href="#" @click="active_tab='training'">Training</a>
+      </li>
+      <li class="tab-item" v-bind:class="{ active: active_tab=='prediction' }">
+        <a href="#" @click="active_tab='prediction'">Prediction</a>
+      </li>
+      <li class="tab-item" v-bind:class="{ active: active_tab=='faq' }">
+        <a href="#" @click="active_tab='faq'">FAQ</a>
+      </li>
+    </ul>
+
+   <!-- This can eventually be replaced by a better organization, e.g. tabs -->
+   <div v-show="active_tab=='summary'" class="tab-content" id="cont_summary"></div>
+   <div v-show="active_tab=='getting-started'" class="tab-content" id="cont_getting_started"></div>
+   <div v-show="active_tab=='data'" class="tab-content" id="cont_data"></div>
+   <div v-show="active_tab=='training'" class="tab-content" id="cont_training"></div>
+   <div v-show="active_tab=='prediction'" class="tab-content" id="cont_prediction"></div>
+   <div v-show="active_tab=='faq'" class="tab-content" id="cont_faq"></div>
+  </div>
+</window>
+
+<style lang="css">
+
+.tab-content{
+  padding: 10px;
+}
+
+.center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 90%;
+}
+
+figcaption {
+    background-color: #fff;
+    color: #a1c8f2;
+    font: italic smaller sans-serif;
+    padding: 3px;
+    text-align: center;
+}
+</style>

@@ -23,9 +23,36 @@
    "uri": "repository/3D Histogram.imjoy.html"
   },
   {
+   "name": "CARE-docs",
+   "type": "window",
+   "tags": [],
+   "ui": "",
+   "version": "0.1.0",
+   "cover": "",
+   "description": "Documentation for CARE plugin.",
+   "icon": "extension",
+   "inputs": null,
+   "outputs": null,
+   "api_version": "0.1.5",
+   "env": "",
+   "requirements": [
+    "https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.10/vue.min.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/marked/0.6.2/marked.js",
+    "https://static.imjoy.io/spectre.css/spectre.min.css",
+    "https://static.imjoy.io/spectre.css/spectre-exp.min.css",
+    "https://static.imjoy.io/spectre.css/spectre-icons.min.css"
+   ],
+   "dependencies": [],
+   "defaults": {
+    "w": 30,
+    "h": 20
+   },
+   "uri": "repository/CARE-docs.imjoy.html"
+  },
+  {
    "name": "CARE",
    "type": "native-python",
-   "version": "0.1.0",
+   "version": "0.1.8",
    "api_version": "0.1.2",
    "description": "This plugin demonstrate denoising using CARE",
    "tags": [
@@ -39,23 +66,29 @@
    "flags": [],
    "icon": "extension",
    "env": {
-    "CPU": "conda create -n care-cpu python=3.6",
-    "GPU": "conda create -n care-gpu python=3.6",
-    "macOS CPU": "conda create -n care-mac-cpu python=3.6"
+    "CPU": "conda create -n care-cpu python=3.6.7",
+    "GPU": "conda create -n care-gpu python=3.6.7",
+    "macOS CPU": "conda create -n care-mac-cpu python=3.6.7"
    },
    "requirements": {
     "CPU": [
-     "pip: tensorflow==1.8.0 Pillow csbdeep tifffile"
+     "pip: tensorflow==1.8.0 Pillow csbdeep tifffile six"
     ],
     "GPU": [
-     "pip: tensorflow-gpu==1.8.0 Pillow csbdeep tifffile"
+     "pip: tensorflow-gpu==1.8.0 Pillow csbdeep tifffile six gputil"
     ],
     "macOS CPU": [
-     "pip: tensorflow==1.5.0 Pillow csbdeep tifffile"
+     "pip: tensorflow==1.5.0 Pillow csbdeep tifffile six"
     ]
    },
    "dependencies": [
-    "oeway/ImJoy-Plugins:Im2Im-Dashboard"
+    "oeway/ImJoy-Plugins:Im2Im-Dashboard",
+    "oeway/ImJoy-Plugins:CARE-docs",
+    "https://gist.githubusercontent.com/oeway/961c8d7abe24383d3ad6312669fe1d7c/raw/launchpad.imjoy.html"
+   ],
+   "cover": [
+    "https://dl.dropbox.com/s/bo8timmql033xy1/CARE-0.1.8.gif",
+    "https://dl.dropbox.com/s/rq5ikbben3xbxge/CARE-0.1.8-2.gif"
    ],
    "uri": "repository/CARE.imjoy.html"
   },
@@ -64,7 +97,7 @@
    "type": "window",
    "tags": [],
    "ui": "",
-   "version": "0.1.3",
+   "version": "0.1.8",
    "api_version": "0.1.2",
    "description": "The dashboard for deep learning based image-to-image translation",
    "icon": "extension",
@@ -72,18 +105,19 @@
    "outputs": null,
    "env": "",
    "requirements": [
-    "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis",
-    "https://unpkg.com/spectre.css/dist/spectre.min.css",
-    "https://unpkg.com/spectre.css/dist/spectre-exp.min.css",
-    "https://unpkg.com/spectre.css/dist/spectre-icons.min.css",
-    "https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.22/vue.min.js"
+    "https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.22/vue.min.js",
+    "https://static.imjoy.io/spectre.css/spectre.min.css",
+    "https://static.imjoy.io/spectre.css/spectre-exp.min.css",
+    "https://static.imjoy.io/spectre.css/spectre-icons.min.css",
+    "https://cdn.jsdelivr.net/npm/apexcharts",
+    "https://cdn.jsdelivr.net/npm/vue-apexcharts"
    ],
    "dependencies": [],
    "defaults": {
     "w": 20,
     "h": 10
    },
-   "runnable": false,
+   "runnable": true,
    "uri": "repository/Im2Im-Dashboard.imjoy.html"
   },
   {
@@ -223,8 +257,8 @@
   {
    "name": "ANNA-PALM",
    "type": "native-python",
-   "version": "0.1.4",
-   "api_version": "0.1.2",
+   "version": "0.1.10",
+   "api_version": "0.1.5",
    "description": "A plugin for training models with ANNA-PALM.",
    "tags": [
     "CPU",
@@ -249,12 +283,14 @@
     ],
     "GPU": [
      "repo:https://github.com/imodpasteur/ANNA-PALM",
-     "pip: Pillow numpy==1.15.0 scipy matplotlib scikit-image tensorflow-gpu==1.8.0"
+     "pip: Pillow numpy==1.15.0 scipy matplotlib scikit-image tensorflow-gpu==1.8.0 gputil==1.4.0"
     ]
    },
    "dependencies": [
-    "oeway/ImJoy-Plugins:Im2Im-Dashboard"
+    "oeway/ImJoy-Plugins:Im2Im-Dashboard",
+    "https://gist.githubusercontent.com/oeway/961c8d7abe24383d3ad6312669fe1d7c/raw/launchpad.imjoy.html"
    ],
+   "cover": "https://dl.dropbox.com/s/gja7uhjctell2nd/annapalm-0.1.9.gif",
    "uri": "repository/annaPalm.imjoy.html"
   },
   {
@@ -560,7 +596,7 @@
    },
    "icon": null,
    "requirements": [
-    "https://cdn.rawgit.com/photopea/UTIF.js/4f1b10cb/UTIF.js"
+    "https://static.imjoy.io/js/UTIF.js"
    ],
    "dependencies": [
     "oeway/ImJoy-Plugins:Image Window"
