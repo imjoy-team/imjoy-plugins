@@ -15,7 +15,7 @@ This is a demo plugin ported from https://github.com/CSBDeep/CSBDeep/blob/master
   "type": "native-python",
   "version": "0.1.8",
   "api_version": "0.1.2",
-  "description": "This plugin demonstrate denoising using CARE",
+  "description": "This plugin demonstrates denoising using CARE.",
   "tags": ["CPU", "GPU", "macOS CPU"],
   "ui": "",
   "inputs": null,
@@ -239,7 +239,7 @@ class ImJoyPlugin():
 
             skip_download = False
             if not os.path.exists(os.path.join('data', name, 'train')):
-                ret = await api.confirm(content='It seem the file you try to download already exists, do you want to downlaoad and process again?', confirm_text='Yes, download', cancel_text= 'No')
+                ret = await api.confirm(content='It seems the file you try to download already exists, do you want to download and process again?', confirm_text='Yes, download', cancel_text= 'No')
                 if not ret:
                     skip_download =True
 
@@ -253,12 +253,12 @@ class ImJoyPlugin():
 
             if not os.path.isdir(os.path.join('data', name, 'train')):
                 api.error('Failed to detect train folder.')
-                await api.alert('You zip file must contain a folder called `train`')
+                await api.alert('Your zip file must contain a folder called `train`.')
                 return
 
             data_file = os.path.join('data', name)
         elif data_file.startswith('http'):
-            api.alert('only zip file can be downloaded and used for now.')
+            api.alert('Only zip files can be downloaded and used for now.')
             return
         elif data_file.startswith('.npz'):
             if os.path.exists(data_file):
@@ -421,7 +421,7 @@ class ImJoyPlugin():
         self.dialog.close()
         try:
             await this.win_docs.run({'data': {}})
-
+            this.win_docs.focus()
         except:
             this.win_docs = await api.createWindow({
                 'name': 'Documentation - CARE',
@@ -429,7 +429,7 @@ class ImJoyPlugin():
                 'w':30, 'h':20,
                 'data': {}
                 })
-
+            this.win_docs.focus()
 
     async def export_model(self):
         self.dialog.close()
