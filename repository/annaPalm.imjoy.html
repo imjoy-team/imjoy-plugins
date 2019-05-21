@@ -147,6 +147,7 @@ class ImJoyPlugin():
 
     if workdirObj:
         try:
+            api.showStatus('Loading ANNA-PALM model ...')
             opt.load_dir = workdirObj.path
             self.model = create_model(opt)
             api.showStatus('ANNA-PALM model loaded!')
