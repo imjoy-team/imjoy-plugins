@@ -222,7 +222,7 @@ class ImJoyPlugin():
             val_y = None
         axes = val_axes
 
-        updateUI = UpdateUI(model, config.train_steps_per_epoch, self.dash, config, (val_x, val_y, axes))
+        updateUI = UpdateUI(model, config.train_epochs, self.dash, config, (val_x, val_y, axes))
 
         api.showStatus('start training')
         self.dash.setLoading({'status_text': 'Start training...', 'loading': False})
