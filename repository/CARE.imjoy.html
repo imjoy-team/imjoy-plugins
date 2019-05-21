@@ -363,7 +363,7 @@ class ImJoyPlugin():
 
         # await api.alert('Please select a test folder contains source folder named ' + ','.join(care_data_config['source_dirs']))
         source_dir_names = ','.join(care_data_config['source_dirs'])
-        test_data_dir = await api.showFileDialog(title=f"Select a folder with test data (contains {source_dir_names})", root=os.path.join(ROOT_DIR, "CARE", "tribolium"), type="directory", engine=api.ENGINE_URL)
+        test_data_dir = await api.showFileDialog(title=f"Select a folder with test data (contains {source_dir_names})", root=os.path.join(ROOT_DIR, "CARE-DATA", "tribolium"), type="directory", engine=api.ENGINE_URL)
         if os.path.exists(os.path.join(test_data_dir, 'test')):
             test_data_dir = os.path.join(test_data_dir, 'test')
         if not all([os.path.exists(os.path.join(test_data_dir, source_dir)) for source_dir in care_data_config['source_dirs']]):
