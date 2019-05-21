@@ -1,4 +1,4 @@
-﻿<docs lang="markdown">
+<docs lang="markdown">
 This plugin renders the documentation for the CARE demo plugin. 
 </docs>
 
@@ -52,8 +52,7 @@ The ImJoy plugins are ported from an **example code** to
 
 ## Installing the plugin and main features
 
-If you don't already have the plugin, you can install it from this <a onclick="api.utils.openUrl('
-https://imjoy.io/#/app?w=anna-palm&plugin=oeway/ImJoy-Plugins:CARE@GPU')">**link.**</a>
+If you don't already have the plugin, you can install it from this <a onclick="api.utils.openUrl('https://imjoy.io/#/app?w=anna-palm&plugin=oeway/ImJoy-Plugins:CARE@GPU')">**link.**</a>
 
 When starting the CARE plugin, you will see a **central launch pad** allowing to select the task to be performed:
 
@@ -73,10 +72,12 @@ Some of the **main features** are:
 
 
 <attachment name="gettingStarted">
-Here we describe how to quickly getting started with CARE plugin
+<p style="color:#FF0000";>This requires that data is already on the engine. As an alternative, you can choose the option to train from URL.</p>
+
+Here we describe how to quickly getting started with CARE plugin.
 
 ## Select plugin engine and computational mode
-Below we show how to select a remote engine (`imjoy.pasteur.cloud`) and the GPU computation (`TAG: GPU`)for fast training and prediction.
+We select a remote engine (`imjoy.pasteur.cloud`) and the GPU computation (`TAG: GPU`) for fast training and prediction.
 
 <figure>
     <img src="https://www.dropbox.com/s/m4hssh4dr2x4frg/care-gs-engine-tag.gif?dl=1" width="250" class="img-responsive p-centered" alt="gs-setting-up">
@@ -84,7 +85,7 @@ Below we show how to select a remote engine (`imjoy.pasteur.cloud`) and the GPU 
 </figure>
 
 ## Training
-Below we show to perform training on the example data on the plugin engine. We set the model name to `CARE_demo_v1` 
+We perform training on the example data on the plugin engine. We then set the model name to `CARE_demo_v1` 
 and train for 60 epoches.
 
 <figure>
@@ -92,8 +93,8 @@ and train for 60 epoches.
     <figcaption>Training with CARE.</figcaption>
 </figure>
 
-While the network is training, you observe progress in the **dashboard**. Here you see how loss evolves and how
-the trained model performs on the validation data. 
+While the network is training, progress can be monitored **dashboard**: it shows how loss changes, and how
+the trained model performs on validation data. 
 
 <figure>
     <img src="https://www.dropbox.com/s/4hqxua2764qpx04/care-gs-training-progress.gif?dl=1" width="500" class="img-responsive p-centered" alt="getting-started-training">
@@ -101,8 +102,8 @@ the trained model performs on the validation data.
 </figure>
 
 ## Prediction
-Below we show to perform prediction with the trained model:
-1. Select trained model `CARE_demo_v1`
+Prediction with the trained model is performed:
+1. Select trained model `CARE_demo_v1`.
 2. Select test data `test` of provided example on the remote server. 
 3. This will open a dedicate interface where prediction progress is shown. 
 
@@ -119,19 +120,17 @@ Once the prediction is done, you can inspect the prediction results and scroll t
 </figure>
 
 
-
 </attachment> 
 
 <attachment name="data">
+<br>
+<p style="color:#FF0000"> FOR IMJOY REVIEWERS: if you use the provided remote-engine, example data is available to be used.</p>
 <br>
 <p id="data-requirements">
 Here we describe briefly how the training images have to be provided: image format, naming scheme, and data organization. 
 </p>
 
-A detailed description for how to generate the training data can be found 
-<a onclick="api.utils.openUrl('https://github.com/CSBDeep/CSBDeep/blob/master/examples/denoising3D/1_datagen.ipynb.')">here.</a>
-
-In short the data has to be provided in this format:
+The provided data from the CARE example is organized like this this:
 * Data for the 3D denoising corresponds to **pairs of low and high quality stacks**. 
   Images are 3D TIFF with identical filenames and are stored in two folders "low" and "GT", corresponding 
   to low and high-SNR stacks.  
@@ -139,7 +138,7 @@ In short the data has to be provided in this format:
   application the authors recommend to acquire at least 10-50 stacks from different developmental timepoints.
 * Training and validation are in separate folders `train` and `test`.
 
-For instance, the provided example data looks looks like this:
+
 ```
 ├─ tribolium/
 │  ├─ test/
@@ -154,6 +153,14 @@ For instance, the provided example data looks looks like this:
 │  │  │  ├─ nGFP_0.1_0.2_0.5_20_13_late.tif
 │  │  ├─ img58
 ```
+To use these **example data** you have two options
+1. They can be directly used for training with the option `Train with data from the web`. 
+ The provided default URLs points to these data. 
+2. Alternatively, the data can be downloaded with this <a onclick="api.utils.openUrl('http://csbdeep.bioimagecomputing.com/example_data/tribolium.zip')">**link**.</a> 
+ After unzipping, you can load the data into the plugin engine with drag & drop and specify it with the option `Train with data from the engine`.
+
+A detailed description for how to generate the training data can be found 
+<a onclick="api.utils.openUrl('https://github.com/CSBDeep/CSBDeep/blob/master/examples/denoising3D/1_datagen.ipynb')">here.</a>
 
 
 </attachment>
@@ -164,7 +171,7 @@ For instance, the provided example data looks looks like this:
 Here we describe how to select a plugin engine, a computationan environment, and the training data. 
 </p>
 
-## Where to perform training: plugin engines
+## Where to perform training: plugin engine
 Training is performed on an ImJoy plugin engine, such a plugin engine can either run remotely or on your 
 own local workstation. This install a local plugin engine, please install the plugin engines from 
 <a onclick="api.utils.openUrl('https://github.com/oeway/ImJoy-App/releases')">**here**</a> and follow 
