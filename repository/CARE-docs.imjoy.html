@@ -31,7 +31,7 @@ This plugin renders the documentation for the CARE demo plugin.
 <attachment name="summary">
 <br>
 <p id="care-summary"> 
-  The CARE framework allows to perform  content-aware restoration of fluorescence microscopy images
+  The CARE framework allows to perform  content-aware restoration of fluorescence microscopy images.
   In this documentation, we describe the ImJoy implementation of an CARE example to perform 3D denoising.
  </p>
  
@@ -46,13 +46,13 @@ The ImJoy plugins are ported from an **example code** to
 
 <figure>
     <img src="https://www.dropbox.com/s/aramdvankqxh9h9/care-dashboard-results.png?dl=1" class="img-responsive p-centered" alt="care-3d-results">
-    <figcaption>Example of 3D denoising traing: input image, target image, predicted image.</figcaption>
+    <figcaption>Example of CARE denoising: input image, target image, predicted image.</figcaption>
 </figure>
 
 
 ## Installing the plugin and main features
 
-If you don't already have the plugin, you can install it from this <a onclick="api.utils.openUrl('https://imjoy.io/#/app?w=anna-palm&plugin=oeway/ImJoy-Plugins:CARE@GPU')">**link.**</a>
+If you don't already have the plugin, you can install it from this <a onclick="api.utils.openUrl('https://imjoy.io/#/app?w=care&plugin=oeway/ImJoy-Plugins:CARE@GPU')">**link.**</a>
 
 When starting the CARE plugin, you will see a **central launch pad** allowing to select the task to be performed:
 
@@ -63,18 +63,16 @@ When starting the CARE plugin, you will see a **central launch pad** allowing to
 
 
 Some of the **main features** are:   
-* Training can be performed either on a provided remote plugin engine or a local plugin engine. 
-* Training data can be provided either directly on the plugin engine or downloaded from the web.
-* Training can be performe either on example data or own data.
+* Training can be performed either on example data or your own data.
 * Prediction can be performed once the model is trained. 
 
 </attachment> 
 
 
 <attachment name="gettingStarted">
-<p style="color:#FF0000";>This requires that data is already on the engine. As an alternative, you can choose the option to train from URL.</p>
+<p style="color:#FF0000";>These steps require that data is already on the engine. As an alternative, you can choose the option to train from URL.</p>
 
-Here we describe how to quickly getting started with CARE plugin.
+Here we describe how to quickly get started with the CARE plugin.
 
 ## Select plugin engine and computational mode
 We select a remote engine (`imjoy.pasteur.cloud`) and the GPU computation (`TAG: GPU`) for fast training and prediction.
@@ -85,8 +83,8 @@ We select a remote engine (`imjoy.pasteur.cloud`) and the GPU computation (`TAG:
 </figure>
 
 ## Training
-We perform training on the example data on the plugin engine. We then set the model name to `CARE_demo_v1` 
-and train for 60 epoches.
+We perform training on the example data on the plugin engine. 
+We then set the model name to `CARE_demo_v1` and train for 60 epochs.
 
 <figure>
     <img src="https://www.dropbox.com/s/0bv9mjm8gszmg5e/care-gs-training.gif?dl=1" class="img-responsive p-centered" alt="getting-started-training">
@@ -98,14 +96,14 @@ the trained model performs on validation data.
 
 <figure>
     <img src="https://www.dropbox.com/s/4hqxua2764qpx04/care-gs-training-progress.gif?dl=1" width="500" class="img-responsive p-centered" alt="getting-started-training">
-    <figcaption>Monitiorin training with CARE.</figcaption>
+    <figcaption>Monitoring training with CARE.</figcaption>
 </figure>
 
 ## Prediction
 Prediction with the trained model is performed:
 1. Select trained model `CARE_demo_v1`.
 2. Select test data `test` of provided example on the remote server. 
-3. This will open a dedicate interface where prediction progress is shown. 
+3. This will open a dedicated interface where prediction progress is shown. 
 
 <figure>
     <img src="https://www.dropbox.com/s/i1rpi9ja84zcdxa/care-gs-prediction.gif?dl=1" class="img-responsive p-centered" alt="getting-started-training">
@@ -116,7 +114,7 @@ Once the prediction is done, you can inspect the prediction results and scroll t
 
 <figure>
     <img src="https://www.dropbox.com/s/1sjose7hwbpm883/care-gs-prediction-inspection.gif?dl=1" width="500" class="img-responsive p-centered" alt="getting-started-training">
-    <figcaption>Monitiorin training with CARE.</figcaption>
+    <figcaption>Monitoring training with CARE.</figcaption>
 </figure>
 
 
@@ -131,13 +129,12 @@ Here we describe briefly how the training images have to be provided: image form
 </p>
 
 The provided data from the CARE example is organized like this this:
-* Data for the 3D denoising corresponds to **pairs of low and high quality stacks**. 
+* Data for the 3D denoising corresponds to **pairs of low and high high signal-to-noise ratio (SNR) stacks**. 
   Images are 3D TIFF with identical filenames and are stored in two folders "low" and "GT", corresponding 
   to low and high-SNR stacks.  
 * The training data for this demo corresponds to **one Tribolium stack pair**, whereas in an actual 
   application the authors recommend to acquire at least 10-50 stacks from different developmental timepoints.
-* Training and validation are in separate folders `train` and `test`.
-
+* Training and validation data are stored in separate folders `train` and `test`.
 
 ```
 ├─ tribolium/
@@ -168,7 +165,7 @@ A detailed description for how to generate the training data can be found
 <attachment name="training">
 <br>
 <p id="training">
-Here we describe how to select a plugin engine, a computationan environment, and the training data. 
+Here we describe how to select a plugin engine, a computational environment, and the training data. 
 </p>
 
 ## Where to perform training: plugin engine
