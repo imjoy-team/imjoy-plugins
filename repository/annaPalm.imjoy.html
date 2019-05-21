@@ -147,6 +147,7 @@ class ImJoyPlugin():
 
     if workdirObj:
         try:
+            api.showStatus('Loading ANNA-PALM model ...')
             opt.load_dir = workdirObj.path
             self.model = create_model(opt)
             api.showStatus('ANNA-PALM model loaded!')
@@ -248,7 +249,7 @@ class ImJoyPlugin():
                     name += '_c'+str(i)
                 displays[name] = imgurl
                 # api.createWindow(name=str(k)+str(b)+str(i) , type='imjoy/image', w=12, h=15, data={"src": imgurl})
-    self.dash.appendDisplay('Training Step ' + str(self.step), displays)
+    self.dash.appendDisplay('Step ' + str(self.step), displays)
 
   async def train(self, dataset, opt, steps=1000, model=None):
     #asyncio.set_event_loop(self.loop)
