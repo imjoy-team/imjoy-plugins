@@ -347,7 +347,7 @@ class ImJoyPlugin():
 
     async def train_with_folder(self):
         self.dialog.close()
-        data_dir = await api.showFileDialog(title="Please select a folder with trianing data (subfolder: train and test)", root=os.path.join(ROOT_DIR, "CARE", "tribolium"), type= 'directory', engine= api.ENGINE_URL)
+        data_dir = await api.showFileDialog(title="Please select a folder containing the training and testing data as subfolders ‘train’ and ‘test.", root=os.path.join(ROOT_DIR, "CARE", "tribolium"), type= 'directory', engine= api.ENGINE_URL)
         await self.start_train(data_dir)
 
     async def train_with_npz(self):
