@@ -11,7 +11,7 @@ Paper on Nature Biotechnology: https://rdcu.be/LGtc
 {
   "name": "ANNA-PALM",
   "type": "native-python",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "api_version": "0.1.5",
   "description": "A plugin for training models with ANNA-PALM.",
   "tags": ["CPU", "GPU"],
@@ -225,7 +225,7 @@ class ImJoyPlugin():
     d = sources['train']
 
     await self.dash.setLoading({'status_text': 'Start Training...', 'loading': True})
-    await self.train(d, opt)
+    await self.train(d, opt, self.model)
 
   def sendImages(self, images):
     displays = {}
