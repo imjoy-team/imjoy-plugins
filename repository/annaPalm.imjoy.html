@@ -118,8 +118,8 @@ class ImJoyPlugin():
             {'name': 'Load trained model', 'description': 'Load a pre-trained model', 'callback': self.load_model, 'img': 'https://img.icons8.com/ios-glyphs/48/000000/submit-progress.png'},
             #{'name': 'Train: simulated microtubules', 'description': 'Start training on simulated microtubules', 'callback': self.train_sim_tubulin, 'img': 'https://img.icons8.com/color/100/000000/gears.png'},
             #{'name': 'Predict: simulated microtubules', 'description': 'Predict simulated microtubule', 'callback': self.predict_sim_tubulin, 'img': 'https://img.icons8.com/color/96/000000/double-right.png'},
-            {'name': 'Train: experimental microtubules', 'description': 'Start training on experimental microtubules', 'callback': self.train_csv, 'img': 'https://img.icons8.com/bubbles/100/000000/gears.png'},
-            {'name': 'Predict: experimental microtubules', 'description': 'Predict experimental microtubules', 'callback': self.predict_csv, 'img': 'https://img.icons8.com/bubbles/100/000000/circled-chevron-right.png'},
+            {'name': 'Train on microtubules', 'description': 'Start training on experimental microtubules', 'callback': self.train_csv, 'img': 'https://img.icons8.com/bubbles/100/000000/gears.png'},
+            {'name': 'Predict microtubules', 'description': 'Predict experimental microtubules', 'callback': self.predict_csv, 'img': 'https://img.icons8.com/bubbles/100/000000/circled-chevron-right.png'},
             {'name': 'Documentation', 'description': 'Show documentation.', 'callback': self.show_docs, 'img': 'https://img.icons8.com/color/96/000000/help.png'},
         ]
     )
@@ -202,7 +202,7 @@ class ImJoyPlugin():
     opt.add_lr_channel = False
     api.showStatus('preparing data from ./tmp_predict')
 
-    workdirObj = await api.showFileDialog(type='directory', name="Please select your data folder (contains `train` subfolder)")
+    workdirObj = await api.showFileDialog(type='directory', name="Please select your data folder for prediction.",root=os.path.join(ROOT_DIR, "ANNA-PALM-DATA"), engine=api.ENGINE_URL)
     opt.workdir = workdirObj.path
 
     self.dash = await api.createWindow(type="Im2Im-Dashboard", name="ANNA-PALM Prediction", w=25, h=20, data={'display_mode':'one'})
@@ -217,7 +217,7 @@ class ImJoyPlugin():
     if self.dialog is not None:
         self.dialog.close()
     opt.batchSize = 1
-    workdirObj = await api.showFileDialog(type='directory', name="Please select your data folder (contains `train` subfolder)")
+    workdirObj = await api.showFileDialog(type='directory', name="Please select your data folder (contains `train` subfolder)",root=os.path.join(ROOT_DIR, "ANNA-PALM-DATA"), engine=api.ENGINE_URL)
     opt.workdir = workdirObj.path
     api.showStatus('preparing data from ', workdirObj.path)
     self.dash = await api.createWindow(type="Im2Im-Dashboard", name="ANNA-PALM Training", w=25, h=20, data={'display_mode':'one','metrics': ["discrim_loss", "gen_loss_GAN", "gen_loss", "gen_loss_L2", "gen_loss_SSIM", "squirrel_discrim_loss", "gen_loss_squirrel"], 'callbacks': ['onEpochEnd', 'onBatchEnd']})
