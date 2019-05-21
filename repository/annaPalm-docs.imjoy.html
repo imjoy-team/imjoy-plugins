@@ -1,4 +1,4 @@
-﻿<docs lang="markdown">
+<docs lang="markdown">
 This plugin renders the documentation for the ANNA-PALM plugin. 
 </docs>
 
@@ -114,7 +114,7 @@ A pre-trained model for microtubulins is available <a onclick="api.utils.openUrl
 3. In ImJOy, press `Files`, and `Open Engine File`.
 4. If ImJoy is connected to multiple plugin engines, select the one the ANNA-PALM plugin is running on.
 5. Navigate to the folder where you want to load your data. 
-5. Drag & drop the folder containing subfolder `__model__` and 'test' into this folder.
+5. Drag & drop the folder containing the model into this folder.
 
 <figure>
     <img src="" class="img-responsive p-centered" alt="load-model-into-engine">
@@ -191,8 +191,8 @@ Experimental test data is available <a onclick="api.utils.openUrl('https://www.d
 Once training data is provided, the training a dashboard will be shown that allows to inspect training progress.
 * In the upper part the dashboard shows the loss functions for the training and validation data. You can hoover
 over the curves to see the current value and what loss function it is. 
-* In the lower part it shows the prediction results on a randomly selected image 'A' stands for input image, 'B' for target image.
-The following images are shown
+* In the lower part it shows the prediction results on a randomly selected image.
+ 'A' stands for sparse (input image), 'B' for high-resolution image. The following images are shown
     - real_A: sparse input image
     - real_B: high-resolution target image
     - reco_B: reconstructed high-resolution image
@@ -200,13 +200,13 @@ The following images are shown
 * The slider allows you to scroll through the different training steps and inspect how the quality
  of the prediction changes.
 
+<figure>
+    <img src="https://www.dropbox.com/s/2zn1t6mnognavst/anna-palm-loss.png?dl=1" class="img-responsive  p-centered" alt="training-loss">
+    <figcaption>Transferring training data to the plugin engine.</figcaption>
+</figure>
+
 If you want to **terminate the training** click on the icon next to the plugin name, 
 and select `Terminate` and then close the window with the red x.
-
-<figure>
-    <img src="" class="img-responsive p-centered" alt="training-interface">
-    <figcaption>ANNA-PALM training interface.</figcaption>
-</figure>
 
 ## Trained model
 Once training is finished, the trained model is stored **WHERE?**. 
@@ -217,12 +217,12 @@ Once training is finished, the trained model is stored **WHERE?**.
 To predict an image, you can either load a pre-trained model into the engine, or
 train a new model. For either option, we refer to the dedicated sections in this documentation. 
 
-1. Press on `Predict`.
+1. Press on `Predict`. This will then use either the loaded model, or the trained one. 
 2. Specify the folder the data you want to predict, e.g. the test folder of the provided example data 
 3. This will then open a new interface, where progress on prediction is reported
 
 <figure>
-    <img src="" class="img-responsive p-centered" alt="prediction-interface">
+    <img src="https://www.dropbox.com/s/1hs0jemw183jg9r/anna-palm-prediction.png?dl=0" class="img-responsive p-centered" alt="screen-shot-care">
     <figcaption>ANNA-PALM prediction interface.</figcaption>
 </figure>
 
