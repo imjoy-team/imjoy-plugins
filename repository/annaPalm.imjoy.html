@@ -11,7 +11,7 @@ Paper on Nature Biotechnology: https://rdcu.be/LGtc
 {
   "name": "ANNA-PALM",
   "type": "native-python",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "api_version": "0.1.5",
   "description": "A plugin for training models with ANNA-PALM.",
   "tags": ["CPU", "GPU"],
@@ -111,8 +111,8 @@ class ImJoyPlugin():
   async def run(self, my):
     self.dialog = await api.showDialog(type='launchpad', data= [
             {'name': 'Load trained model', 'description': 'Load a pretrained model', 'callback': self.load_model, 'img': 'https://img.icons8.com/ios-glyphs/48/000000/submit-progress.png'},
-            {'name': 'Train: simulated microtubules', 'description': 'Start training on simulated microtubules', 'callback': self.train_sim_tubulin, 'img': 'https://img.icons8.com/color/100/000000/gears.png'},
-            {'name': 'Predict: simulated microtubules', 'description': 'Predict simulated microtubule', 'callback': self.predict_sim_tubulin, 'img': 'https://img.icons8.com/color/96/000000/double-right.png'},
+            #{'name': 'Train: simulated microtubules', 'description': 'Start training on simulated microtubules', 'callback': self.train_sim_tubulin, 'img': 'https://img.icons8.com/color/100/000000/gears.png'},
+            #{'name': 'Predict: simulated microtubules', 'description': 'Predict simulated microtubule', 'callback': self.predict_sim_tubulin, 'img': 'https://img.icons8.com/color/96/000000/double-right.png'},
             {'name': 'Train: experimental microtubules', 'description': 'Start training on experimental microtubules', 'callback': self.train_csv, 'img': 'https://img.icons8.com/bubbles/100/000000/gears.png'},
             {'name': 'Predict: experimental microtubules', 'description': 'Predict experimental microtubules', 'callback': self.predict_csv, 'img': 'https://img.icons8.com/bubbles/100/000000/circled-chevron-right.png'},
             {'name': 'Documentation', 'description': 'Show documentation.', 'callback': self.show_docs, 'img': 'https://img.icons8.com/color/96/000000/help.png'},
@@ -135,15 +135,22 @@ class ImJoyPlugin():
     self.__abort = True
 
   async def load_model(self):
-    workdirObj = await api.showFileDialog(type='directory', name="Please select your model folder (typically named `__model__`)")
-    opt.load_dir = workdirObj.path
-    self.model = create_model(opt)
+    if self.dialog is not None:
+        self.dialog.close()
+    try:
+        workdirObj = await api.showFileDialog(type='directory', name="Please select your model folder (typically named `__model__`)")
+        opt.load_dir = workdirObj.path
+        self.model = create_model(opt)
+    except Exception as e:
+        api.alert('Failed to load model, error: ' + str(e))
+    
 
   async def train_sim_tubulin(self):
     if self.dialog is not None:
         self.dialog.close()
     opt.add_lr_channel = 'pseudo'
     opt.batchSize = 1
+    opt.phase = 'train'
     api.showStatus('preparing data...')
     self.dash = await api.createWindow(type="Im2Im-Dashboard", name="ANNA-PALM Training", standalone=True, data={'display_mode':'one','metrics': ["discrim_loss", "gen_loss_GAN", "gen_loss", "gen_loss_L2", "gen_loss_SSIM", "squirrel_discrim_loss", "gen_loss_squirrel"], 'callbacks': ['onEpochEnd', 'onBatchEnd']})
     self.dash.onClose(self.abort)
@@ -159,6 +166,7 @@ class ImJoyPlugin():
   async def train_csv(self):
     if self.dialog is not None:
         self.dialog.close()
+    opt.phase = 'train'
     opt.batchSize = 1
     opt.add_lr_channel = False
     workdirObj = await api.showFileDialog(type='directory')
@@ -177,6 +185,7 @@ class ImJoyPlugin():
     if self.dialog is not None:
         self.dialog.close()
     opt.batchSize = 1
+    opt.phase = 'test'
     opt.add_lr_channel = False
     api.showStatus('preparing data from ./tmp_predict')
     
@@ -197,6 +206,7 @@ class ImJoyPlugin():
     if self.dialog is not None:
         self.dialog.close()
     opt.batchSize = 1
+    opt.phase = 'test'
     opt.add_lr_channel = False
     api.showStatus('preparing data from ./tmp_predict')
     
