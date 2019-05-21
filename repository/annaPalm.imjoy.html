@@ -179,7 +179,7 @@ class ImJoyPlugin():
     opt.phase = 'train'
     opt.batchSize = 1
     opt.add_lr_channel = False
-    workdirObj = await api.showFileDialog(type='directory')
+    workdirObj = await api.showFileDialog(type='directory', name="Please select a folder containing training data`)", root=os.path.join(ROOT_DIR, "ANNA-PALM-DATA"), engine=api.ENGINE_URL)
     opt.workdir = workdirObj.path
     api.showStatus('preparing data from ', workdirObj.path)
     self.dash = await api.createWindow(type="Im2Im-Dashboard", name="ANNA-PALM Training", w=25, h=20, data={'display_mode':'one','metrics': ["discrim_loss", "gen_loss_GAN", "gen_loss", "gen_loss_L2", "gen_loss_SSIM", "squirrel_discrim_loss", "gen_loss_squirrel"], 'callbacks': ['onEpochEnd', 'onBatchEnd']})
