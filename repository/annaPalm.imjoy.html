@@ -119,6 +119,18 @@ class ImJoyPlugin():
         ]
     )
 
+  async def show_docs(self):
+    self.dialog.close()
+    try:
+        await this.win_docs.run({'data': {}})
+    except:
+        this.win_docs = await api.createWindow({
+                'name': 'Documentation - ANNA-PALM',
+                'type': 'ANNA-PALM-docs',
+                'w':30, 'h':20,
+                'data': {}
+                })
+  
   def abort(self):
     self.__abort = True
 
