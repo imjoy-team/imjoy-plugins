@@ -3,7 +3,7 @@
 # ANNA-PALM: deep learning massively accelerates super-resolution localization microscopy
 
 Ouyang et al., Nat. Biotechnol. 2018, doi:10.1038/nbt.4106
-  
+
 Paper on Nature Biotechnology: https://rdcu.be/LGtc
 </docs>
 
@@ -11,7 +11,7 @@ Paper on Nature Biotechnology: https://rdcu.be/LGtc
 {
   "name": "ANNA-PALM",
   "type": "native-python",
-  "version": "0.1.16",
+  "version": "0.1.13",
   "api_version": "0.1.5",
   "description": "A plugin for training models with ANNA-PALM.",
   "tags": ["CPU", "GPU"],
@@ -24,7 +24,7 @@ Paper on Nature Biotechnology: https://rdcu.be/LGtc
     "CPU": ["repo:https://github.com/imodpasteur/ANNA-PALM", "cmd:pip install -r ANNA-PALM/requirements.txt"],
     "GPU": ["repo:https://github.com/imodpasteur/ANNA-PALM", "pip: Pillow numpy==1.15.0 scipy matplotlib scikit-image tensorflow-gpu==1.8.0 gputil==1.4.0"]
   },
-  "dependencies": ["oeway/ImJoy-Plugins:Im2Im-Dashboard", "https://gist.githubusercontent.com/oeway/961c8d7abe24383d3ad6312669fe1d7c/raw/launchpad.imjoy.html"],
+  "dependencies": ["oeway/ImJoy-Plugins:Im2Im-Dashboard","oeway/ImJoy-Plugins:ANNA-PALM-docs", "https://gist.githubusercontent.com/oeway/961c8d7abe24383d3ad6312669fe1d7c/raw/launchpad.imjoy.html"],
   "cover": "https://dl.dropbox.com/s/gja7uhjctell2nd/annapalm-0.1.9.gif"
   }
 </config>
@@ -96,6 +96,11 @@ else:
     if api.TAG == 'GPU':
         api.alert('No GPU device is avilable')
 
+if os.path.exists('/imjoy/imjoy-paper'):
+    ROOT_DIR = '/imjoy/imjoy-paper'
+else:
+    ROOT_DIR = ''
+
 class ImJoyPlugin():
   async def setup(self):
     self.step = 0
@@ -131,29 +136,39 @@ class ImJoyPlugin():
                 'data': {}
                 })
 
-
   def abort(self):
     self.__abort = True
 
   async def load_model(self):
-    workdirObj = await api.showFileDialog(type='directory', name="Please select your model folder (typically named `__model__`)")
-    opt.load_dir = workdirObj.path
-    self.model = create_model(opt)
+    if self.dialog is not None:
+        self.dialog.close()
+
+    workdirObj = await api.showFileDialog(type='directory', name="Please select your model folder (typically named `__model__`)", root=os.path.join(ROOT_DIR, "ANNA-PALM-MODELS"), engine=api.ENGINE_URL)
+
+    if workdirObj:
+        try:
+            opt.load_dir = workdirObj.path
+            self.model = create_model(opt)
+            api.showStatus('ANNA-PALM model loaded!')
+
+        except Exception as e:
+            api.alert('Failed to load model, error: ' + str(e))
 
   async def train_sim_tubulin(self):
     if self.dialog is not None:
         self.dialog.close()
     opt.add_lr_channel = 'pseudo'
     opt.batchSize = 1
+    opt.phase = 'train'
     api.showStatus('preparing data...')
-    self.dash = await api.createWindow(type="Im2Im-Dashboard", name="ANNA-PALM Training", standalone=True, data={'display_mode':'one','metrics': ["discrim_loss", "gen_loss_GAN", "gen_loss", "gen_loss_L2", "gen_loss_SSIM", "squirrel_discrim_loss", "gen_loss_squirrel"], 'callbacks': ['onEpochEnd', 'onBatchEnd']})
+    self.dash = await api.createWindow(type="Im2Im-Dashboard", name="ANNA-PALM Training", w=25, h=20, data={'display_mode':'one','metrics': ["discrim_loss", "gen_loss_GAN", "gen_loss", "gen_loss_L2", "gen_loss_SSIM", "squirrel_discrim_loss", "gen_loss_squirrel"], 'callbacks': ['onEpochEnd', 'onBatchEnd']})
     self.dash.onClose(self.abort)
     await self.dash.setLoading({'status_text': 'Preparing data...', 'loading': True})
     sources = create_data_sources(['TransformedTubulin001NB'], opt)
     d = sources['train']
 
     await self.dash.setLoading({'status_text': 'Start Training...', 'loading': True})
-    await self.train(d, opt, self.model)
+    await self.train(d, opt, model=self.model)
     #self.loop = asyncio.get_event_loop()
     #await asyncio.get_event_loop().run_in_executor(self.executor, self.train, d, opt)
 
@@ -161,14 +176,15 @@ class ImJoyPlugin():
     if self.dialog is not None:
         self.dialog.close()
     opt.batchSize = 1
+    opt.phase = 'test'
     opt.add_lr_channel = False
     api.showStatus('preparing data from ./tmp_predict')
-    
+
     workdirObj = await api.showFileDialog(type='directory', name="Please select your data folder (contains `train` subfolder)")
     opt.workdir = workdirObj.path
 
 
-    self.dash = await api.createWindow(type="Im2Im-Dashboard", name="ANNA-PALM Prediction", standalone=True, data={'display_mode':'one'})
+    self.dash = await api.createWindow(type="Im2Im-Dashboard", name="ANNA-PALM Prediction", w=25, h=20, data={'display_mode':'one'})
     self.dash.onClose(self.abort)
     await self.dash.setLoading({'status_text': 'Preparing data...', 'loading': True})
     sources = create_data_sources(['TransformedTubulin001NB'], opt)
@@ -181,13 +197,14 @@ class ImJoyPlugin():
     if self.dialog is not None:
         self.dialog.close()
     opt.batchSize = 1
+    opt.phase = 'test'
     opt.add_lr_channel = False
     api.showStatus('preparing data from ./tmp_predict')
-    
+
     workdirObj = await api.showFileDialog(type='directory', name="Please select your data folder (contains `train` subfolder)")
     opt.workdir = workdirObj.path
 
-    self.dash = await api.createWindow(type="Im2Im-Dashboard", name="ANNA-PALM Prediction", standalone=True, data={'display_mode':'one'})
+    self.dash = await api.createWindow(type="Im2Im-Dashboard", name="ANNA-PALM Prediction", w=25, h=20, data={'display_mode':'one'})
     self.dash.onClose(self.abort)
     await self.dash.setLoading({'status_text': 'Preparing data...', 'loading': True})
     sources = create_data_sources(['TransformedCSVImages'], opt)
@@ -202,14 +219,14 @@ class ImJoyPlugin():
     workdirObj = await api.showFileDialog(type='directory', name="Please select your data folder (contains `train` subfolder)")
     opt.workdir = workdirObj.path
     api.showStatus('preparing data from ', workdirObj.path)
-    self.dash = await api.createWindow(type="Im2Im-Dashboard", name="ANNA-PALM Training", standalone=True, data={'display_mode':'one','metrics': ["discrim_loss", "gen_loss_GAN", "gen_loss", "gen_loss_L2", "gen_loss_SSIM", "squirrel_discrim_loss", "gen_loss_squirrel"], 'callbacks': ['onEpochEnd', 'onBatchEnd']})
+    self.dash = await api.createWindow(type="Im2Im-Dashboard", name="ANNA-PALM Training", w=25, h=20, data={'display_mode':'one','metrics': ["discrim_loss", "gen_loss_GAN", "gen_loss", "gen_loss_L2", "gen_loss_SSIM", "squirrel_discrim_loss", "gen_loss_squirrel"], 'callbacks': ['onEpochEnd', 'onBatchEnd']})
     self.dash.onClose(self.abort)
     await self.dash.setLoading({'status_text': 'Preparing data...', 'loading': True})
     sources = create_data_sources(['TransformedCSVImages'], opt)
     d = sources['train']
 
     await self.dash.setLoading({'status_text': 'Start Training...', 'loading': True})
-    await self.train(d, opt)
+    await self.train(d, opt, model=self.model)
 
   def sendImages(self, images):
     displays = {}
@@ -236,7 +253,7 @@ class ImJoyPlugin():
   async def train(self, dataset, opt, steps=1000, model=None):
     #asyncio.set_event_loop(self.loop)
     self.__abort = False
-    
+
     api.showStatus('start training...')
     if model is None:
         model = create_model(opt)
@@ -267,7 +284,7 @@ class ImJoyPlugin():
   async def predict(self, dataset, opt, model=None):
     if model is None:
         model = create_model(opt)
-   
+
     self.step = 0
     def step_callback(model, details):
         self.step += 1
