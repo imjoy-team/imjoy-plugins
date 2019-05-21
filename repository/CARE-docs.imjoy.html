@@ -8,7 +8,7 @@ This plugin renders the documentation for the CARE demo plugin.
   "type": "window",
   "tags": [],
   "ui": "",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "cover": "",
   "description": "Documentation for CARE plugin.",
   "icon": "extension",
@@ -122,7 +122,9 @@ Once the prediction is done, you can inspect the prediction results and scroll t
 
 <attachment name="data">
 <br>
-<p style="color:#FF0000"> FOR IMJOY REVIEWERS: if you use the provided remote-engine, example data is available to be used.</p>
+<p style="color:#FF0000"> 
+  FOR IMJOY REVIEWERS: if you use the provided remote-engine, example data is available at `imjoy-paper/CARE-DATA`. 
+  The respective file-dialogs will initiate at this repository.</p>
 <br>
 <p id="data-requirements">
 Here we describe briefly how the training images have to be provided: image format, naming scheme, and data organization. 
@@ -169,10 +171,9 @@ Here we describe how to select a plugin engine, a computational environment, and
 </p>
 
 ## Where to perform training: plugin engine
-Training is performed on an ImJoy plugin engine, such a plugin engine can either run remotely or on your 
-own local workstation. This install a local plugin engine, please install the plugin engines from 
-<a onclick="api.utils.openUrl('https://github.com/oeway/ImJoy-App/releases')">**here**</a> and follow 
-the provided instructions.
+Training is performed on an ImJoy plugin engine, which can either run remotely or on your 
+own local workstation. To install a local plugin engine, please follow   
+<a onclick="api.utils.openUrl('https://github.com/oeway/ImJoy-App/releases')">**these instructions.**</a>
 
 Once your ImJoy app is connected to one (or more) plugin engine(s), you can choose on which engine the CARE 
 plugin should run. For this press on the icon next to the plugin name in the plugin menu. 
@@ -189,7 +190,7 @@ In the lower part of the dropdown menu you can then choose on which of the the a
 </figure>
 
 ## GPU or CPU computation
-Training can be performed on CPUs or (preferentially GPUs). The latter is substantially faster. To switch 
+Training can be performed on CPUs or GPUs. The latter is substantially faster. To switch 
 between these computational modes, you can select the corresponding "tag". Currently supported are
 <figure>
     <img src="https://www.dropbox.com/s/k1ruchskrqtmqak/care-tags.png?dl=1" class="img-responsive p-centered" alt="tags">
@@ -200,9 +201,9 @@ between these computational modes, you can select the corresponding "tag". Curre
 Two options exist to provide the training, which can be selected from the CARE launchpad prior to start training.
 For either option, we provide the **CARE example data** as a default.
 
-* `Train with data from the web`: here you can specify an URl containing data as a zip archive. 
-The default points the zipped example data-set. 
-* `Train with data from the engine`: here you can select data from a plugin engine. More preciscely, you have to select the folder
+* `Train with data from the web`: here you can specify an URL containing data as a zip archive. 
+The default points to the zipped example data. 
+* `Train with data from the engine`: here you can select data from a plugin engine. More precisely, you have to select the folder
  containing the training data, e.g. the folder `tribolium` for the example data. 
 
 <figure>
@@ -210,12 +211,14 @@ The default points the zipped example data-set.
     <figcaption>Selecting training data from the plugin engine.</figcaption>
 </figure>
 
-  
-You can also provide **your own data**. Data has to be organized as explained in the dedicated section **Data**. 
-* You can upload your data to the Plugin engine (local or remote) by drag and drop: In the ImJoy interface, select `Files` and `Open Engine files`.
-  In the dialog, select to which engine you want to load your files, navigate to the folder where you want to store your data, 
-  drag and drop your folder containing the training data. 
-* You can create a zip archive of your data, upload it to the web, and use an URL
+You can also provide **your own data**. Your own data has to be organized as explained in the dedicated section **Data**. 
+* You can create *a zip archive of your folder*, upload it to the web, and use an URL
+* You can **drag and drop a folder containing subfolders 'train' and 'test'**  into the plugin engine, where the CARE plugin is running:
+    1. In the ImJoy interface, select `Files` and `Open Engine files`.
+    2. If you have multiple plugin engines running, select the engine on which the CARE plugin is running in the upper part of the interface. 
+    3. Navigate to the folder where you want to load your data. 
+    4. Drag & drop the folder containing subfolder 'train' and 'test' into this folder.
+    5. You can then use this folder for training.
 
 ## Configure training for CARE
 Once you specified the data, a dialog will be shown to configure the training. Here you have to specify
@@ -226,7 +229,7 @@ Once you specified the data, a dialog will be shown to configure the training. H
 * The name of the folder containing the target images, e.g. the folder `GT` containing the high SNR images. 
 
 <figure>
-    <img src="https://www.dropbox.com/s/e50qi8y5tz4ri4c/care-configure-training.png?dl=1" class="img-responsive p-centered" alt="training-configuration">
+    <img src="https://www.dropbox.com/s/e50qi8y5tz4ri4c/care-configure-training.png?dl=1" width="300" class="img-responsive p-centered" alt="training-configuration">
     <figcaption>Configuration parameters to train the CARE network.</figcaption>
 </figure>
 
@@ -255,20 +258,20 @@ but hoovering over the four squares in the upper left part of the interface, e.g
 
 To find the trained model, 
 1. Click `Files` in the ImJoy interface, and `Open Engine files`. 
-2. Select the plugin engine where you performed training. 
+2. Select the plugin engine where you performed training, e.g. where the CARE plugin was running. 
 3. Navigate to your workspace name. The dialog will initiate for the `default` workspace, if you are in another 
 workspace, you have to move up one folder and select your workspace name.
-4. The folder `models` contains all trained models
+4. The folder `CARE-MODELS` contains all trained models
 
-<figure>
-    <img src="https://www.dropbox.com/s/hpfnr09yrs1wq5t/care-find-models.gif?dl=0" class="img-responsive p-centered" alt="screen-shot-care">
-    <figcaption>How to find a trained model.</figcaption>
-</figure>
 
 
 </attachment>
 
 <attachment name="prediction">
+<p style="color:#FF0000"> 
+  FOR IMJOY REVIEWERS: if you use the provided remote-engine, a trained model is available at `imjoy-paper/CARE-MODEL`. 
+  The respective file-dialogs will initiate at this repository, and you can select the folder `CARE_model_2000steps` to use this model.</p>
+<br>
 Once a model is trained, you can use it for prediction. 
 
 Data for prediction has to be stored in a folder with same name as the input images, e.g. `low` in the example data. 
