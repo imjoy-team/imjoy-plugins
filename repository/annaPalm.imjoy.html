@@ -232,6 +232,8 @@ class ImJoyPlugin():
   def sendImages(self, images):
     displays = {}
     for k, v in images.items():
+        if 'lr_' in k:
+            continue
         for b in range(v.shape[0]):
             ima = v[b]
             channels = ima.shape[2]
