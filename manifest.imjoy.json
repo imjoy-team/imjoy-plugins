@@ -315,6 +315,7 @@
    },
    "dependencies": [
     "oeway/ImJoy-Plugins:Im2Im-Dashboard",
+    "oeway/ImJoy-Plugins:ANNA-PALM-docs",
     "https://gist.githubusercontent.com/oeway/961c8d7abe24383d3ad6312669fe1d7c/raw/launchpad.imjoy.html"
    ],
    "cover": "https://dl.dropbox.com/s/gja7uhjctell2nd/annapalm-0.1.9.gif",
@@ -457,6 +458,32 @@
    "dependencies": [],
    "runnable": false,
    "uri": "repository/imageWindow.imjoy.html"
+  },
+  {
+   "name": "launchpad",
+   "type": "window",
+   "tags": [],
+   "ui": "",
+   "version": "0.1.11",
+   "api_version": "0.1.6",
+   "description": "",
+   "icon": "extension",
+   "inputs": null,
+   "outputs": null,
+   "env": "",
+   "requirements": [
+    "https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.min.js",
+    "https://static.imjoy.io/spectre.css/spectre.min.css",
+    "https://static.imjoy.io/spectre.css/spectre-exp.min.css",
+    "https://mfglabs.github.io/mfglabs-iconset/css/mfglabs_iconset.css"
+   ],
+   "dependencies": [],
+   "defaults": {
+    "w": 45,
+    "h": 20
+   },
+   "runnable": true,
+   "uri": "repository/launchpad.imjoy.html"
   },
   {
    "name": "Live Stream",
