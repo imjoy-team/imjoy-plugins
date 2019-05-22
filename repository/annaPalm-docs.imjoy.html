@@ -8,7 +8,7 @@ This plugin renders the documentation for the ANNA-PALM plugin.
   "type": "window",
   "tags": [],
   "ui": "",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "cover": "",
   "description": "Documentation for ANNA-PALM plugin.",
   "icon": "extension",
@@ -31,7 +31,7 @@ This plugin renders the documentation for the ANNA-PALM plugin.
 <attachment name="summary">
 <br>
 <p id="summary"> 
-  This plugin use ANNA-PALM that uses deep learning to reconstruct super-resolution 
+  This plugin implements ANNA-PALM, which uses deep learning to reconstruct super-resolution 
   views from sparse, rapidly acquired localization images and/or widefield images.
  </p>
  
@@ -45,18 +45,18 @@ Here, we provide workflows to reconstruct a super-resolution view of microtubule
 
 <figure>
     <img src="https://www.dropbox.com/s/4a0f9h8i0svf3h2/anna-palm-example.png?dl=1" width="700" class="img-responsive p-centered" alt="anna-palm-reconstruction">
-    <figcaption>Example of ANNA-PALM: (left) spares input image, (right) predicted super resolution view.</figcaption>
+    <figcaption>Example of ANNA-PALM reconstruction: (left) input = sparse localization image, (right) output = predicted super-resolution image.</figcaption>
 </figure>
 
 ## Installing the plugin and main features
 
-If you don't already have the plugin, you can install it from this <a onclick="api.utils.openUrl('https://imjoy.io/#/app?w=care&plugin=oeway/ImJoy-Plugins:ANNA-PALME@GPU')">**link.**</a>
+If you don't already have the plugin, you can install it from this <a onclick="api.utils.openUrl('https://imjoy.io/#/app?w=care&plugin=oeway/ImJoy-Plugins:ANNA-PALM@GPU')">**link.**</a>
 
 When starting the ANNA-PALM plugin, you will see a **central launch pad** allowing to select the task to be performed:
 
 <figure>
-    <img src="https://www.dropbox.com/s/wgz17gxewlmrg6r/anna-palm-launchpad.png?dl=1" class="img-responsive p-centered" alt="anna-palm-launchpad">
-    <figcaption>Screen shot of ANNA-PALM plugin launchpad.</figcaption>
+    <img src="https://www.dropbox.com/s/ahpjey8fs7flz7q/anna-palm-launchpad.png?dl=1" class="img-responsive p-centered" alt="anna-palm-launchpad">
+    <figcaption>ANNA-PALM plugin launchpad.</figcaption>
 </figure>
 
 The **main features** are:   
@@ -66,20 +66,51 @@ The **main features** are:
 
 </attachment> 
 
-
-<attachment name="data">
+<attachment name="load-model">
 <br>
-<p style="color:#FF0000"> FOR IMJOY REVIEWERS: if you use the provided remote-engine, example data is available at `imjoy/imjoy-paper/ANNA-PALM-DATA`.</p>
+<p style="color:#FF0000"> FOR IMJOY REVIEWERS: if you use the provided remote-engine, a pre-trained model is available at`imjoy/imjoy-paper/ANNA-PALM-MODEL`.</p>
 <br>
-<p id="data-requirements">
-Here we describe briefly how the experimental data has to be provided. 
+<p>
+Here we describe how to load a pre-trained model that can be used either directly for prediction or for re-training. 
 </p>
 
-* Experimental data for training consists of pairs of PALM/STORM results and the corresponding super-resolution image.
- PALM/STORM results have to be provided as **thunderSTROM csv format**. These pairs have the same filename, except the extension. 
-* Training and validation data are in separate folders `train` and `test`.
+## Trained model for microtubulins
+A pre-trained model for microtubulins is available <a onclick="api.utils.openUrl('https://www.dropbox.com/sh/0ze0iq1pkxntszc/AADpXGwkRu894f4idjoNCEpSa?dl=0')">**here**.</a>
+1. The actual model is contained in the folder `__model__`. 
+2. After downloading, you can load the trained model to the plugin engine (See FAQ for how to load data on the engine). 
 
-For instance, the provided example data for the microtubules looks like this:
+## Load model into ANNA-PALM plugin
+Pressing the button `Load trained model` will open a file-dialog where you can select 
+a model that is stored on the plugin engine on which the plugin is running. 
+
+This model is then available either for re-training or prediction. 
+
+</attachment>
+
+
+<attachment name="training">
+<br>
+<p style="color:#FF0000"> FOR IMJOY REVIEWERS: for immediating testing, you can use the provided remote engine 'imjoy.pasteur.cloud' with the 'GPU' tag.
+  Further, training data for microtubules is already available at 'imjoy/imjoy-paper/ANNA-PALM-DATA'. 
+</p>
+<br>
+<p id="training">
+Here we describe how to select a plugin engine, a computational environment, and the training data to perform training. 
+</p>
+
+## Training data
+* Training data consist of widefield and dense PALM/STORM images. The localization data must be 
+provided using the csv format of ThunderSTORM. These data pairs have the same filename, except the extension. 
+Training data will then be performed on sub-sampled PALM/STORM images. 
+* Training and validation data are in separate folders 'train' and 'test'.
+
+Training data (the folder containing subfolder 'train' and 'test') has to be loaded onto 
+the plugin engine, where the ANNA-PALM plugin is running. See FAQ for how to load data 
+on the engine. 
+
+Experimental test data is available <a onclick="api.utils.openUrl('https://www.dropbox.com/sh/x6iy0gb928lk956/AADPLbIgsLaF8QcvnmX7qt72a?dl=0')">**here**.</a>
+
+The provided example data for the microtubules looks like this:
 
 ```
 ├─ experimental_microtubules/
@@ -93,51 +124,6 @@ For instance, the provided example data for the microtubules looks like this:
 │  │  ├─ Ctrl-lowDens_pos10.png
 │  │  ├─ ...
 ```
-
-Experimental test data is available <a onclick="api.utils.openUrl('https://www.dropbox.com/sh/x6iy0gb928lk956/AADPLbIgsLaF8QcvnmX7qt72a?dl=0')">**here**.</a>
- 
-
-</attachment>
-
-<attachment name="load-model">
-<br>
-<p style="color:#FF0000"> FOR IMJOY REVIEWERS: if you use the provided remote-engine, a pre-trained model is available at`imjoy/imjoy-paper/ANNA-PALM-MODEL`.</p>
-<br>
-<p>
-Here we describe how to load a pre-trained model that can be used either directly for prediction or for re-training. 
-</p>
-
-## Trained model for microtubulins
-A pre-trained model for microtubulins is available <a onclick="api.utils.openUrl('https://www.dropbox.com/sh/0ze0iq1pkxntszc/AADpXGwkRu894f4idjoNCEpSa?dl=0')">**here**.</a>
-1. The actual model is contained in the folder `__model__`. 
-2. After downloading, you can drag and drop the folder containing the model subfolder to the plugin engine. 
-3. In ImJOy, press `Files`, and `Open Engine File`.
-4. If ImJoy is connected to multiple plugin engines, select the one the ANNA-PALM plugin is running on.
-5. Navigate to the folder where you want to load your data. 
-5. Drag & drop the folder containing the model into this folder.
-
-<figure>
-    <img src="" class="img-responsive p-centered" alt="load-model-into-engine">
-    <figcaption>Load a pre-trained model on a plugin engine.</figcaption>
-</figure>
-
-## Load model into ANNA-PALM plugin
-Pressing the button `Load trained model` will open a file-dialog where you can select 
-a model that is stored on the plugin engine on which the plugin is running. 
-
-This model is then available either for re-training or prediction. 
-
-</attachment>
-
-
-<attachment name="training">
-<br>
-<p style="color:#FF0000"> FOR IMJOY REVIEWERS: for immediating testing, you can use the provided remote engine 'imjoy.pasteur.cloud' with the 'GPU' tag.</p>
-<br>
-<br>
-<p id="training">
-Here we describe how to select a plugin engine, a computational environment, and the training data to perform training. 
-</p>
 
 ## Where to perform training: plugin engine
 Training is performed on an ImJoy plugin engine, which can either run remotely or on your 
@@ -165,51 +151,29 @@ between these computational modes, you can select the corresponding "tag". Curre
     <figcaption>Choosing between GPU and CPU computing.</figcaption>
 </figure>
 
-## Providing training data
-<br>
-<p style="color:#FF0000"> FOR IMJOY REVIEWERS: if you use the provided remote-engine, a training data is available at`imjoy/imjoy-paper/ANNA-PALM-DATA`.</p>
-<br>
-
-The training has to be copied to the plugin engine, on which the ANNA-PALM plugin is running. 
-
-Experimental test data is available <a onclick="api.utils.openUrl('https://www.dropbox.com/sh/x6iy0gb928lk956/AADPLbIgsLaF8QcvnmX7qt72a?dl=0')">**here**.</a>
-
-* You can **drag and drop a folder containing subfolders 'train' and 'test'**  into the plugin engine, where the CARE plugin is running:
-    1. In the ImJoy interface, select `Files` and `Open Engine files`.
-    2. If you have multiple plugin engines running, select the engine on which the CARE plugin is running in the upper part of the interface. 
-    3. Navigate to the folder where you want to load your data. 
-    4. Drag & drop the folder containing subfolders 'train' and 'test' into this folder.
-    5. You can then use this folder for training.
-
-<figure>
-    <img src=" " class="img-responsive  p-centered" alt="transfer-training-data">
-    <figcaption>Transferring training data to the plugin engine.</figcaption>
-</figure>
-
-
 ## Monitoring training progress
 Once training data is provided, the training a dashboard will be shown that allows to inspect training progress.
 * In the upper part the dashboard shows the loss functions for the training and validation data. You can hoover
-over the curves to see the current value and what loss function it is. 
+over the curves to see the current value and what loss function it is. The slider allows you to scroll through the different training steps and inspect how the quality
+ of the prediction changes.
+
+<figure>
+    <img src="https://www.dropbox.com/s/2zn1t6mnognavst/anna-palm-loss.png?dl=1" width="500" class="img-responsive  p-centered" alt="training-loss">
+    <figcaption>Transferring training data to the plugin engine.</figcaption>
+</figure>
+
 * In the lower part it shows the prediction results on a randomly selected image.
  'A' stands for sparse (input image), 'B' for high-resolution image. The following images are shown
     - real_A: sparse input image
     - real_B: high-resolution target image
     - reco_B: reconstructed high-resolution image
     - squirrel_error_map: error map calculate with the squirrel approach
-* The slider allows you to scroll through the different training steps and inspect how the quality
- of the prediction changes.
-
-<figure>
-    <img src="https://www.dropbox.com/s/2zn1t6mnognavst/anna-palm-loss.png?dl=1" class="img-responsive  p-centered" alt="training-loss">
-    <figcaption>Transferring training data to the plugin engine.</figcaption>
-</figure>
 
 If you want to **terminate the training** click on the icon next to the plugin name, 
-and select `Terminate` and then close the window with the red x.
+select `Terminate` and then close the window with the red x.
 
 ## Trained model
-Once training is finished, the trained model is stored **WHERE?**. 
+Once training is finished, the trained model can be used for prediction. 
 
 </attachment>
 
@@ -217,12 +181,17 @@ Once training is finished, the trained model is stored **WHERE?**.
 To predict an image, you can either load a pre-trained model into the engine, or
 train a new model. For either option, we refer to the dedicated sections in this documentation. 
 
-1. Press on `Predict`. This will then use either the loaded model, or the trained one. 
-2. Specify the folder the data you want to predict, e.g. the test folder of the provided example data 
-3. This will then open a new interface, where progress on prediction is reported
+
+1. Press on `Predict`. This will then use either the loaded model, or (if available) the newly trained one. 
+2. Specify the folder the data you want to predict (it must contain a 'test' subfolder), e.g. the folder of the provided example data 
+3. This will then open a new interface, where progress on prediction is reported. 
+   The plugin will use the data in the 'test' folder. 
+   It will create 30 different samples, by sub-sampling with vastly different framenumbers
+5. Once prediction is finished, you can scroll throught these data. 'Step' corresponds to one 
+ created data-set.   
 
 <figure>
-    <img src="https://www.dropbox.com/s/1hs0jemw183jg9r/anna-palm-prediction.png?dl=0" class="img-responsive p-centered" alt="screen-shot-care">
+    <img src="https://www.dropbox.com/s/1hs0jemw183jg9r/anna-palm-prediction.png?dl=1" class="img-responsive p-centered" alt="screen-shot-care">
     <figcaption>ANNA-PALM prediction interface.</figcaption>
 </figure>
 
@@ -230,6 +199,19 @@ train a new model. For either option, we refer to the dedicated sections in this
 
 <attachment name="faq">
 Here we provide answer to frequenty asked questions and encountered problems.
+
+## How can I load data or a model into the plugin engine?
+You can simply drag and drop a folder containing either training data or model:
+
+1. In ImJOy, press `Files`, and `Open Engine File`.
+2. If ImJoy is connected to multiple plugin engines, select the one where ANNA-PALM plugin is running in the upper part of the interface.
+3. Navigate to the folder where you want to store your data. 
+4. Drag & drop the folder from Finder (MacOS) or Explorer (WIN) into the ImJoy file dialog.
+
+<figure>
+    <img src="https://www.dropbox.com/s/6dih56s3buf4y48/anna-palm-load-model-to-engine.gif?dl=1" width="700" class="img-responsive p-centered" alt="load-model-into-engine">
+    <figcaption>Load a pre-trained model on a plugin engine.</figcaption>
+</figure>
 
 </attachment>
 
@@ -263,8 +245,6 @@ class ImJoyPlugin {
       
       document.getElementById('cont_summary').innerHTML =
       marked(await api.getAttachment('summary'));
-      document.getElementById('cont_data').innerHTML =
-      marked(await api.getAttachment('data')); 
       document.getElementById('cont_loadModel').innerHTML =
       marked(await api.getAttachment('load-model'));      
       document.getElementById('cont_training').innerHTML =
@@ -293,9 +273,6 @@ api.export(new ImJoyPlugin())
       <li class="tab-item" v-bind:class="{ active: active_tab=='summary' }">
         <a href="#" @click="active_tab='summary'">Summary</a>
       </li>
-      <li class="tab-item" v-bind:class="{ active: active_tab=='data' }">
-         <a href="#" @click="active_tab='data'">Data</a>
-      </li>
       <li class="tab-item" v-bind:class="{ active: active_tab=='load-model' }">
         <a href="#" @click="active_tab='load-model'">Load model</a>
       </li>
@@ -312,7 +289,6 @@ api.export(new ImJoyPlugin())
 
    <!-- This can eventually be replaced by a better organization, e.g. tabs -->
    <div v-show="active_tab=='summary'" class="tab-content" id="cont_summary"></div>
-   <div v-show="active_tab=='data'" class="tab-content" id="cont_data"></div>
    <div v-show="active_tab=='load-model'" class="tab-content" id="cont_loadModel"></div>
    <div v-show="active_tab=='training'" class="tab-content" id="cont_training"></div>
    <div v-show="active_tab=='prediction'" class="tab-content" id="cont_prediction"></div>
