@@ -82,14 +82,14 @@ const app = new Vue({
           min: 0,
           labels: {
             formatter: function (value) {
-              return value.toFixed(0);
+              return value&&value.toFixed(0);
             }
           }
         },
         yaxis: {
           labels: {
             formatter: function (value) {
-              return value.toFixed(4);
+              return value&&value.toFixed(4);
             }
           }
         },
