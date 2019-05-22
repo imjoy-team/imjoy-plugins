@@ -1,0 +1,222 @@
+<docs lang="markdown">
+</docs>
+<config lang="json">
+{
+    "name":"launchpad",
+    "type":"window",
+    "tags":[],
+    "ui":"",
+    "version":"0.1.11",
+    "api_version":"0.1.6",
+    "description":"",
+    "icon":"extension",
+    "inputs":null,
+    "outputs":null,
+    "env":"",
+    "requirements":[
+        "https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.min.js",
+        "https://static.imjoy.io/spectre.css/spectre.min.css",
+        "https://static.imjoy.io/spectre.css/spectre-exp.min.css",
+        "https://mfglabs.github.io/mfglabs-iconset/css/mfglabs_iconset.css"
+    ],
+    "dependencies":[],
+    "defaults":{
+        "w":45,
+        "h":20
+    },
+    "runnable":true
+}
+</config>
+<script lang="javascript">
+const default_callback = ()=>{
+    api.alert('started')
+}
+class ImJoyPlugin {
+    async setup() {
+        this.store = {
+            title: 'launchpad',
+            iconList: [
+                {name: 'icon1', description: `ImJoy - Deploying Deep Learning Made Easy!
+                    ImJoy is a plugin powered hybrid computing platform for deploying deep learning applications such as advanced image analysis tools.
+                    ImJoy - Deploying Deep Learning Made Easy!
+                    ImJoy is a plugin powered hybrid computing platform for deploying deep learning applications such as advanced image analysis tools.
+                    `, icon: 'icon-globe', callback: default_callback},
+                {name: 'icon2', description: 'desc', icon: 'icon-at', callback: default_callback},
+                {name: 'icon3', description: 'desc', icon: 'icon-arrow_up', callback: default_callback},
+                {name: 'icon4', description: 'desc', icon: 'icon-reorder_square', callback: default_callback},
+                {name: 'icon5', description: 'desc', icon: 'icon-globe', callback: default_callback},
+                {name: 'icon6', description: 'desc', icon: 'icon-globe', callback: default_callback},
+                {name: 'icon7', description: 'desc', icon: 'icon-globe', callback: default_callback},
+                {name: 'icon8', description: 'desc', 'img': 'https://cdn.elegantthemes.com/preview/Vertex/wp-content/uploads/2013/06/test5.jpg', callback: default_callback},
+                {name: 'icon9', description: 'desc', 'img': 'https://cdn.elegantthemes.com/preview/Vertex/wp-content/uploads/2013/06/test3.jpg', callback: default_callback}
+            ],
+            description: ''
+        }
+        this.app = new Vue({
+            el: '#app',
+            data: this.store,
+            methods: {
+                imageMouseover (desc) {
+                    this.description = desc
+                },
+                imageMouseout () {
+                    this.description = ''
+                }
+            },
+            mounted () {}
+        })
+    }
+    async run(my) {
+        console.log(my.data)
+        if (my.data && my.data.length > 0) {
+            this.store.iconList = my.data
+            this.app.$forceUpdate()
+        } else {
+            console.log('data is empty')
+        }
+    }
+}
+api.export(new ImJoyPlugin())
+</script>
+<window lang="html">
+<div class="container" id="app">
+    <div class="description">
+        {{description}}
+    </div>
+    <div class="columns">    
+        <div class="column hide-sm col-md-1 col-2">&nbsp;</div>
+        <div class="columns col-sm-12 col-md-10 col-8">
+            <div v-for="(v, k) in iconList" class="column col-xs-6 col-sm-4 col-md-3 col-3 cursor-pointer column-container">
+                <div class="popover popover-bottom image" @click="v.callback()">
+                    <i v-if="v.icon" class="gradient icon-size" :class="[v.icon]" @mouseover="imageMouseover(v.description)" @mouseout="imageMouseout()"></i>
+                    <img v-else :src="v.img" class="img-size" @mouseover="imageMouseover(v.description)" @mouseout="imageMouseout()">
+                    <div class="info" v-if="v.name">
+                        <h1>{{v.name}}</h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="column hide-sm col-md-1 col-2">&nbsp;</div>
+    </div>
+    
+</div>
+</window>
+<style lang="css">
+.container {
+    margin: auto;
+    text-align: center;
+    padding: 5px;
+}
+.column-container {
+    text-align: center;
+}
+.description {
+    min-height: 72px;
+}
+.icon-container {
+    width: 100px;
+    height: 100px;
+    margin: 20px 0 50px 0;
+    margin: auto;
+}
+.cursor-pointer {
+    cursor: pointer;
+}
+.icon-size {
+    font-size: 10em;
+    position: relative;
+    top: -20px;
+}
+.img-size {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    position: relative;
+    top: 20px;
+    margin-bottom: 85px;
+}
+.popover-container {
+    width: 230px !important;
+    text-align: justify;
+}
+.card-body {
+    padding: 10px 20px !important;
+}
+@font-face {
+    font-family: 'mfg_labs_iconsetregular';
+    src: url('https://mfglabs.github.io/mfglabs-iconset/css/font/mfglabsiconset-webfont.eot');
+    src: url('https://mfglabs.github.io/mfglabs-iconset/css/font/mfglabsiconset-webfont.eot?#iefix') format('embedded-opentype'),
+         url('https://mfglabs.github.io/mfglabs-iconset/css/font/mfglabsiconset-webfont.woff') format('woff'),
+         url('https://mfglabs.github.io/mfglabs-iconset/css/font/mfglabsiconset-webfont.ttf') format('truetype'),
+         url('https://mfglabs.github.io/mfglabs-iconset/css/font/mfglabsiconset-webfont.svg#mfg_labs_iconsetregular') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+body{
+    font-family: 'Open Sans', sans-serif;
+    text-align: center;
+    padding-bottom: 80px;
+}
+.image{
+    position: relative;
+    width: 192px;
+    height: 192px;
+    display: inline-block;
+    border-radius: 50%;
+    background-size: 100% !important;
+    z-index: 2;
+    transform: scale3d(.5,.5,1);
+    transition: .3s all;
+    -webkit-filter: grayscale(.6);
+    cursor: pointer;
+}
+.image:nth-child(2n){
+    top: 20px;
+}
+.image:before{
+    transform: scale3d(2,2,1);
+    z-index: 1;
+    opacity: .1
+}
+.image:after{
+   transform: scale3d(0,0,1);
+}
+.image:hover:before{
+    transform: scale3d(1,1,1);
+    opacity: .3;
+}
+.image:hover:after{
+    transform: scale3d(1,1,1);
+    opacity: .3;
+}
+.image .info{
+    position: relative;
+    width: 192px;
+    padding: 20px;
+    z-index: 1;
+    text-align: center;
+    border-radius: 5px;
+    transform: translate3d(0, -65px,0) scale3d(1.5,1.5,1);
+}
+.image .info h1{
+    font-weight: 700;
+    font-size: 20px;
+}
+.image .info h2{
+    font-weight: 300;
+    font-size: 16px;
+}
+.image .info h2 b{
+    font-weigth: 400;
+}
+.image:hover{
+    transform: scale3d(0.8,0.8,0.8);
+    -webkit-filter: grayscale(0);
+    z-index: 100;
+}
+.image:hover .info{
+    transform: rotate3d(0,0, 0, 90deg) translate3d(0, -85px,0) scale3d(1,1,1);
+    opacity: 1;
+    visibility: visible;
+}
+</style>
