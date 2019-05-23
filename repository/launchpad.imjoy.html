@@ -6,7 +6,7 @@
     "type":"window",
     "tags":[],
     "ui":"",
-    "version":"0.1.11",
+    "version":"0.1.12",
     "api_version":"0.1.6",
     "description":"",
     "icon":"extension",
@@ -60,12 +60,13 @@ class ImJoyPlugin {
                     this.description = desc
                 },
                 imageMouseout () {
-                    this.description = ''
+                    // this.description = ''
                 }
             },
             mounted () {}
         })
     }
+
     async run(my) {
         console.log(my.data)
         if (my.data && my.data.length > 0) {
@@ -81,9 +82,9 @@ api.export(new ImJoyPlugin())
 <window lang="html">
 <div class="container" id="app">
     <div class="description">
-        {{description}}
+        <p style="text-align:center;">{{description}}<p>
     </div>
-    <div class="columns">    
+    <div class="columns" style="margin-top: 60px;">    
         <div class="column hide-sm col-md-1 col-2">&nbsp;</div>
         <div class="columns col-sm-12 col-md-10 col-8">
             <div v-for="(v, k) in iconList" class="column col-xs-6 col-sm-4 col-md-3 col-3 cursor-pointer column-container">
@@ -110,15 +111,26 @@ api.export(new ImJoyPlugin())
 .column-container {
     text-align: center;
 }
+
 .description {
-    min-height: 72px;
+    height: 80px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    text-align: center;
+    overflow: auto;
+    z-index: 9999;
+    background-color: white;
 }
+
 .icon-container {
     width: 100px;
     height: 100px;
     margin: 20px 0 50px 0;
     margin: auto;
 }
+
 .cursor-pointer {
     cursor: pointer;
 }
@@ -127,6 +139,7 @@ api.export(new ImJoyPlugin())
     position: relative;
     top: -20px;
 }
+
 .img-size {
     width: 150px;
     height: 150px;
@@ -135,13 +148,16 @@ api.export(new ImJoyPlugin())
     top: 20px;
     margin-bottom: 85px;
 }
+
 .popover-container {
     width: 230px !important;
     text-align: justify;
 }
+
 .card-body {
     padding: 10px 20px !important;
 }
+
 @font-face {
     font-family: 'mfg_labs_iconsetregular';
     src: url('https://mfglabs.github.io/mfglabs-iconset/css/font/mfglabsiconset-webfont.eot');
@@ -152,6 +168,7 @@ api.export(new ImJoyPlugin())
     font-weight: normal;
     font-style: normal;
 }
+
 body{
     font-family: 'Open Sans', sans-serif;
     text-align: center;
@@ -173,6 +190,7 @@ body{
 .image:nth-child(2n){
     top: 20px;
 }
+
 .image:before{
     transform: scale3d(2,2,1);
     z-index: 1;
@@ -181,6 +199,7 @@ body{
 .image:after{
    transform: scale3d(0,0,1);
 }
+
 .image:hover:before{
     transform: scale3d(1,1,1);
     opacity: .3;
@@ -198,10 +217,12 @@ body{
     border-radius: 5px;
     transform: translate3d(0, -65px,0) scale3d(1.5,1.5,1);
 }
+
 .image .info h1{
     font-weight: 700;
     font-size: 20px;
 }
+
 .image .info h2{
     font-weight: 300;
     font-size: 16px;
@@ -214,6 +235,7 @@ body{
     -webkit-filter: grayscale(0);
     z-index: 100;
 }
+
 .image:hover .info{
     transform: rotate3d(0,0, 0, 90deg) translate3d(0, -85px,0) scale3d(1,1,1);
     opacity: 1;
