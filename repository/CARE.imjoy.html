@@ -420,16 +420,16 @@ class ImJoyPlugin():
     async def show_docs(self):
         self.dialog.close()
         try:
-            await this.win_docs.run({'data': {}})
-            this.win_docs.focus()
+            await self.win_docs.run({'data': {}})
+            self.win_docs.focus()
         except:
-            this.win_docs = await api.createWindow({
+            self.win_docs = await api.createWindow({
                 'name': 'Documentation - CARE',
                 'type': 'CARE-docs',
                 'w':30, 'h':20,
                 'data': {}
                 })
-            this.win_docs.focus()
+            self.win_docs.focus()
 
     async def export_model(self):
         self.dialog.close()
