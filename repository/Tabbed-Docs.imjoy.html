@@ -10,7 +10,7 @@ A plugin for displaying documentation in tabs
   "type": "window",
   "tags": [],
   "ui": "",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "cover": "",
   "description": "A plugin for displaying documentation in tabs.",
   "icon": "extension",
@@ -44,26 +44,26 @@ class ImJoyPlugin {
         marked: marked
       },
       methods: {
-        activateTab(name){
-          this.active_tab = name
+        selectTab(tab_name, section_id){
+          this.active_tab = tab_name
         },
-        select(tab_name, section_id){
-          if(tab_name){
-            this.active_tab = tab_name
-          }
-          if(section_id){
-            this.nextTick(()=>{
-              document.getElementById(section_id).scrollIntoView()
-            })
-          }
+        scrollTo(section_id){
+          this.nextTick(()=>{
+            document.getElementById(section_id).scrollIntoView()
+          })
         }
       }
     })
     api.log('initialized')
   }
   
-  select(tab, section){
-    this.app.select(tab, section)
+  selectTab(tab){
+    this.app.selectTab(tab)
+    this.app.$forceUpdate()
+  }
+
+  scrollTo(section){
+    this.app.scrollTo(section)
     this.app.$forceUpdate()
   }
 
@@ -74,9 +74,10 @@ class ImJoyPlugin {
     }
     else{
       this.app.docs_data = {tabs: [ {'name': 'tab1', 'content': '## Title 1'}, {'name': 'tab2', 'content': '## Title 2'}] }
-      this.app.active_tab = 'tab1'
+       this.selectTab('tab1')
       setTimeout(()=>{
-        this.select('tab2', 'title-2')
+        this.selectTab('tab2')
+        this.scrollTo('title-2')
       }, 2000)
     }
   }
