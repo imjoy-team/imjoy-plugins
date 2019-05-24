@@ -1,0 +1,107 @@
+<docs lang="markdown">
+# Tabbed Docs Plugin
+
+A plugin for displaying documentation in tabs
+</docs>
+
+<config lang="json">
+{
+  "name": "Tabbed-Docs",
+  "type": "window",
+  "tags": [],
+  "ui": "",
+  "version": "0.1.1",
+  "cover": "",
+  "description": "A plugin for displaying documentation in tabs.",
+  "icon": "extension",
+  "inputs": null,
+  "outputs": null,
+  "api_version": "0.1.5",
+  "env": "",
+  "requirements": [
+        "https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.10/vue.min.js",
+        "https://cdnjs.cloudflare.com/ajax/libs/marked/0.6.2/marked.js",
+        "https://static.imjoy.io/spectre.css/spectre.min.css",
+        "https://static.imjoy.io/spectre.css/spectre-exp.min.css",
+        "https://static.imjoy.io/spectre.css/spectre-icons.min.css"],
+  "dependencies": [],
+  "defaults": {"w": 30, "h": 20}
+}
+</config>
+
+<script lang="javascript">
+class ImJoyPlugin {
+  async setup() {
+    // For vue
+    this.app = new Vue({
+      el: '#app',
+      data: {
+        active_tab: 'summary',
+        docs_data: {
+          tabs: [
+          ]
+        },
+        marked: marked
+      },
+      methods: {
+        activateTab(name){
+          this.active_tab = name
+        },
+        focus(tab_name, section_id){
+          if(tab_name && section_id){
+            this.active_tab = tab_name
+            this.nextTick(()=>{
+              document.getElementById(section_id).scrollIntoView()
+            })
+          }
+        }
+      }
+    })
+    api.log('initialized')
+  }
+  
+  focus(tab, section){
+    this.app.focus(tab, section)
+    this.app.$forceUpdate()
+  }
+
+  async run(ctx) {
+    this.app.docs_data = {tabs: [ {'name': 'tab1', 'content': '## Title 1'}, {'name': 'tab2', 'content': '## Title 2'}] }
+    this.app.active_tab = 'tab1'
+  }
+}
+api.export(new ImJoyPlugin())
+</script>
+
+<window lang="html">
+  <div id="app">
+    
+    <ul class="tab tab-block" v-if="docs_data">
+      <li class="tab-item" v-for="(tab, k) in docs_data.tabs" v-bind:class="{ active: active_tab==tab.name }">
+        <a href="#" @click="active_tab=tab.name">{{tab.name}}</a>
+      </li>
+     
+    </ul>
+
+   <!-- This can eventually be replaced by a better organization, e.g. tabs -->
+   <div v-show="active_tab===tab.name"  v-for="(tab, k) in docs_data.tabs" class="tab-content">
+     <span v-html="marked(tab.content)" v-if="tab.content"></span>
+   </div>
+  </div>
+</window>
+
+<style lang="css">
+
+.tab-content{
+  padding: 10px;
+}
+
+figcaption {
+    background-color: #fff;
+    color: #a1c8f2;
+    font: italic smaller sans-serif;
+    padding: 3px;
+    text-align: center;
+}
+
+</style>
