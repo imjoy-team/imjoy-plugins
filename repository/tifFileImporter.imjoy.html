@@ -11,7 +11,8 @@
   "outputs": {"type": "object", "properties": {"type": { "type": "string", "enum": ["image/grayscale"] }}},
   "icon": null,
   "requirements": ["https://static.imjoy.io/js/UTIF.js"],
-  "dependencies": ["oeway/ImJoy-Plugins:Image Window"]
+  "dependencies": ["oeway/ImJoy-Plugins:Image Window"],
+  "runnable": false
 }
 </config>
 <script lang="javascript">
@@ -151,7 +152,7 @@ class ImJoyPlugin {
     this._count = this._count + 1
     this.opened[id] = new TifFile(file)
     await this.opened[id].load()
-    return {id: id, 
+    return {id: id,
       read: ()=>{
         if(this.opened[id]){
           const [canvas_data, w, h, max, min] = this.opened[id].read()
@@ -172,7 +173,7 @@ class ImJoyPlugin {
       },
       close: ()=>{
         if(this.opened[id]){
-          delete this.opened[id] 
+          delete this.opened[id]
         }
         else{
           throw "file does not exisits or beining closed already"

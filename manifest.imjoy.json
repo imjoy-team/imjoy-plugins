@@ -52,7 +52,7 @@
   {
    "name": "CARE",
    "type": "native-python",
-   "version": "0.1.10",
+   "version": "0.1.11",
    "api_version": "0.1.2",
    "description": "This plugin demonstrates denoising using CARE.",
    "tags": [
@@ -117,8 +117,46 @@
     "w": 20,
     "h": 10
    },
-   "runnable": true,
+   "runnable": false,
    "uri": "repository/Im2Im-Dashboard.imjoy.html"
+  },
+  {
+   "name": "ImageAnnotator",
+   "type": "window",
+   "tags": [],
+   "ui": "",
+   "version": "0.5.63",
+   "api_version": "0.1.5",
+   "description": "An image annotator made with OpenLayers",
+   "icon": "extension",
+   "inputs": null,
+   "outputs": null,
+   "env": "",
+   "requirements": [
+    "https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.min.js",
+    "https://cdn.jsdelivr.net/npm/openlayers@4.6.5/css/ol.css",
+    "https://cdn.jsdelivr.net/npm/openlayers@4.6.5/dist/ol.min.js",
+    "https://static.imjoy.io/spectre.css/spectre.min.css",
+    "https://static.imjoy.io/spectre.css/spectre-exp.min.css",
+    "https://static.imjoy.io/spectre.css/spectre-icons.min.css",
+    "https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/13.1.5/nouislider.min.css",
+    "https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/13.1.5/nouislider.min.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/pako/1.0.10/pako.min.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/upng-js/2.1.0/UPNG.min.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.2.0/jszip.min.js",
+    "https://use.fontawesome.com/releases/v5.8.2/css/all.css"
+   ],
+   "dependencies": [
+    "https://git.sg-ai.com/imjoy/ImJoy-Plugins/raw/master/plugins/ImageSelection.imjoy.html",
+    "oeway/ImJoy-Plugins:Tif File Importer"
+   ],
+   "defaults": {
+    "w": 35,
+    "h": 25,
+    "fullscreen": true
+   },
+   "cover": "https://dl.dropbox.com/s/hmoio1d62vuvito/annotator-v0.5.40.gif",
+   "uri": "repository/ImageAnnotator.imjoy.html"
   },
   {
    "name": "MNIST-CNN",
@@ -655,6 +693,7 @@
    "dependencies": [
     "oeway/ImJoy-Plugins:Image Window"
    ],
+   "runnable": false,
    "uri": "repository/tifFileImporter.imjoy.html"
   },
   {
