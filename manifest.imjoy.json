@@ -246,6 +246,33 @@
    "uri": "repository/Noise2Self.imjoy.html"
   },
   {
+   "name": "Tabbed-Docs",
+   "type": "window",
+   "tags": [],
+   "ui": "",
+   "version": "0.1.2",
+   "cover": "",
+   "description": "A plugin for displaying documentation in tabs.",
+   "icon": "extension",
+   "inputs": null,
+   "outputs": null,
+   "api_version": "0.1.5",
+   "env": "",
+   "requirements": [
+    "https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.10/vue.min.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/marked/0.6.2/marked.js",
+    "https://static.imjoy.io/spectre.css/spectre.min.css",
+    "https://static.imjoy.io/spectre.css/spectre-exp.min.css",
+    "https://static.imjoy.io/spectre.css/spectre-icons.min.css"
+   ],
+   "dependencies": [],
+   "defaults": {
+    "w": 30,
+    "h": 20
+   },
+   "uri": "repository/Tabbed-Docs.imjoy.html"
+  },
+  {
    "name": "Anet-Lite",
    "mode": "pyworker",
    "version": "0.1.2",
