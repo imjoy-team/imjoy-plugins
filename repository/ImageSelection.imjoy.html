@@ -1,0 +1,608 @@
+<docs lang="markdown">
+  [TODO: write documentation for this plugin.]
+</docs>
+<config lang="json">
+{
+    "name":"ImageSelection",
+    "type":"window",
+    "tags":[],
+    "ui":"",
+    "version":"0.2.46",
+    "api_version":"0.1.5",
+    "description":"This is a backbone plugin for using Vue.js in ImJoy",
+    "icon":"extension",
+    "inputs":null,
+    "outputs":null,
+    "env":"",
+    "requirements":[
+        "https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.min.js",
+        "https://static.imjoy.io/spectre.css/spectre.min.css",
+        "https://static.imjoy.io/spectre.css/spectre-exp.min.css",
+        "https://static.imjoy.io/spectre.css/spectre-icons.min.css",
+        "https://static.imjoy.io/js/UTIF.js"
+    ],
+    "dependencies":[
+        "oeway/ImJoy-Plugins:Tif File Importer"
+    ],
+    "defaults":{
+        "w":30,
+        "h":20
+    },
+    "runnable":false
+}
+</config>
+<script lang="javascript">
+function longest_common_starting_substring(arr1) {
+    const arr = arr1.concat().sort();
+    const a1 = arr[0];
+    const a2 = arr[arr.length - 1];
+    const L = a1.length;
+    let i = 0;
+    while (i < L && a1.charAt(i) === a2.charAt(i)) i++;
+    return a1.substring(0, i);
+}
+
+function array2url(imageArr, w, h, low, high, lut){
+    var canvas = document.createElement('canvas');
+    canvas.width = w
+    canvas.height = h
+    var ctx = canvas.getContext("2d");
+    var canvas_img = ctx.getImageData(0, 0, canvas.width, canvas.height)
+    var canvas_img_data = canvas_img.data;
+    var count = w*h
+    var range = high -low
+    var min = Number.POSITIVE_INFINITY, max= Number.NEGATIVE_INFINITY;
+    var v;
+    if(range<=0){
+        for(let i=0;i<count;i++){
+            if(imageArr[i]>max) max=imageArr[i]
+            if(imageArr[i]<min) min=imageArr[i]
+        }
+        low = min
+        high = max
+        range = max-min
+    }
+    for(let i=0;i<count;i++){
+        if(imageArr[i]>max) max=imageArr[i]
+        if(imageArr[i]<min) min=imageArr[i]
+
+        v = (imageArr[i]-low)/range * 255
+        v = v>255?255:v
+        if(lut){
+            v = lut[parseInt(v)]
+            canvas_img_data[i*4] = v[0]
+            canvas_img_data[i*4+1] = v[1]
+            canvas_img_data[i*4+2] = v[2]
+            canvas_img_data[i*4+3] = 255
+        }
+        else{
+            canvas_img_data[i*4] = v
+            canvas_img_data[i*4+1] = v
+            canvas_img_data[i*4+2] = v
+            canvas_img_data[i*4+3] = 255
+        }
+
+    }
+    ctx.putImageData(canvas_img, 0, 0);
+    return canvas.toDataURL("image/png")
+}
+
+function generateThumbnail(f) {
+    return new Promise(async (resolve, reject) => {
+        if(f.name.endsWith('.tif') || f.name.endsWith('.tiff')){
+            const p = await api.getPlugin('Tif File Importer')
+            const fileObj = await p.open(f)
+            const obj = await fileObj.read()
+
+            console.log(obj.width, obj.height, obj.min, obj.max)
+            const url = array2url(obj.array, obj.width, obj.height, obj.min, obj.max)
+
+            var img = new Image();
+            img.onload = function () {
+                var canvas = document.createElement('canvas')
+                var ctx = canvas.getContext('2d');
+                canvas.width = 64;
+                canvas.height = 64;
+                ctx.drawImage(img, 0, 0);
+                resolve(canvas.toDataURL())
+            }
+            img.onerror = function (e) {
+                reject('image load error')
+            };
+            img.src = url
+        }
+        else if(f.name.endsWith('.png') || f.name.endsWith('.jpg')){
+            var reader = new FileReader();
+            reader.onload = function (event) {
+                var img = new Image();
+                img.onload = function () {
+                    var canvas = document.createElement('canvas')
+                    var ctx = canvas.getContext('2d');
+                    canvas.width = 64;
+                    canvas.height = 64;
+                    ctx.drawImage(img, 0, 0);
+                    resolve(canvas.toDataURL())
+                }
+                img.onerror = function (e) {
+                    reject('image load error')
+                };
+                img.src = event.target.result;
+            }
+            reader.onerror = function (event) {
+                reader.abort();
+                reject('reader error')
+            };
+            reader.readAsDataURL(f);
+        }
+        else{
+            resolve()
+        }
+    })
+}
+
+function file2text(file) {
+    return new Promise((resolve, reject) => {
+        var reader = new FileReader();
+        reader.onload = (event) => {
+            resolve(event.target.result)
+        }
+        reader.onerror = (err) => {
+            reject(err)
+        }
+        reader.readAsText(file, 'utf8');
+    })
+}
+
+function fetchDataByUrl(url, type = 'json') {
+    return new Promise((resolve, reject) => {
+        fetch(url)
+            .then((response) => {
+                if (type === 'json') {
+                    return response.json();
+                } else if (type === 'blob') {
+                    return response.blob()
+                } else {
+                    reject('File type error')
+                }
+            })
+            .then((data) => {
+                resolve(data)
+            })
+            .catch((err) => {
+                reject(err)
+            })
+    })
+}
+
+let self = null
+const API_VERSION = '0.1.6'
+
+class ImJoyPlugin {
+    async setup() {
+        this.store = {
+            dataset: null,
+            samples: [],
+            receiveData: {},
+            channelName: '',
+            filter: '',
+            channel_config: {},
+            loading: false
+        }
+        this.app = new Vue({
+            el: '#app',
+            data: this.store,
+            methods: {
+                async loadEngineClick() {
+                    let pathObj = await api.showFileDialog()
+                    this.channel_config = {}
+                    this.samples = []
+
+                    let root_url = await api.getFileUrl({'path': pathObj.path, 'engine': pathObj.engine})
+                    this.loading = true
+                    let root_items = await fetchDataByUrl(root_url)
+
+                    root_items = root_items.filter((item) => {
+                        return item.name && !item.name.startsWith('.') && !(item.name.startsWith('__'))
+                    })
+
+                    let dataset_name = pathObj.path.substring(pathObj.path.lastIndexOf('/') + 1, pathObj.path.length)
+                    const dataset = {
+                        "api_version": API_VERSION,
+                        "root_folder": pathObj.path,
+                        "name": dataset_name,
+                        "channel_config": {},
+                        "annotation_types": {},
+                        "samples": [],
+                        "source": "engine"
+                    }
+                    let channel_config = {}
+                    let arr = root_items.filter((item) => { return item.type === 'file' && item.name === 'config.json' })
+                    if (arr && arr.length > 0) {
+                        let config_file_url = root_url + '/' + arr[0].name
+                        let configData = await fetchDataByUrl(config_file_url)
+                        channel_config = configData.channel_config || {}
+                        dataset.annotation_types = configData.annotation_types || {}
+                    }
+
+                    const get_sample = async (item) => {
+                        if (item.type === 'dir') {
+                            let sample_folder = await fetchDataByUrl(root_url + '/' + item.name)
+                            for (let sf of sample_folder) {
+                                let sample = {}
+                                let data = {}
+                                if (sf.type === 'dir') {
+                                    let files = await fetchDataByUrl(root_url + '/' + item.name + '/' + sf.name)
+                                    for (let f of files) {
+                                        let name = f.name
+                                        data[name] = {
+                                            file_name: f.name,
+                                            path: dataset_name + '/' + item.name + '/' + sf.name + '/' + f.name,
+                                            url: root_url + '/' + item.name + '/' + sf.name + '/' + f.name
+                                        }
+                                    }
+                                }
+
+                                let dataSort = {}
+                                Object.keys(data).sort().forEach((k) => {
+                                    dataSort[k] = data[k]
+                                })
+                                sample['data'] = dataSort
+                                sample['name'] = sf.name
+                                sample['group'] = item.name
+                                console.log('============add sample', sample)
+                                dataset.samples.push(sample)
+                            }
+                        }
+                    }
+                    for(let item of root_items){
+                        await get_sample(item)
+                    }
+
+                    this.samples = dataset.samples
+                    this.dataset = dataset
+                    this.channel_config = {}
+                    this.dataset.channel_config = this.channel_config
+
+                    for (let c in channel_config) {
+                        this.channelName = c
+                        this.filter = channel_config[c].filter
+                        this.addChannel()
+                    }
+                    this.loading = false
+                },
+                async selectFileChanged(event) {
+                    this.samples = []
+                    this.channel_config = {}
+                    this.selected_file = event.target.files[0];
+                    let len = event.target.files.length
+                    document.getElementById('msg').innerHTML = len + ' Files'
+                    const ret = this.detectSamples(event.target.files)
+
+                    let sample_sets = ret.sample_sets
+                    let folder_names = Object.keys(sample_sets)
+                    let arr = []
+                    for (let name of folder_names) {
+                        let samples = this.scanFiles(sample_sets, name)
+                        for (let sample of Object.values(samples)) {
+                            sample.group = name
+                            let dataSort = {}
+                            Object.keys(sample.data).sort().forEach((k) => {
+                                dataSort[k] = sample.data[k]
+                            })
+                            sample['data'] = dataSort
+                            this.samples.push(sample)
+                        }
+                    }
+
+                    this.dataset = {
+                        "api_version": API_VERSION,
+                        "root_folder": ret.root_folder,
+                        "name": ret.root_folder,
+                        "channel_config": this.channel_config,
+                        "annotation_types": {},
+                        "samples": this.samples,
+                        "source": "local"
+                    }
+
+                    console.log(JSON.stringify(this.dataset))
+
+                    // set channel
+                    for (let file of event.target.files) {
+                        if (file.name === 'config.json') {
+                            let jsonData = JSON.parse(await file2text(file))
+                            let config = jsonData.channel_config
+                            let names = Object.keys(config)
+
+                            for (let name of names) {
+                                this.channelName = name
+                                this.filter = config[name].filter
+                                this.addChannel()
+                            }
+                        }
+                    }
+
+                },
+                detectSamples(files) {
+                    const sample_sets = {}
+                    let folder_files = files;
+                    let root = null
+                    for (let i = 0; i < folder_files.length; i++) {
+                        const path = folder_files[i].relativePath || folder_files[i].webkitRelativePath;
+                        const ps = path.split('/')
+                        root = ps[0]
+                        let skip = false
+                        for (let p of ps) {
+                            if (p.startsWith('.')) {
+                                skip = true
+                                break
+                            }
+                        }
+                        if (skip) continue
+
+                        let sample_set
+                        let start = 3
+                        if (ps.length == 3) {
+                            start = 2
+                            if (!sample_sets.hasOwnProperty('/')) {
+                                sample_sets['/'] = {}
+                            }
+                            sample_set = sample_sets['/']
+                        }
+                        else if (ps.length >= 4) {
+                            start = 3
+                            if (!sample_sets.hasOwnProperty(ps[1])) {
+                                sample_sets[ps[1]] = {}
+                            }
+                            sample_set = sample_sets[ps[1]]
+                        }
+                        else{
+                            continue
+                        }
+                        let subf = ps[start -1 ]
+                        const f = ps.slice(start, ps.length).join('/')
+                        const fo = {
+                            file_name: f,
+                            file: folder_files[i],
+                            path: path
+                        }
+                        if (sample_set.hasOwnProperty(subf)) {
+                            sample_set[subf].data[f] = fo
+                        } else {
+                            const ffs = {}
+                            ffs[f] = fo
+                            sample_set[subf] = {
+                                name: subf,
+                                data: ffs
+                            }
+                        }
+                    };
+                    return {sample_sets: sample_sets, root_folder: root}
+                },
+                scanFiles(sample_sets, selected_sample_set) {
+                    const current_samples = sample_sets[selected_sample_set]
+                    const samples = {}
+                    for (let [sample_name, sample] of Object.entries(current_samples)) {
+                        samples[sample_name] = sample
+                    }
+                    return samples
+                },
+                activeClick() {
+                    document.getElementById('file').click()
+                },
+                async finish(save) {
+                    let samples = this.dataset.samples
+                    let channel_config = this.dataset.channel_config
+                    let channel_keys = Object.keys(channel_config)
+                    let result = samples.filter((s) => {
+                        let flag = 0
+                        channel_keys.forEach((c) => {
+                            if (Object.keys(s.data).indexOf(c) === -1) {
+                                flag += 1
+                            }
+                        })
+                        if (flag > 0) {
+                            return false
+                        } else {
+                            return true
+                        }
+                    })
+                    this.dataset.samples = result
+                    api.showMessage(result.length + ' samples were imported. ' + ' There are ' + (samples.length - result.length) + ' samples not imported.')
+
+                    console.log('dataset: ')
+                    console.log(this.dataset)
+                    if(this.receiveData.callback){
+                        this.receiveData.callback(this.dataset, save)
+                    }
+                    else{
+                        console.log('==========dataset===========', this.dataset, save)
+                    }
+                },
+                removeSample(ch) {
+                    this.samples.splice(this.samples.indexOf(ch), 1);
+                },
+                addChannel() {
+                    if (Object.keys(this.channel_config).length >= this.samples[0].data.length) {
+                        api.showMessage('channel out of range.')
+                        return false
+                    }
+                    let channelName = this.channelName
+                    let filter = this.filter
+
+                    if (!channelName || !filter) {
+                        api.showMessage('channel or filter is empty.')
+                        return false
+                    }
+                    if (this.channel_config[channelName]) {
+                        api.showMessage('channel is already exist.')
+                        return false
+                    }
+                    let annotationFlag = 0
+                    for(let sample of this.samples){
+                        for(let fn in sample.data){
+                            if(sample.data[fn].file_name.indexOf(this.filter) >-1){
+                                if (sample.data[fn].file_name === 'annotation.json' || sample.data[fn].file_name === 'prediction.json') {
+                                    api.showMessage('The annotation files cannot be used as channel')
+                                    annotationFlag = 1
+                                } else {
+                                    sample.data[channelName] = sample.data[fn]
+                                    if (fn !== channelName) {
+                                        delete sample.data[fn]
+                                    }
+                                }
+                            } else {
+                                console.log('No match to file. ')
+                            }
+                        }
+                    }
+
+                    if (annotationFlag === 0) {
+                        this.channel_config[channelName] = {filter: this.filter, name: channelName}
+                    }
+                    this.channelName = ''
+                    this.filter = ''
+                    this.$forceUpdate()
+                },
+                removeChannel(channelName) {
+                    for(let sample of this.samples){
+                        for(let fn in sample.data){
+                            if (fn === channelName) {
+                                let name = sample.data[channelName].file_name
+                                sample.data[name] = sample.data[channelName]
+                                delete sample.data[channelName]
+                            }
+                        }
+                    }
+                    delete this.channel_config[channelName]
+                    this.$forceUpdate()
+                },
+                setChannelFilter(f, fs) {
+                    const names = fs.map(f => f.file_name)
+                    const comm = longest_common_starting_substring(names)
+                    this.filter = f.file_name.replace(comm, '')
+                    this.channelName = this.filter.split('.')[0]
+
+                }
+            }
+        })
+    }
+
+    async addSample(config) {
+        this.store.samples.push(config)
+        console.log('config: ', config)
+        this.app.$forceUpdate()
+    }
+
+    async run(my) {
+        self = this
+        this.store.receiveData = my.data
+    }
+}
+api.export(new ImJoyPlugin())
+</script>
+<window lang="html">
+<div class="container" id="app">
+    <div class="loading loading-lg overlay" v-show="loading"></div>
+    <div style="display: flex;padding: 5px;">
+        <div style="width:50%;text-align: left;">
+            <div class="dropdown">
+                <a href="#" class="btn btn-primary dropdown-toggle" tabindex="0">
+                    Choose Files <i class="icon icon-caret"></i>
+                </a>
+                <ul class="menu">
+                    <li class="menu-item" @click="activeClick">
+                        <a href="#">
+                            Select Local Files
+                        </a>
+                    </li>
+                    <li class="menu-item" @click="loadEngineClick">
+                        <a href="#">
+                            Load Engine Files
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            &nbsp;&nbsp;<label id="msg">No file chosen</label>
+            <input id="file" style="display:none;" type="file" webkitdirectory mozdirectory msdirectory odirectory
+                directory multiple @change="selectFileChanged" /></div>
+        <div style="text-align:right;width:50%;">
+            <button class="btn btn-primary" @click="finish(true)">Save & Import</button>
+            <button class="btn btn-primary" @click="finish(false)">Import</button>
+        </div>
+    </div>
+    <div style="text-align:center;display:flex;padding:10px 5px;">
+        <input class="form-input" type="text" placeholder="channel name" v-model="channelName">&nbsp;&nbsp;&nbsp;&nbsp;
+        <input class="form-input" type="text" placeholder="filter" v-model="filter">&nbsp;&nbsp;&nbsp;&nbsp;
+        <input class="btn" style="float:left;" type="button" value="Add Channel" @click="addChannel">
+    </div>
+    <div class="table-container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Sample Name</th>
+                    <th>Files</th>
+                    <th v-for="cn in channel_config">
+                        <span class="chip">
+                            {{cn.name}}
+                            <a href="#" class="btn btn-clear" aria-label="Close" role="button" @click="removeChannel(cn.name)"></a>
+                        </span>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="(sample, k1) in samples" :key="k1">
+                    <td>
+                        <span class="chip">
+                            {{sample.group}} / {{sample.name}}
+                            <a href="#" class="btn btn-clear" aria-label="Close" role="button" @click="removeSample(sample)"></a>
+                        </span>
+                    </td>
+                    <td>
+                        <img  v-for="(f, k) in sample.data" v-if="!channel_config[k] && f.thumbnail" class="avatar-img" :src="f.thumbnail" :title="f.file_name"
+                            :alt="f.file_name" @click="setChannelFilter(f, Object.values(sample.data))">
+                        <span v-else-if="!channel_config[k]" :title="f.file_name"><button class="btn btn-action" :disabled="f.file_name.startsWith('annotation') || f.file_name.startsWith('prediction')" @click="setChannelFilter(f, Object.values(sample.data))"><i v-if="f.file_name.startsWith('annotation') || f.file_name.startsWith('prediction')" class="icon icon-edit"></i><i v-else class="icon icon-photo"></i></button></span>
+                    </td>
+                    <td v-for="cn in channel_config" :key="cn.name">
+                        <img v-if="sample.data[cn.name] && sample.data[cn.name].thumbnail" :src="sample.data[cn.name].thumbnail" :alt="cn.name" :title="sample.data[cn.name].file_name" class="avatar-channel">
+                        <span v-else-if="sample.data[cn.name]"><button class="btn btn-action" :title="cn.name"><i class="icon icon-photo"></i></button></span>
+                        <span v-else>&nbsp;</span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+</window>
+<style lang="css">
+.container {
+    text-align: center;
+    overflow: auto;
+    min-height: 500px;
+}
+.avatar-img {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+}
+
+.margin-left-6 {
+    margin-left: 6px;
+}
+
+.avatar-channel {
+    width: 64px;
+    height: 64px;
+}
+.table-container {
+    overflow-x: auto;
+}
+td {
+    min-width: 100px;
+}
+.overlay{
+    position: absolute;
+    top: 38%;
+    left: 50%;
+}
+</style>
