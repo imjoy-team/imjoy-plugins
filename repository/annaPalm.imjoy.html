@@ -11,7 +11,7 @@ Paper on Nature Biotechnology: https://rdcu.be/LGtc
 {
   "name": "ANNA-PALM",
   "type": "native-python",
-  "version": "0.1.14",
+  "version": "0.1.15",
   "api_version": "0.1.5",
   "description": "A plugin for training models with ANNA-PALM.",
   "tags": ["CPU", "GPU"],
@@ -147,17 +147,21 @@ class ImJoyPlugin():
     if self.dialog is not None:
         self.dialog.close()
 
-    workdirObj = await api.showFileDialog(type='directory', name="Please select your model folder (typically named `__model__`)", root=os.path.join(ROOT_DIR, "ANNA-PALM-MODELS"), engine=api.ENGINE_URL)
+    workdirObj = await api.showFileDialog(type='directory', title="Please select your model folder (typically named `__model__`)", root=os.path.join(ROOT_DIR, "ANNA-PALM-MODELS"), engine=api.ENGINE_URL)
 
     if workdirObj:
         try:
-            api.showStatus('Loading ANNA-PALM model ...')
+            api.showStatus('Please wait, loading ANNA-PALM model ...')
             opt.load_dir = workdirObj.path
             self.model = create_model(opt)
             api.showStatus('ANNA-PALM model loaded!')
-
+            return self.model
         except Exception as e:
-            api.alert('Failed to load model, error: ' + str(e))
+            api.showStatus('Failed to load model.')
+            await api.alert('Failed to load model, error: ' + str(e))
+            raise
+    else:
+        return None
 
   async def train_sim_tubulin(self):
     if self.dialog is not None:
@@ -165,7 +169,6 @@ class ImJoyPlugin():
     opt.add_lr_channel = 'pseudo'
     opt.batchSize = 1
     opt.phase = 'train'
-    api.showStatus('preparing data...')
     self.dash = await api.createWindow(type="Im2Im-Dashboard", name="ANNA-PALM Training", w=25, h=20, data={'display_mode':'one','metrics': ["discrim_loss", "gen_loss_GAN", "gen_loss", "gen_loss_L2", "gen_loss_SSIM", "squirrel_discrim_loss", "gen_loss_squirrel"], 'callbacks': ['onEpochEnd', 'onBatchEnd']})
     self.dash.onClose(self.abort)
     await self.dash.setLoading({'status_text': 'Preparing data...', 'loading': True})
@@ -183,9 +186,8 @@ class ImJoyPlugin():
     opt.batchSize = 1
     opt.phase = 'test'
     opt.add_lr_channel = False
-    api.showStatus('preparing data from ./tmp_predict')
 
-    workdirObj = await api.showFileDialog(type='directory', name="Please select your data folder (contains `train` subfolder)")
+    workdirObj = await api.showFileDialog(type='directory', title="Please select your data folder (contains `train` subfolder)")
     opt.workdir = workdirObj.path
 
 
@@ -204,34 +206,49 @@ class ImJoyPlugin():
     opt.batchSize = 1
     opt.phase = 'test'
     opt.add_lr_channel = False
-    api.showStatus('preparing data from ./tmp_predict')
 
-    workdirObj = await api.showFileDialog(type='directory', name="Please select your data folder for prediction.",root=os.path.join(ROOT_DIR, "ANNA-PALM-DATA"), engine=api.ENGINE_URL)
+    if self.model is None:
+        self.model = await self.load_model()
+        if self.model is None:
+            api.alert('Model is not selected, prediction aborted.')
+
+    workdirObj = await api.showFileDialog(type='directory', title="Please select your data folder for prediction.",root=os.path.join(ROOT_DIR, "ANNA-PALM-DATA"), engine=api.ENGINE_URL)
     opt.workdir = workdirObj.path
 
     self.dash = await api.createWindow(type="Im2Im-Dashboard", name="ANNA-PALM Prediction", w=25, h=20, data={'display_mode':'one'})
     self.dash.onClose(self.abort)
-    await self.dash.setLoading({'status_text': 'Preparing data...', 'loading': True})
+    api.showStatus('preparing data from ' + workdirObj.path)
     sources = create_data_sources(['TransformedCSVImages'], opt)
     d = sources['test']
-    await self.dash.setLoading({'status_text': 'Start testing...', 'loading': True})
-    await self.predict(d, opt, self.model)
+    try:
+        await self.dash.setLoading({'status_text': 'Start testing...', 'loading': True})
+        await self.predict(d, opt, self.model)
+    except Exception as e:
+        api.alert('Failed to perform prediction, error: ' + str(e))
+        raise
+    finally:
+        await self.dash.setLoading({'status_text': 'Error occured', 'loading': False})
 
   async def train_csv(self):
     if self.dialog is not None:
         self.dialog.close()
     opt.batchSize = 1
-    workdirObj = await api.showFileDialog(type='directory', name="Please select your data folder (contains `train` subfolder)",root=os.path.join(ROOT_DIR, "ANNA-PALM-DATA"), engine=api.ENGINE_URL)
+    workdirObj = await api.showFileDialog(type='directory', title="Please select your data folder (contains `train` subfolder)",root=os.path.join(ROOT_DIR, "ANNA-PALM-DATA"), engine=api.ENGINE_URL)
     opt.workdir = workdirObj.path
-    api.showStatus('preparing data from ', workdirObj.path)
+    api.showStatus('preparing data from ' + workdirObj.path)
     self.dash = await api.createWindow(type="Im2Im-Dashboard", name="ANNA-PALM Training", w=25, h=20, data={'display_mode':'one','metrics': ["discrim_loss", "gen_loss_GAN", "gen_loss", "gen_loss_L2", "gen_loss_SSIM", "squirrel_discrim_loss", "gen_loss_squirrel"], 'callbacks': ['onEpochEnd', 'onBatchEnd']})
     self.dash.onClose(self.abort)
     await self.dash.setLoading({'status_text': 'Preparing data...', 'loading': True})
     sources = create_data_sources(['TransformedCSVImages'], opt)
     d = sources['train']
-
-    await self.dash.setLoading({'status_text': 'Start Training...', 'loading': True})
-    await self.train(d, opt, model=self.model)
+    try:
+        await self.dash.setLoading({'status_text': 'Start Training...', 'loading': True})
+        await self.train(d, opt, model=self.model)
+    except Exception as e:
+        api.alert('Failed to perform training, error: ' + str(e))
+        raise
+    finally:
+        await self.dash.setLoading({'status_text': 'Error occured', 'loading': False})
 
   def sendImages(self, images):
     displays = {}
@@ -290,7 +307,10 @@ class ImJoyPlugin():
 
   async def predict(self, dataset, opt, model=None):
     if model is None:
-        model = create_model(opt)
+        model = await self.load_model()
+        #model = create_model(opt)
+        if model is None:
+            api.alert('Model is not selected, prediction aborted.')
 
     self.step = 0
     def step_callback(model, details):
