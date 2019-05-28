@@ -13,7 +13,7 @@ This is a demo plugin ported from https://github.com/CSBDeep/CSBDeep/blob/master
 {
   "name": "CARE",
   "type": "native-python",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "api_version": "0.1.2",
   "description": "This plugin demonstrates denoising using CARE.",
   "tags": ["CPU", "GPU", "macOS CPU"],
@@ -34,8 +34,8 @@ This is a demo plugin ported from https://github.com/CSBDeep/CSBDeep/blob/master
   },
   "dependencies": [
       "oeway/ImJoy-Plugins:Im2Im-Dashboard",
-      "oeway/ImJoy-Plugins:CARE-docs",
-      "oeway/ImJoy-Plugins:launchpad"
+      "oeway/ImJoy-Plugins:launchpad",
+      "oeway/ImJoy-Plugins:Tabbed-Docs"
   ],
   "cover": ["https://dl.dropbox.com/s/bo8timmql033xy1/CARE-0.1.8.gif", "https://dl.dropbox.com/s/rq5ikbben3xbxge/CARE-0.1.8-2.gif"]
  }
@@ -428,11 +428,21 @@ class ImJoyPlugin():
             self.win_docs.focus()
         except:
             self.win_docs = await api.createWindow({
-                'name': 'Documentation - CARE',
-                'type': 'CARE-docs',
-                'w':30, 'h':20,
-                'data': {}
-                })
+                    'name': 'Documentation - Care',
+                    'type': 'Tabbed-Docs',
+                    'w':30, 'h':20,
+                    'data': {
+                        'tabs': [
+                            {'name': 'Summary', 'content': await api.getAttachment('summary')},
+                            {'name': 'Getting started', 'content': await api.getAttachment('gettingStarted')},
+                            {'name': 'Data', 'content': await api.getAttachment('data')},
+                            {'name': 'Training', 'content': await api.getAttachment('training')},
+                            {'name': 'Prediction', 'content': await api.getAttachment('prediction')},
+                            {'name': 'FAQ', 'content': await api.getAttachment('faq')}
+                        ]
+                    }
+            })
+            #self.win_docs = await api.createWindow({'name': 'Documentation - CARE','type': 'CARE-docs','w':30, 'h':20,'data': {}})
             self.win_docs.focus()
 
     async def export_model(self):
@@ -450,3 +460,276 @@ class ImJoyPlugin():
 
 api.export(ImJoyPlugin())
 </script>
+
+
+<attachment name="summary">
+<br>
+<p id="care-summary">
+  The CARE framework allows to perform  content-aware restoration of fluorescence microscopy images.
+  In this documentation, we describe the ImJoy implementation of an CARE example to perform 3D denoising.
+ </p>
+
+More details about CARE can be found here:
+
+* **Publication**: Weigert et. al, <a onclick="api.utils.openUrl('https://www.nature.com/articles/s41592-018-0216-7')">Content-aware image restoration: pushing the limits of fluorescence microscopy</a>,
+Nature Methods, 2018
+* **GitHub**: <a onclick="api.utils.openUrl('https://github.com/CSBDeep/CSBDeep')">https://github.com/CSBDeep/CSBDeep</a>
+
+The ImJoy plugins are ported from an **example code** to
+<a onclick="api.utils.openUrl('https://github.com/CSBDeep/CSBDeep/tree/master/examples/denoising3D')">perform denoising of 3D images.</a>
+
+<figure>
+    <img src="https://www.dropbox.com/s/aramdvankqxh9h9/care-dashboard-results.png?dl=1" class="img-responsive p-centered" alt="care-3d-results">
+    <figcaption>Example of CARE denoising: input image, target image, predicted image.</figcaption>
+</figure>
+
+
+## Installing the plugin and main features
+
+If you don't already have the plugin, you can install it from this <a onclick="api.utils.openUrl('https://imjoy.io/#/app?w=care&plugin=oeway/ImJoy-Plugins:CARE@GPU')">**link.**</a>
+
+When starting the CARE plugin, you will see a **central launch pad** allowing to select the task to be performed:
+
+<figure>
+    <img src="https://www.dropbox.com/s/rja3lvzwvihm6wz/care-launchpad.png?dl=1" class="img-responsive p-centered" alt="care-launchpad">
+    <figcaption>Screen shot of CARE plugin launchpad.</figcaption>
+</figure>
+
+
+Some of the **main features** are:
+* Training can be performed either on example data or your own data.
+* Prediction can be performed once the model is trained.
+
+</attachment>
+
+
+<attachment name="gettingStarted">
+<p style="color:#FF0000";>These steps require that data is already on the engine. As an alternative, you can choose the option to train from URL.</p>
+
+Here we describe how to quickly get started with the CARE plugin.
+
+## Select plugin engine and computational mode
+We select a remote engine (`imjoy.pasteur.cloud`) and the GPU computation (`TAG: GPU`) for fast training and prediction.
+
+<figure>
+    <img src="https://www.dropbox.com/s/m4hssh4dr2x4frg/care-gs-engine-tag.gif?dl=1" width="250" class="img-responsive p-centered" alt="gs-setting-up">
+    <figcaption>Select remote engine and GPU tag.</figcaption>
+</figure>
+
+## Training
+We perform training on the example data on the plugin engine.
+We then set the model name to `CARE_demo_v1` and train for 60 epochs.
+
+<figure>
+    <img src="https://www.dropbox.com/s/0bv9mjm8gszmg5e/care-gs-training.gif?dl=1" class="img-responsive p-centered" alt="getting-started-training">
+    <figcaption>Training with CARE.</figcaption>
+</figure>
+
+While the network is training, progress can be monitored **dashboard**: it shows how loss changes, and how
+the trained model performs on validation data.
+
+<figure>
+    <img src="https://www.dropbox.com/s/4hqxua2764qpx04/care-gs-training-progress.gif?dl=1" width="500" class="img-responsive p-centered" alt="getting-started-training">
+    <figcaption>Monitoring training with CARE.</figcaption>
+</figure>
+
+## Prediction
+Prediction with the trained model is performed:
+1. Select trained model `CARE_demo_v1`.
+2. Select test data `test` of provided example on the remote server.
+3. This will open a dedicated interface where prediction progress is shown.
+
+<figure>
+    <img src="https://www.dropbox.com/s/i1rpi9ja84zcdxa/care-gs-prediction.gif?dl=1" class="img-responsive p-centered" alt="getting-started-training">
+    <figcaption>Training with CARE.</figcaption>
+</figure>
+
+Once the prediction is done, you can inspect the prediction results and scroll through the z-stack of the sample.
+
+<figure>
+    <img src="https://www.dropbox.com/s/1sjose7hwbpm883/care-gs-prediction-inspection.gif?dl=1" width="500" class="img-responsive p-centered" alt="getting-started-training">
+    <figcaption>Monitoring training with CARE.</figcaption>
+</figure>
+
+
+</attachment>
+
+<attachment name="data">
+<br>
+<p style="color:#FF0000">
+  FOR IMJOY REVIEWERS: if you use the provided remote-engine, example data is available at `imjoy/imjoy-paper/CARE-DATA`.
+  The respective file-dialogs will initiate at this repository.</p>
+<br>
+<p id="data-requirements">
+Here we describe briefly how the training images have to be provided: image format, naming scheme, and data organization.
+</p>
+
+The provided data from the CARE example is organized like this this:
+* Data for the 3D denoising corresponds to **pairs of low and high high signal-to-noise ratio (SNR) stacks**.
+  Images are 3D TIFF with identical filenames and are stored in two folders "low" and "GT", corresponding
+  to low and high-SNR stacks.
+* The training data for this demo corresponds to **one Tribolium stack pair**, whereas in an actual
+  application the authors recommend to acquire at least 10-50 stacks from different developmental timepoints.
+* Training and validation data are stored in separate folders `train` and `test`.
+
+```
+├─ tribolium/
+│  ├─ test/
+│  │  ├─ GT
+│  │  │  ├─ nGFP_0.1_0.2_0.5_20_14_late.tif
+│  │  ├─ low
+│  │  │  ├─ nGFP_0.1_0.2_0.5_20_14_late.tif
+│  ├─ train/
+│  │  ├─ GT
+│  │  │  ├─ nGFP_0.1_0.2_0.5_20_13_late.tif
+│  │  ├─ low
+│  │  │  ├─ nGFP_0.1_0.2_0.5_20_13_late.tif
+│  │  ├─ img58
+```
+To use these **example data** you have two options
+1. They can be directly used for training with the option `Train with data from the web`.
+ The provided default URLs points to these data.
+2. Alternatively, the data can be downloaded with this <a onclick="api.utils.openUrl('http://csbdeep.bioimagecomputing.com/example_data/tribolium.zip')">**link**.</a>
+ After unzipping, you can load the data into the plugin engine with drag & drop and specify it with the option `Train with data from the engine`.
+
+A detailed description for how to generate the training data can be found
+<a onclick="api.utils.openUrl('https://github.com/CSBDeep/CSBDeep/blob/master/examples/denoising3D/1_datagen.ipynb')">here.</a>
+
+
+</attachment>
+
+<attachment name="training">
+<br>
+<p id="training">
+Here we describe how to select a plugin engine, a computational environment, and the training data to perform training.
+</p>
+
+## Where to perform training: plugin engine
+Training is performed on an ImJoy plugin engine, which can either run remotely or on your
+own local workstation. To install a local plugin engine, please follow
+<a onclick="api.utils.openUrl('https://github.com/oeway/ImJoy-App/releases')">**these instructions.**</a>
+
+Once your ImJoy app is connected to one (or more) plugin engine(s), you can choose on which engine the CARE
+plugin should run. For this press on the icon next to the plugin name in the plugin menu.
+
+<figure>
+    <img src="https://www.dropbox.com/s/6c7eze7eidabdz8/care_plugin_menu.png?dl=1" class="img-responsive p-centered" alt="screen-shot-care">
+    <figcaption>CARE plugin in the plugin menu.</figcaption>
+</figure>
+This will show a dropdown menu, where you can determine how and where the plugin is running.
+In the lower part of the dropdown menu you can then choose on which of the the available plugin engines the plugin should run.
+<figure>
+    <img src="https://www.dropbox.com/s/06wgxikauwv3lmk/care-plugin-engines.png?dl=1" class="img-responsive p-centered" alt="plugin-engines">
+    <figcaption>Choosing the plugin engine.</figcaption>
+</figure>
+
+## GPU or CPU computation
+Training can be performed on CPUs or GPUs. The latter is substantially faster. To switch
+between these computational modes, you can select the corresponding "tag". Currently supported are
+<figure>
+    <img src="https://www.dropbox.com/s/k1ruchskrqtmqak/care-tags.png?dl=1" class="img-responsive p-centered" alt="tags">
+    <figcaption>Choosing between GPU and CPU computing.</figcaption>
+</figure>
+
+## Providing training data
+Two options exist to provide the training, which can be selected from the CARE launchpad prior to start training.
+For either option, we provide the **CARE example data** as a default.
+
+* `Train with data from the web`: here you can specify an URL containing data as a zip archive.
+The default points to the zipped example data.
+* `Train with data from the engine`: here you can select data from a plugin engine. More precisely, you have to select the folder
+ containing the training data, e.g. the folder `tribolium` for the example data.
+
+<figure>
+    <img src="https://www.dropbox.com/s/zm59g9tsp1t55vx/care-select-folder.png?dl=1" class="img-responsive  p-centered" alt="selecting-training-data">
+    <figcaption>Selecting training data from the plugin engine.</figcaption>
+</figure>
+
+You can also provide **your own data**. Your own data has to be organized as explained in the dedicated section **Data**.
+* You can create *a zip archive of your folder*, upload it to the web, and use an URL
+* You can **drag and drop a folder containing subfolders 'train' and 'test'**  into the plugin engine, where the CARE plugin is running:
+    1. In the ImJoy interface, select `Files` and `Open Engine files`.
+    2. If you have multiple plugin engines running, select the engine on which the CARE plugin is running in the upper part of the interface.
+    3. Navigate to the folder where you want to load your data.
+    4. Drag & drop the folder containing subfolders 'train' and 'test' into this folder.
+    5. You can then use this folder for training.
+
+## Configure training for CARE
+Once you specified the data, a dialog will be shown to configure the training. Here you have to specify
+* Under which name the trained model should be stored
+* For how many epochs the training should be performed. There are 20 training steps per epoche. Longer training
+ might improve the prediction but can also lead to overfitting.
+* The name of the folder containing the source images, e.g. the folder `low` containing the low SNR images.
+* The name of the folder containing the target images, e.g. the folder `GT` containing the high SNR images.
+
+<figure>
+    <img src="https://www.dropbox.com/s/e50qi8y5tz4ri4c/care-configure-training.png?dl=1" width="300" class="img-responsive p-centered" alt="training-configuration">
+    <figcaption>Configuration parameters to train the CARE network.</figcaption>
+</figure>
+
+
+## Monitoring training progress
+After launch the training a dashboard will be shown that allows to inspect training progress.
+
+* In the upper part the dashboard shows the loss functions for the training and validation data. You can hoover
+over the curves to see the current value and what loss function it is.
+* In the lower part it shows the prediction results on a randomly selected z-slices of the validation data.
+* The slider allows you to scroll through the different training steps and inspect how the quality
+ of the prediction changes.
+
+If you want to **terminate the training** click on the icon next to the plugin name, and select `Terminate` and close
+the window.
+
+## Trained model
+Once training is finished, the trained model is stored in folder with the specified name in the configuration.
+This folder can found in the current ImJoy workspace in a folder called `models`. You can find the name of your current workspace,
+but hoovering over the four squares in the upper left part of the interface, e.g. `default` for the example below.
+
+<figure>
+    <img src="https://www.dropbox.com/s/cwz7j8nfhc14mkw/care-workspace.gif?dl=1" class="img-responsive p-centered" alt="screen-shot-care">
+    <figcaption>How to identify the current workspace.</figcaption>
+</figure>
+
+To find the trained model,
+1. Click `Files` in the ImJoy interface, and `Open Engine files`.
+2. Select the plugin engine where you performed training, e.g. where the CARE plugin was running.
+3. Navigate to your workspace name. The dialog will initiate for the `default` workspace, if you are in another
+workspace, you have to move up one folder and select your workspace name.
+4. The folder `CARE-MODELS` contains all trained models
+
+</attachment>
+
+<attachment name="prediction">
+<p style="color:#FF0000">
+  FOR IMJOY REVIEWERS: if you use the provided remote-engine, a trained model is available at `imjoy/imjoy-paper/CARE-MODEL`.
+  The respective file-dialogs will initiate at this repository, and you can select the folder `CARE_model_2000steps` to use this model.</p>
+<br>
+Once a model is trained, you can use it for prediction.
+
+Data for prediction has to be stored in a folder with same name as the input images, e.g. `low` in the example data.
+Prediction will then be performed for each image in this folder.
+Results are stored in folder `CARE_results`, where one folder for each data-set with the same name is created. Predictions
+for each z-slice are stored as separate PNGs.
+
+1. Press on `Predict`
+2. Specify the folder containing the trained model.
+3. Specify the folder containg the images you want to process.
+
+This will then open a new interface, where progress on prediction is reported
+
+<figure>
+    <img src="https://www.dropbox.com/s/yybco7e2fz8ue3g/care-prediction.gif?dl=1" class="img-responsive p-centered" alt="screen-shot-care">
+    <figcaption>CARE prediction interface.</figcaption>
+</figure>
+
+</attachment>
+
+
+<attachment name="faq">
+Here we provide answer to frequenty asked questions and encountered problems.
+
+### Example training data is not available on the remote engine
+In case the example data is not available anymore, you can either train with data by specyfing the URL or
+download the data and upload to the remote engine again.
+
+</attachment>
