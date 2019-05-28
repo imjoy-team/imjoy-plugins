@@ -1,5 +1,92 @@
 <docs lang="markdown">
 
+Plugin to annotate different structures of interest in multi-channel images.
+
+When opening the plugin, it will show a default image, which can be used to
+get familiarised with some of its functionality. Below we describe in detail
+how data can be imported, annotated, and exported.
+
+## Data organisation
+
+The plugin requires that the data is organised in the following way:
+
+1.  Each sample, e.g. a field of view, is in a separate folder.
+2.  Sample folder contains the image(s) either as a multi-channel TIF, or as images of the individual channels
+3.  Image names are identical across the sample folders
+
+Below an example is shown for sample folders ('pos1' and 'pos2)
+containing two channels ('nuclei.png' and 'cells.png). Note that the annotations
+will be saved as `annotation.json`.
+
+    ├─ data_for_annotation/
+    │  ├─ pos1
+    │  │  ├─ annotation.json
+    │  │  ├─ cells.png
+    │  │  ├─ nuclei.png
+    │  ├─ pos2
+    │  │  ├─ annotation.json
+    │  │  ├─ nuclei.png
+    │  │  ├─ nuclei.png
+
+These example data can be found [**here**](https://www.dropbox.com/sh/i0pzlgvayuvqats/AADEChH3mPGBDGkmMZOOtQSva?dl=0).
+
+## Import
+
+To import your data follow the steps listed below and also shown in the animated gif:
+1. Press `File`, then `Import Samples`
+2. In the next dialog, press `Choose Files` and then `Select local files` to load
+   files from your local computer, or `Select engine files` to load from files
+  from one of the connected plugin engines.
+3. Select the folder containing the sample folders, e.g. `data_for_annotation` in the
+   example data. When choosing the option `Select local files`, a warning dialog
+   will be displayed. This is a default security measure of the browser, please confirm.
+  Data will not be uploaded at this step, but only the folders scanned for the existing files.
+4. The interface will then be populated with the different folders and the contained files.
+   Each file is symbolised by a little item, hoovering over the item will show the file-name.
+   To actually load the data, filters have to be defined which files should be loaded and
+   how this file should be called. For instance, you can specify as a `channel name` 'Cells' and as the `filter` 'cells.png'.
+   The plugin will then import for each folder a file containing the string 'cells.png'
+   as name this channel 'Cells'. Clicking on the file icon will automatically populate
+   these fields with a suggestion. To add a channel press `Add channel`
+5. To finalise the import, press `Import`. This will then show again the Annotator plugin,
+    where you
+
+![](https://www.dropbox.com/s/128t0vefs5wrtao/annotator-import-local.gif?dl=1)
+
+## Navigating samples and channels
+From the `File` pulldown menu: you can can choose the different sample folders.
+Data is loaded into the browser each time you select a sample. This allows to work
+with large data-sets. With the mouse, you can zoom-in and zoom-out,
+and pan (with the left button pressed).
+
+![](https://www.dropbox.com/s/dt8i27tuq3uwdkn/annotator-channels.gif?dl=1)
+
+From the `Channel` pulldown menu: you can show either each channel separately, or a composite image.
+For the latter you can change the contrast of each channel separately.
+
+![](https://www.dropbox.com/s/dt8i27tuq3uwdkn/annotator-channels.gif?dl=1)
+
+## Annotating samples
+From the `Annotation` pulldown menu: you can toggle the display of the different annotation types, and
+define a new annotation type. To start annotating, select one of the annotation types
+and start drawing. To stop annotating, press the `Stop annotation`.
+
+![](https://www.dropbox.com/s/uru2ov5s121x2vh/annotator-annotations.gif?dl=1)
+
+## Upload and export
+Annotation are stored in the [GeoJson format](https://geojson.org/).
+
+You can either upload the annotations to one of the connected plugin engines, e.g.
+for further processing, or download them for local storage.
+
+For either option, you can choose between
+* `Current annotation`: the GeoJson file will be downloaded as `sample_name_annotation.json`,
+   with `sample_name` being the name of the sample.
+* `All annotations`: will create a identical folder structure as the uploaded one and
+   will save all annotations as `annotation.json` to their respective sample folders.
+* `Channels + Annotations`: will create the complete folder structure as the uploaded one (including images)
+   and save all annotations as `annotation.json` to their respective sample folders.
+
 </docs>
 <config lang="json">
 {
@@ -7,7 +94,7 @@
     "type":"window",
     "tags":[],
     "ui":"",
-    "version":"0.5.64",
+    "version":"0.5.65",
     "api_version":"0.1.5",
     "description":"An image annotator made with OpenLayers",
     "icon":"extension",
