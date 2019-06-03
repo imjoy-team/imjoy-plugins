@@ -6,7 +6,7 @@
     "type":"window",
     "tags":[],
     "ui":"",
-    "version":"0.1.12",
+    "version":"0.1.15",
     "api_version":"0.1.6",
     "description":"",
     "icon":"extension",
@@ -21,10 +21,10 @@
     ],
     "dependencies":[],
     "defaults":{
-        "w":45,
-        "h":20
+        "w":100,
+        "h":25
     },
-    "runnable":false
+    "runnable":true
 }
 </config>
 <script lang="javascript">
@@ -47,8 +47,8 @@ class ImJoyPlugin {
                 {name: 'icon5', description: 'desc', icon: 'icon-globe', callback: default_callback},
                 {name: 'icon6', description: 'desc', icon: 'icon-globe', callback: default_callback},
                 {name: 'icon7', description: 'desc', icon: 'icon-globe', callback: default_callback},
-                {name: 'icon8', description: 'desc', 'img': 'https://cdn.elegantthemes.com/preview/Vertex/wp-content/uploads/2013/06/test5.jpg', callback: default_callback},
-                {name: 'icon9', description: 'desc', 'img': 'https://cdn.elegantthemes.com/preview/Vertex/wp-content/uploads/2013/06/test3.jpg', callback: default_callback}
+                {name: 'img01', description: 'image 01', 'img': 'https://git.sg-ai.com/imjoy/ImJoy-Plugins/raw/master/img/default01.jpeg', callback: default_callback},
+                {name: 'img02', description: 'image 02', 'img': 'https://git.sg-ai.com/imjoy/ImJoy-Plugins/raw/master/img/default02.jpeg', callback: default_callback}
             ],
             description: ''
         }
@@ -84,10 +84,10 @@ api.export(new ImJoyPlugin())
     <div class="description">
         <p style="text-align:center;">{{description}}<p>
     </div>
-    <div class="columns" style="margin-top: 60px;">
+    <div class="columns center-container">
         <div class="column hide-sm col-md-1 col-2">&nbsp;</div>
         <div class="columns col-sm-12 col-md-10 col-8">
-            <div v-for="(v, k) in iconList" class="column col-xs-6 col-sm-4 col-md-3 col-3 cursor-pointer column-container">
+            <div v-for="(v, k) in iconList" class="column col-xs-6 col-sm-4 col-md-3 col-3 cursor-pointer">
                 <div class="popover popover-bottom image" @click="v.callback()">
                     <i v-if="v.icon" class="gradient icon-size" :class="[v.icon]" @mouseover="imageMouseover(v.description)" @mouseout="imageMouseout()"></i>
                     <img v-else :src="v.img" class="img-size" @mouseover="imageMouseover(v.description)" @mouseout="imageMouseout()">
@@ -103,25 +103,24 @@ api.export(new ImJoyPlugin())
 </div>
 </window>
 <style lang="css">
+body {
+    overflow: hidden;
+}
 .container {
     margin: auto;
-    text-align: center;
-    padding: 5px;
-}
-.column-container {
     text-align: center;
 }
 
 .description {
     height: 80px;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    text-align: center;
     overflow: auto;
-    z-index: 9999;
-    background-color: white;
+}
+
+.center-container {
+    height: calc(100% - 80px);
+    width: 100vw;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .icon-container {
@@ -169,11 +168,6 @@ api.export(new ImJoyPlugin())
     font-style: normal;
 }
 
-body{
-    font-family: 'Open Sans', sans-serif;
-    text-align: center;
-    padding-bottom: 80px;
-}
 .image{
     position: relative;
     width: 192px;
@@ -242,3 +236,4 @@ body{
     visibility: visible;
 }
 </style>
+
