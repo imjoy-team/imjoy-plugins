@@ -13,7 +13,7 @@ This is a demo plugin ported from https://github.com/CSBDeep/CSBDeep/blob/master
 {
   "name": "CARE",
   "type": "native-python",
-  "version": "0.1.13",
+  "version": "0.1.14",
   "api_version": "0.1.2",
   "description": "This plugin demonstrates denoising using CARE.",
   "tags": ["CPU", "GPU", "macOS CPU"],
@@ -241,19 +241,12 @@ class ImJoyPlugin():
             filename = data_file.split('/')[-1]
             name, _ = os.path.splitext(filename)
 
-            skip_download = False
-            if not os.path.exists(os.path.join('data', name, 'train')):
-                ret = await api.confirm(content='It seems the file you try to download already exists, do you want to download and process again?', confirm_text='Yes, download', cancel_text= 'No')
-                if not ret:
-                    skip_download =True
-
-            if not skip_download:
-                await api.showStatus('Downloading data ' + filename + '...')
-                download_and_extract_zip_file (
-                    url       = data_file,
-                    targetdir = 'data',
-                )
-                await api.showStatus('Downloaded ' + filename )
+            await api.showStatus('Downloading data ' + filename + '...')
+            download_and_extract_zip_file (
+                url       = data_file,
+                targetdir = 'data',
+            )
+            await api.showStatus('Downloaded ' + filename )
 
             if not os.path.isdir(os.path.join('data', name, 'train')):
                 api.error('Failed to detect train folder.')
