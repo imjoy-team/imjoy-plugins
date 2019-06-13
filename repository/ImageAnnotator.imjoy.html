@@ -94,7 +94,7 @@ For either option, you can choose between
     "type":"window",
     "tags":[],
     "ui":"",
-    "version":"0.5.67",
+    "version":"0.5.68",
     "api_version":"0.1.5",
     "description":"An image annotator made with OpenLayers",
     "icon":"extension",
@@ -2330,12 +2330,17 @@ api.export(new ImJoyPlugin())
 </window>
 <style lang="css">
 body {
+    height: 100%;
     display: block;
     margin: 2px;
     font-family: Arial, Helvetica, sans-serif;
 }
+
+#app{
+    height: 100%;
+}
 .image-view {
-    height: calc(100% - 76px);
+    height: calc(100% - 36px);
 }
 /* css for the range slider */
 @supports (--css: variables) {
