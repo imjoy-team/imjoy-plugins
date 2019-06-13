@@ -94,7 +94,7 @@ For either option, you can choose between
     "type":"window",
     "tags":[],
     "ui":"",
-    "version":"0.5.65",
+    "version":"0.5.66",
     "api_version":"0.1.5",
     "description":"An image annotator made with OpenLayers",
     "icon":"extension",
@@ -585,11 +585,15 @@ const API_VERSION = '0.1.6'
 const DATASET_DIR = '/home'
 const default_dataset = {
     api_version: API_VERSION,
-    version: 1,
+    version: 2,
     samples: [
         {
             name: '19661_221_G2_1',
             data: {
+                "All": {
+                    url: 'https://www.proteinatlas.org/images/19661/221_G2_1_blue_red_green.jpg',
+                    file_name: '19661_221_G2_1_blue_red_green.jpg'
+                },
                 "Microtubules": {
                     url: 'https://www.proteinatlas.org/images/19661/221_G2_1_red.jpg',
                     file_name: '19661_221_G2_1_red.jpg'
@@ -612,6 +616,10 @@ const default_dataset = {
         {
             name: '19663_395_C4_2',
             data: {
+                "All": {
+                    url: 'https://www.proteinatlas.org/images/19663/395_C4_2_blue_red_green.jpg',
+                    file_name: '19661_221_G2_1_blue_red_green.jpg'
+                },
                 "Microtubules": {
                     url: 'https://www.proteinatlas.org/images/19663/395_C4_2_red.jpg',
                     file_name: '19663_395_C4_2_red.jpg'
@@ -635,6 +643,10 @@ const default_dataset = {
     name: 'default',
     root_folder: '/home/default',
     channel_config: {
+        "All": {
+            'filter': '_blue_red_green_yellow.jpg',
+            'name': 'All'
+        },
         "Microtubules": {
             'filter': '_red.jpg',
             'name': 'Microtubules'
