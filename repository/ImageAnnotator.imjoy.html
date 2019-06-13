@@ -94,7 +94,7 @@ For either option, you can choose between
     "type":"window",
     "tags":[],
     "ui":"",
-    "version":"0.5.66",
+    "version":"0.5.67",
     "api_version":"0.1.5",
     "description":"An image annotator made with OpenLayers",
     "icon":"extension",
@@ -585,7 +585,7 @@ const API_VERSION = '0.1.6'
 const DATASET_DIR = '/home'
 const default_dataset = {
     api_version: API_VERSION,
-    version: 2,
+    version: 4,
     samples: [
         {
             name: '19661_221_G2_1',
@@ -618,7 +618,7 @@ const default_dataset = {
             data: {
                 "All": {
                     url: 'https://www.proteinatlas.org/images/19663/395_C4_2_blue_red_green.jpg',
-                    file_name: '19661_221_G2_1_blue_red_green.jpg'
+                    file_name: '19663_395_C4_2_blue_red_green.jpg'
                 },
                 "Microtubules": {
                     url: 'https://www.proteinatlas.org/images/19663/395_C4_2_red.jpg',
@@ -642,6 +642,24 @@ const default_dataset = {
     ],
     name: 'default',
     root_folder: '/home/default',
+    annotation_types:{
+        "cell":{
+            "label":"cell",
+            "color":"#3f51b5",
+            "line_width":4,
+            "type":"Polygon",
+            "freehand":true,
+            "checked":true
+        },
+        "nuclei":{
+            "label":"nuclei",
+            "color":"#ff9800",
+            "line_width":4,
+            "type":"Polygon",
+            "freehand":true,
+            "checked":true
+        }
+    },
     channel_config: {
         "All": {
             'filter': '_blue_red_green_yellow.jpg',
@@ -669,11 +687,11 @@ const app = new Vue({
     el: '#app',
     data: {
         COLORS: [
-            '#ff0000', '#f44336', '#e91e63', '#9c27b0', '#673ab7',
-            '#2196f3', '#03a9f4', '#00bcd4', '#009688', '#4caf50',
-            '#8bc34a', '#cddc39', '#ffeb3b', '#ffc107', '#ff9800',
+            '#76ff03', '#e91e63', '#9c27b0', '#673ab7',
+            '#2196f3', '#03a9f4', '#00bcd4', '#009688', '#4caf50',  '#f44336',
+            '#8bc34a', '#cddc39', '#ff0000', '#ffeb3b', '#ffc107', '#ff9800',
             '#ff5722', '#795548', '#9e9e9e', '#607d8b', '#d500f9',
-            '#212121', '#ff9e80', '#ff6d00', '#ffff00', '#76ff03',
+            '#ff9e80', '#ff6d00', '#ffff00', 
             '#00e676', '#64ffda', '#18ffff', '#3f51b5', '#e91e63'
         ],
         gray_slider: null,
@@ -689,7 +707,7 @@ const app = new Vue({
         selection_dialog: null,
         new_annotation_type: {
             label: 'default',
-            color: '#ff0000',
+            color: '#18ffff',
             line_width: 4,
             type: 'Polygon',
             freehand: true
@@ -1631,7 +1649,14 @@ const app = new Vue({
 
             const labels = {}
             api.showMessage('Collecting data ...')
+            // export config.json
+            var file = new File([JSON.stringify(dataset)], "config.json", {
+                type: "text/plain",
+            })
+            zip.file(pathJoin(dataset.name, 'config.json'), file)
+    
             await this.walkThroughSamples(dataset, samples, (sample, data, file)=>{
+                if(data)
                 zip.file(pathJoin(dataset.name, sample.group, sample.name, data.file_name), file)
             }, with_images)
             api.showMessage('Making zip archive...')
@@ -1709,7 +1734,7 @@ const app = new Vue({
                 type: "text/plain;charset=utf-8"
             });
 
-            var file = new File([blob], "config.json", {
+            var file = new File([blob], "annotation.json", {
                 type: "text/plain",
             })
             console.log('uploading to ',  targetObj.engine, targetObj.path)
@@ -1743,6 +1768,7 @@ const app = new Vue({
 
             api.showMessage('Uploading dataset: ', this.selected_dataset, ' to ', targetObj.engine, targetObj.path)
             await this.walkThroughSamples(this.selected_dataset, this.selected_dataset.samples, (sample, data, file)=>{
+                if(data)
                 this.uploadFile(file, pathJoin(targetDir, sample.group, sample.name, data.file_name), overwrite, targetObj.engine)
             }, with_images)
             api.showMessage('The dataset is successfully uploaded')
@@ -2032,7 +2058,7 @@ api.export(new ImJoyPlugin())
         <div class="dropdown">
             <a href="#" class="btn btn-link dropdown-toggle" tabindex="0">
                 <i class="fas fa-folder-plus icon-size-position"></i>
-                <label class="hide-sm">File</label>  <i class="icon icon-caret"></i>
+                <label class="hide-sm">File</label>  <i class="icon icon-caret hide-sm"></i>
             </a>
             <ul class="menu">
                 <li v-if="selected_samples" v-for="sample in selected_samples" :key="sample.name" class="menu-item"
@@ -2056,7 +2082,7 @@ api.export(new ImJoyPlugin())
         <div class="dropdown">
             <a href="#" class="btn btn-link dropdown-toggle" tabindex="0">
                 <i class="fas fa-layer-group icon-size-position"></i>
-                <label class="hide-sm">Channel</label>  <i class="icon icon-caret"></i>
+                <label class="hide-sm">Channel</label>  <i class="icon icon-caret hide-sm"></i>
             </a>
             <ul class="menu" v-if="selected_dataset && selected_dataset.channel_config">
                 <li v-if="!iOS">
@@ -2082,7 +2108,7 @@ api.export(new ImJoyPlugin())
             <a href="#" class="btn btn-link dropdown-toggle" tabindex="0">
                 <i class="fas fa-user-edit icon-size-position"></i>
                 <label class="hide-sm">Annotation&nbsp;</label>
-                <i class="icon" :class="selected_annotation?'':'icon-caret'" :style="{ backgroundColor: selected_annotation?convertColor(selected_annotation.color, 80):'rgb(255,255,255)' }"></i>
+                <i class="icon hide-sm" :class="selected_annotation?'':'icon-caret'" :style="{ backgroundColor: selected_annotation?convertColor(selected_annotation.color, 80):'rgb(255,255,255)' }"></i>
             </a>
             <ul class="menu">
                 <li v-if="selected_annotation"  class="menu-item cursor-pointer">
@@ -2115,7 +2141,14 @@ api.export(new ImJoyPlugin())
                 </li>
             </ul>
         </div>
-
+        
+        <label class="form-switch hide-sm" style="display: inline-block!important; min-height: 0.7rem; width: 35px;" v-if="selected_annotation">
+            <!-- <i class="fas fa-paint-brush"></i> -->
+            <input v-model="selected_annotation.freehand" @change="switchDrawInteraction()"
+                type="checkbox">
+            <i class="form-icon"></i>
+            <!-- <label class="hide-sm">Free hand</label> -->
+        </label>
         <button class="btn btn-sm" title="delete" @Click="deleteAnnotation()"><i class="icon icon-delete"></i></button>
         <button :disabled="!undo_button_flag" class="btn btn-sm" title="undo" @click="undoDraw()"><i class="fas fa-undo"></i></button>
 
@@ -2123,32 +2156,22 @@ api.export(new ImJoyPlugin())
             <div class="dropdown">
                 <a href="#" class="btn btn-link dropdown-toggle" tabindex="0">
                     <i class="fas fa-upload icon-size-position"></i>
-                    <label class="hide-sm">Upload</label>
-<!--                     <i class="icon icon-caret"></i> -->
+                    <label class="hide-sm">Upload/Export</label>
+                    <i class="icon icon-caret hide-sm"></i>
                 </a>
-                <ul class="menu" style="width: 200px;">
-                    <li class="cursor-pointer"
-                        @click="uploadAnnotation()">Current annotation</li>
-                     <li class="cursor-pointer"
-                        @click="uploadAllAnnotations(false)">All Annotations</li>
-                     <li class="cursor-pointer"
-                        @click="uploadAllAnnotations(true)">Channels + Annotations</li>
-                </ul>
-            </div>
-            &nbsp;
-            <div class="dropdown">
-                <a href="#" class="btn btn-link dropdown-toggle" tabindex="0">
-                    <i class="fas fa-download icon-size-position"></i>
-                    <label class="hide-sm">Export</label>
-<!--                     <i class="icon icon-caret"></i> -->
-                </a>
-                <ul class="menu" style="width: 200px;">
-                    <li class="cursor-pointer"
-                        @click="exportAnnotation()">Current annotation</li>
-                     <li class="cursor-pointer"
-                        @click="exportAllAnnotation(false)">All Annotations</li>
-                     <li class="cursor-pointer"
-                        @click="exportAllAnnotation(true)">Channels + Annotations</li>
+                <ul class="menu" style="width: 250px; right:0; left: unset;">
+                    <li class="menu-item cursor-pointer">
+                        <a href="#"  @click="uploadAnnotation()">Upload Current annotation</a></li>
+                     <li class="menu-item cursor-pointer">
+                        <a href="#" @click="uploadAllAnnotations(false)">Upload Annotations</a></li>
+                     <li class="menu-item cursor-pointer">
+                        <a href="#" @click="uploadAllAnnotations(true)">Upload Images&Annotations</a></li>
+                    <li class="menu-item cursor-pointer">
+                       <a href="#"  @click="exportAnnotation()">Export Current annotation</a></li>
+                     <li class="menu-item cursor-pointer">
+                        <a href="#" @click="exportAllAnnotation(false)">Export Annotations</a></li>
+                     <li class="menu-item cursor-pointer">
+                        <a href="#" @click="exportAllAnnotation(true)">Export Images&Annotations</a></li>
                 </ul>
             </div>
         </div>
