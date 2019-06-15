@@ -1,0 +1,422 @@
+﻿<docs lang="markdown">
+#Noise2Void - Learning Denoising from Single Noisy Images
+
+Alexander Krull, Tim-Oliver Buchholz, Florian Jug
+
+Arxiv paper: https://arxiv.org/abs/1811.10980
+
+This is a demo plugin ported from http://juglab.github.io/n2v_SEM_colab
+
+</docs>
+
+<config lang="json">
+{
+  "name": "Noise2Void",
+  "type": "native-python",
+  "version": "0.1.3",
+  "api_version": "0.1.5",
+  "description": "This plugin demonstrates denoising using Noise2Void.",
+  "tags": ["CPU", "GPU", "macOS CPU"],
+  "ui": "",
+  "inputs": null,
+  "outputs": null,
+  "flags": [],
+  "icon": null,
+  "env": {
+      "CPU": "conda create -n n2v-cpu python=3.6.7",
+      "GPU":  "conda create -n n2v-cpu python=3.6.7",
+      "macOS CPU": "conda create -n n2v-mac-cpu python=3.6.7"
+  },
+  "requirements": {
+      "CPU": ["pip: tensorflow==1.8.0 Pillow n2v tifffile six"],
+      "GPU": ["pip: tensorflow-gpu==1.8.0 Pillow n2v tifffile six gputil"],
+      "macOS CPU": ["pip: tensorflow==1.5.0 Pillow n2v tifffile six"]
+  },
+  "dependencies": [
+      "oeway/ImJoy-Plugins:Im2Im-Dashboard",
+      "oeway/ImJoy-Plugins:launchpad",
+      "oeway/ImJoy-Plugins:Tabbed-Docs"
+  ],
+  "cover": ["https://dl.dropbox.com/s/bo8timmql033xy1/Noise2Void-0.1.8.gif", "https://dl.dropbox.com/s/rq5ikbben3xbxge/Noise2Void-0.1.8-2.gif"]
+ }
+</config>
+
+<script lang="python">
+from __future__ import print_function, unicode_literals, absolute_import, division
+import os
+import asyncio
+import random
+import numpy as np
+from tifffile import imread
+
+if api.TAG == 'GPU':
+    import GPUtil
+    # Set CUDA_DEVICE_ORDER so the IDs assigned by CUDA match those from nvidia-smi
+    os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+
+    # Get the first available GPU
+    DEVICE_ID_LIST = GPUtil.getFirstAvailable()
+    api.log(f'Available GPUs: {DEVICE_ID_LIST}')
+    if len(DEVICE_ID_LIST)<= 0:
+        api.alert('No GPU available')
+        raise Exception('No GPU available')
+
+    DEVICE_ID = DEVICE_ID_LIST[0] # grab first element from list
+    api.log(f'Set GPU id to : {DEVICE_ID}')
+    # Set CUDA_VISIBLE_DEVICES to mask out all other GPUs than the first available device id
+    os.environ["CUDA_VISIBLE_DEVICES"] = str(DEVICE_ID)
+
+from imjoy import api
+import tensorflow as tf
+import base64
+from io import BytesIO
+from PIL import Image
+from keras.callbacks import Callback
+import json
+import glob
+
+# We import all our dependencies.
+from n2v.models import N2VConfig, N2V
+import numpy as np
+from csbdeep.utils import plot_history
+from n2v.utils.n2v_utils import manipulate_val_data
+from n2v.internals.N2V_DataGenerator import N2V_DataGenerator
+from matplotlib import pyplot as plt
+import urllib
+import os
+import zipfile
+from tifffile import imread
+from csbdeep.io import save_tiff_imagej_compatible
+
+# api.log(str(os.environ))
+ROOT_DIR = ''
+
+if tf.test.gpu_device_name():
+    api.log('Default GPU Devices: {}'.format(tf.test.gpu_device_name()))
+else:
+    api.log("No GPU device is avilable")
+
+def plot_tensors(dash, image_list, label, titles):
+    displays = {}
+    titles = titles or [ 'Tensor '+str(i) for i in range(len(image_list))]
+    for i in range(len(image_list)):
+        im = image_list[i]
+        
+        # limit the size to 1024x1024
+        im = im[:1024:, :1024]
+        min = 0 # im.min()
+        normalized_im = np.clip(((im-min)/(im.max()-min)*255), 0, 255)
+        im = Image.fromarray(normalized_im.astype('uint8'))
+
+        buffered = BytesIO()
+        im.save(buffered, format="JPEG")
+        img_str = base64.b64encode(buffered.getvalue()).decode('ascii')
+        imgurl = 'data:image/png;base64,' + img_str
+        displays[titles[i]] = imgurl
+    dash.appendDisplay(label, displays)
+
+
+async def plot_all_tensors(dash, result_dir, result_url, tensor_list, label, titles):
+    # randomly select a Z
+    image_list = [tensor[ :,:] for tensor in tensor_list]
+    displays = {}
+    titles = titles or [ 'Tensor '+str(i) for i in range(len(image_list))]
+    for i in range(len(image_list)):
+        im = image_list[i]
+        api.log(str(im.shape))
+
+        im = im[ :,:]
+        min = 0 # im.min()
+        normalized_im = np.clip(((im-min)/(im.max()-min)*255), 0, 255)
+        im = Image.fromarray(normalized_im.astype('uint8'))
+
+        image_path = os.path.join(result_dir, label+'_'+titles[i] + '.png')
+        im.save(image_path, format="png")
+        displays[titles[i]] = result_url + '/' +label + '_' + titles[i]+ '.png'
+
+        # send the image directly
+        #buffered = BytesIO()
+        #im.save(buffered, format="PNG")
+        #img_str = base64.b64encode(buffered.getvalue()).decode('ascii')
+        #imgurl = 'data:image/png;base64,' + img_str
+        #displays[titles[i]] = imgurl
+    
+    await dash.appendDisplay(label, displays)
+
+class UpdateUI(Callback):
+    def __init__(self, model, total_epoch, dash, config, val_data=None):
+        self.total_epoch = total_epoch
+        self.epoch = 0
+        self.logs = {}
+        self.dash = dash
+        self.step = 0
+        self.config = config
+        self.m = model
+        if val_data is not None:
+            self.x, self.axes = val_data
+        else:
+            self.x, self.axes = None, None
+
+    def on_batch_end(self, batch, logs):
+        if batch % 10 == 0:
+            self.logs = logs
+            api.showStatus('training epoch:'+str(self.epoch)+'/'+str(self.total_epoch))
+            api.log('batch:'+str(batch) + ' '+ str(logs))
+            self.dash.updateCallback('onStep', self.step, {'loss': np.asscalar(logs['loss']), 'n2v_mse': np.asscalar(logs['n2v_mse'])})
+        self.step += 1
+    def on_epoch_end(self, epoch, logs):
+        self.epoch = epoch
+        self.logs = logs
+        self.dash.updateCallback('onStep', self.step, {'val_loss': np.asscalar(logs['val_loss']), 'val_n2v_mse': np.asscalar(logs['val_n2v_mse'])})
+        api.showProgress(self.epoch/self.total_epoch*100)
+        api.showStatus('training epoch:'+str(self.epoch)+'/'+str(self.total_epoch))
+        api.log('epoch:'+str(self.epoch)+'/'+str(self.total_epoch) + ' '+ str(logs))
+        x, axes = self.x, self.axes
+        if x is not None:
+            try:
+                restored = self.m.predict(x, axes=axes)
+            except Exception as e:
+                api.error(str(e))
+                restored = self.m.predict(x, axes, n_tiles=(2,1))
+            label = 'Step '+ str(self.step)
+            tensor_list = [x, restored]
+            titles = ['input', "Prediction"]
+            plot_tensors(self.dash, tensor_list, label, titles)
+
+def download_and_extract_zip_file (url, filename="SEM.zip", targetdir = './data'):
+    # create a folder for our data.
+    if not os.path.isdir(targetdir):
+        os.mkdir(targetdir)
+
+    # check if data has been downloaded already
+    zipPath = os.path.join(targetdir, filename)
+    if not os.path.exists(zipPath):
+        #download and unzip data
+        data = urllib.request.urlretrieve(url, zipPath)
+        with zipfile.ZipFile(zipPath, 'r') as zip_ref:
+            zip_ref.extractall(targetdir)
+
+loop = asyncio.get_event_loop()
+
+class ImJoyPlugin():
+    async def setup(self):
+        self.model = None
+
+    async def run(self, ctx):
+        self.dialog = await api.showDialog(type='launchpad', data= [
+                {'name': 'Train with data from the web', 'description': 'Use training data stored as zip provided with an url.', 'callback': self.train_with_url, 'img': 'https://img.icons8.com/color/96/000000/download-2.png'},
+                {'name': 'Train with data from the engine', 'description': 'Use training data stored on a (local or remote) plugin engine.', 'callback': self.train_with_folder, 'img': 'https://img.icons8.com/color/96/000000/opened-folder.png'},
+                {'name': 'Predict', 'description': 'Perform denoising on new images.', 'callback': self.predict_folder, 'img': 'https://img.icons8.com/color/96/000000/double-right.png'}
+            ]
+        )
+
+    def get_model_config(self, X, epochs):
+        return N2VConfig(X, unet_kern_size=3, 
+                    train_steps_per_epoch=10, train_epochs=epochs, train_loss='mse', batch_norm=True, 
+                    train_batch_size=128, n2v_perc_pix=1.6, n2v_patch_shape=(64, 64), 
+                    n2v_manipulator='uniform_withCP', n2v_neighborhood_radius=5)
+
+    def train(self, data, epochs, model_name, data_config, basedir):
+        asyncio.set_event_loop(loop)
+        self.dash.setLoading({'status_text': 'Loading data...', 'loading': True})
+
+        X, X_val, val, axes = data
+        val_data = (val, axes)
+        api.log(str(X.shape))
+        
+
+        api.showStatus('creating model ...')
+        self.dash.setLoading({'status_text': 'Creating model...', 'loading': True})
+
+
+        # You can increase "train_steps_per_epoch" to get even better results at the price of longer computation. 
+        config = self.get_model_config(X, epochs)
+        # We are now creating our network model.
+        model = N2V(config, model_name, basedir=basedir)
+        self.model = model
+
+        noise2void_data_config = os.path.join(basedir, model_name, "noise2void_data_config.json")
+        with open(noise2void_data_config, "w") as write_file:
+            json.dump(data_config, write_file)
+
+
+        updateUI = UpdateUI(model, config.train_epochs, self.dash, config, val_data)
+
+        api.showStatus('start training...')
+        self.dash.setLoading({'status_text': 'Start training...', 'loading': False})
+        model.prepare_for_training()
+        model.callbacks.append(updateUI)
+        history = model.train(X, X_val)
+        print(sorted(list(history.history.keys())))
+        api.showStatus('Noise2Void training completed!')
+    
+    async def prepare_data(self, data_file, filter="*.tif", axes='YX'):
+        if data_file.startswith('http'):
+            filename = data_file.split('/')[-1]
+            if not filename.endswith('.zip'):
+                filename += '.zip'
+
+            name, _ = os.path.splitext(filename)
+
+            await api.showStatus('Downloading data ' + filename + '...')
+            download_and_extract_zip_file (
+                url       = data_file,
+                filename = filename,
+                targetdir = os.path.join('data', name)
+            )
+            await api.showStatus('Downloaded ' + filename )
+            data_file = os.path.join('data', name)
+
+        elif os.path.exists(data_file) and data_file.endswith('.zip'):
+            zipPath = data_file
+            _, filename = os.path.split(zipPath)
+            name, _ = os.path.splitext(filename)
+            targetdir = os.path.join('data', name)
+            with zipfile.ZipFile(zipPath, 'r') as zip_ref:
+                zip_ref.extractall(targetdir)
+            data_file = targetdir
+        elif os.path.isdir(data_file):
+            pass
+        else:
+            raise Exception('data file is not supported.')
+        # handle data folder
+        data_dir = data_file
+        _, name = os.path.split(data_dir)
+        await api.showStatus('Loading data from ' + data_dir)
+        datagen = N2V_DataGenerator()
+        imgs = datagen.load_imgs_from_directory(directory = data_dir, filter=filter, dims=axes)
+        await api.log('training images loaded {}, {}'.format(imgs[0].shape,imgs[1].shape))
+
+        # We will use the first image to extract training patches and store them in 'X'
+        X = datagen.generate_patches_from_list(imgs[:1], shape=(96,96))
+
+        # We will use the second image to extract validation patches.
+        X_val = datagen.generate_patches_from_list(imgs[1:], shape=(96,96))
+        
+        await api.showStatus('Patches generated: '+str(X.shape))
+        api.log('Patches generated: '+str(X.shape))
+
+        # We load and process the data we previously used for validation.
+        input_val = imread(os.path.join(data_dir, 'validation.tif'))
+    
+        await api.showStatus('Data prepared.')
+        return X, X_val, input_val, axes
+
+    async def start_train(self, data_file):
+        ret = await api.showDialog( name="Training Configurations", ui= "<br>".join([
+            "Noise2Void Model Name {id: 'model_name', type: 'string', placeholder: 'n2v_2D'}",
+            "Epochs { id: 'epochs', type:'number', placeholder: 10}",
+            "Data file filter { id: 'filter', type:'string', placeholder: '*.tif'}",
+            ]))
+
+        # a name used to identify the model
+        model_name = ret.model_name
+        # the base directory in which our model will live
+        basedir = 'models'
+
+        epochs = int(ret.epochs)
+        filter = ret.filter
+
+        data_config = {}
+        data_config['filter'] = filter
+        self.dash = await api.createWindow(type="Im2Im-Dashboard", name="Noise2Void Training", w=25, h=20, data={"display_mode": "all", 'metrics': ['loss', 'val_loss', 'n2v_mse', 'val_n2v_mse'], 'callbacks': ['onStep']})
+        await self.dash.setLoading({'status_text': 'Preparing data...', 'loading': True})
+        try:
+            ret = await self.prepare_data(data_file, filter=filter)
+            if not ret:
+                api.alert('Failed to prepare data.')
+                await self.dash.setLoading({'status_text': 'Failed to prepare data', 'loading': False})
+                return
+        except Exception as e:
+            api.alert(f'Failed to prepare data, error: {e}')
+            await self.dash.setLoading({'status_text': 'Failed to prepare data', 'loading': False})
+            raise
+            return
+        X, X_val, input_val, axes = ret
+        try:
+            await self.dash.setLoading({'status_text': 'Start training', 'loading': True})
+            await loop.run_in_executor(None, self.train, (X, X_val, input_val, axes), epochs, model_name, data_config, basedir)
+        except Exception as e:
+            api.alert(f'Failed to start training, error: {e}')
+            raise
+        finally:
+            await self.dash.setLoading({'status_text': 'Start training', 'loading': False})
+    
+    async def train_with_url(self):
+        self.dialog.close()
+        url = await api.prompt('Please paste your file url here: ', 'https://cloud.mpi-cbg.de/index.php/s/pXgfbobntrw06lC/download')
+        await self.start_train(url)
+
+    async def train_with_folder(self):
+        self.dialog.close()
+        retObj = await api.showFileDialog(title="Please select a folder containing the training and testing data as subfolders ‘train’ and ‘test.", type= 'directory', engine= api.ENGINE_URL)
+        await self.start_train(retObj.path)
+
+    async def predict_folder(self):
+        self.dialog.close()
+        if self.model is None:
+            model_dir, noise2void_data_config = await self.select_model()
+            basedir, model_name = os.path.split(model_dir)
+
+            # config=None means to find the weights automatically
+            model = N2V(None, model_name, basedir=basedir)
+
+        retObj = await api.showFileDialog(title=f"Select a folder with test data", root=os.path.join(ROOT_DIR, "data"), type="directory", engine=api.ENGINE_URL)
+        test_data_dir = retObj.path
+        if os.path.exists(os.path.join(test_data_dir, 'test')):
+            test_data_dir = os.path.join(test_data_dir, 'test')
+        #filter = await api.prompt('Do you want to filter out some of the images for testing?', '*.tif')
+        #input_images = glob.glob(test_data_dir, filter)
+        input_images = [ os.path.join(test_data_dir, f) for f in os.listdir(test_data_dir) if f.endswith('.tif')]
+
+        api.log(f'test data directory: {test_data_dir}')
+        result_dir = os.path.join(test_data_dir, 'Noise2Void_results')
+        if not os.path.exists(result_dir):
+            os.makedirs(result_dir)
+        result_url = await api.getFileUrl(path=result_dir, engine=api.ENGINE_URL)
+        
+        self.dash = await api.createWindow(type="Im2Im-Dashboard", name="Noise2Void Prediction", w=25, h=20, data={"display_mode": "all"})
+        await self.dash.setLoading({'status_text': 'Running prediction...', 'loading': True})
+        axes = 'YX'
+        try:
+            sample_count = 0
+            for x_file in input_images:
+                dir, filename = os.path.split(x_file)
+                x = imread(x_file)
+                restored = model.predict(x, axes)
+                save_tiff_imagej_compatible(os.path.join(result_dir, 'pred_'+filename), restored, axes=axes)
+                api.log(str(restored.shape) + str(x.shape))
+                _, file_name = os.path.split(x_file)
+                label = str(sample_count) + '_' + file_name
+                tensor_list = [x, restored ]
+                titles = ['input', "output"]
+                await plot_all_tensors(self.dash, result_dir, result_url, tensor_list, label, titles)
+                sample_count += 1
+            await self.dash.setLoading({'status_text': f'Prediction finished, {sample_count} sample processed', 'loading': False})
+            await api.log('image size ='+ str(x.shape))
+            await api.alert('Prediction done.')
+        except Exception as e:
+            await api.alert(f'Error occured: {e}')
+            raise
+        finally:
+            await self.dash.setLoading({'status_text': 'done', 'loading': False})
+
+    async def select_model(self):
+        self.dialog.close()
+        retObj = await api.showFileDialog(title="Please select a folder with trained Noise2Void model", root=os.path.join(ROOT_DIR, "models"), type="directory", engine=api.ENGINE_URL)
+        model_dir = retObj.path
+        if not os.path.exists(os.path.join(model_dir, 'config.json')) or not os.path.exists(os.path.join(model_dir, "noise2void_data_config.json")):
+            await api.alert('This folder does not seem to contain a model, please select another one.')
+            return
+
+        with open(os.path.join(model_dir, "noise2void_data_config.json"), "r") as read_file:
+            noise2void_data_config = json.load(read_file)
+
+        return model_dir, noise2void_data_config
+
+    async def export_model(self):
+        self.dialog.close()
+        api.alert('not implemented.')
+
+api.export(ImJoyPlugin())
+</script>
