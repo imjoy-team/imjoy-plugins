@@ -94,7 +94,7 @@ For either option, you can choose between
     "type":"window",
     "tags":[],
     "ui":"",
-    "version":"0.5.69",
+    "version":"0.5.70",
     "api_version":"0.1.5",
     "description":"An image annotator made with OpenLayers",
     "icon":"extension",
@@ -1250,7 +1250,10 @@ const app = new Vue({
                     url: imgObj.url,
                     projection: projection,
                     imageExtent: extent,
-                    crossOrigin: 'anonymous'
+                    crossOrigin: 'anonymous',
+                    attributions: [new ol.Attribution({
+                        html: "Image from Human Protein Atlas"
+                    })]
                 })
                 const configs = [{type: imgObj.type, min: imgObj.min, max: imgObj.max}]
                 const ranges = [[imgObj.min, imgObj.max]]
@@ -1535,7 +1538,10 @@ const app = new Vue({
                 operation: mkOperation(),
                 lib: {
                     truncateColor: truncateColor,
-                }
+                },
+                attributions: [new ol.Attribution({
+                    html: "Image from Human Protein Atlas"
+                })]
             });
             raster.set('ranges', ranges);
             raster.set('configs', configs);
