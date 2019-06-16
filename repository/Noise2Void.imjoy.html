@@ -1,4 +1,4 @@
-﻿<docs lang="markdown">
+<docs lang="markdown">
 #Noise2Void - Learning Denoising from Single Noisy Images
 
 Alexander Krull, Tim-Oliver Buchholz, Florian Jug
@@ -13,7 +13,7 @@ This is a demo plugin ported from http://juglab.github.io/n2v_SEM_colab
 {
   "name": "Noise2Void",
   "type": "native-python",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "api_version": "0.1.5",
   "description": "This plugin demonstrates denoising using Noise2Void.",
   "tags": ["CPU", "GPU", "macOS CPU"],
@@ -185,8 +185,8 @@ class UpdateUI(Callback):
 
 def download_and_extract_zip_file (url, filename="SEM.zip", targetdir = './data'):
     # create a folder for our data.
-    if not os.path.isdir(targetdir):
-        os.mkdir(targetdir)
+    if not os.path.exists(targetdir):
+        os.makedirs(targetdir)
 
     # check if data has been downloaded already
     zipPath = os.path.join(targetdir, filename)
