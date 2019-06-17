@@ -1,4 +1,4 @@
-<docs lang="markdown">
+﻿<docs lang="markdown">
 #CARE
 
 Weigert et. al, Content-aware image restoration: pushing the limits of fluorescence microscopy, Nature Methods, 2018
@@ -13,7 +13,7 @@ This is a demo plugin ported from https://github.com/CSBDeep/CSBDeep/blob/master
 {
   "name": "CARE",
   "type": "native-python",
-  "version": "0.1.14",
+  "version": "0.1.15",
   "api_version": "0.1.2",
   "description": "This plugin demonstrates denoising using CARE.",
   "tags": ["CPU", "GPU", "macOS CPU"],
@@ -86,8 +86,8 @@ import json
 
 # api.log(str(os.environ))
 
-if os.path.exists('/imjoy/imjoy-paper'):
-    ROOT_DIR = '/imjoy/imjoy-paper'
+if os.path.exists('/imjoy/imjoy-examples'):
+    ROOT_DIR = '/imjoy/imjoy-examples'
 else:
     ROOT_DIR = ''
 
@@ -550,7 +550,7 @@ Once the prediction is done, you can inspect the prediction results and scroll t
 <attachment name="data">
 <br>
 <p style="color:#FF0000">
-  FOR IMJOY REVIEWERS: if you use the provided remote-engine, example data is available at `imjoy/imjoy-paper/CARE-DATA`.
+  FOR IMJOY REVIEWERS: if you use the provided remote-engine, example data is available at `imjoy/imjoy-examples/CARE-DATA`.
   The respective file-dialogs will initiate at this repository.</p>
 <br>
 <p id="data-requirements">
@@ -694,7 +694,7 @@ workspace, you have to move up one folder and select your workspace name.
 
 <attachment name="prediction">
 <p style="color:#FF0000">
-  FOR IMJOY REVIEWERS: if you use the provided remote-engine, a trained model is available at `imjoy/imjoy-paper/CARE-MODEL`.
+  FOR IMJOY REVIEWERS: if you use the provided remote-engine, a trained model is available at `imjoy/imjoy-examples/CARE-MODEL`.
   The respective file-dialogs will initiate at this repository, and you can select the folder `CARE_model_2000steps` to use this model.</p>
 <br>
 Once a model is trained, you can use it for prediction.
