@@ -98,7 +98,7 @@
    "type": "window",
    "tags": [],
    "ui": "",
-   "version": "0.5.68",
+   "version": "0.5.70",
    "api_version": "0.1.5",
    "description": "An image annotator made with OpenLayers",
    "icon": "extension",
@@ -221,7 +221,7 @@
   {
    "name": "Noise2Void",
    "type": "native-python",
-   "version": "0.1.3",
+   "version": "0.1.5",
    "api_version": "0.1.5",
    "description": "This plugin demonstrates denoising using Noise2Void.",
    "tags": [
@@ -255,10 +255,7 @@
     "oeway/ImJoy-Plugins:launchpad",
     "oeway/ImJoy-Plugins:Tabbed-Docs"
    ],
-   "cover": [
-    "https://dl.dropbox.com/s/bo8timmql033xy1/Noise2Void-0.1.8.gif",
-    "https://dl.dropbox.com/s/rq5ikbben3xbxge/Noise2Void-0.1.8-2.gif"
-   ],
+   "cover": "https://dl.dropbox.com/s/dy9zyzp6oub2sr2/noise2void-v0.1.3.jpg",
    "uri": "repository/Noise2Void.imjoy.html"
   },
   {
@@ -368,7 +365,7 @@
   {
    "name": "ANNA-PALM",
    "type": "native-python",
-   "version": "0.1.16",
+   "version": "0.1.17",
    "api_version": "0.1.5",
    "description": "A plugin for training models with ANNA-PALM.",
    "tags": [
