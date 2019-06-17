@@ -1,4 +1,4 @@
-
+﻿
 <docs lang="markdown">
 # ANNA-PALM: deep learning massively accelerates super-resolution localization microscopy
 
@@ -11,7 +11,7 @@ Paper on Nature Biotechnology: https://rdcu.be/LGtc
 {
   "name": "ANNA-PALM",
   "type": "native-python",
-  "version": "0.1.16",
+  "version": "0.1.17",
   "api_version": "0.1.5",
   "description": "A plugin for training models with ANNA-PALM.",
   "tags": ["CPU", "GPU"],
@@ -100,8 +100,8 @@ else:
     if api.TAG == 'GPU':
         api.alert('No GPU device is avilable')
 
-if os.path.exists('/imjoy/imjoy-paper'):
-    ROOT_DIR = '/imjoy/imjoy-paper'
+if os.path.exists('/imjoy/imjoy-examples'):
+    ROOT_DIR = '/imjoy/imjoy-examples'
 else:
     ROOT_DIR = ''
 
@@ -384,7 +384,7 @@ The **main features** are:
 
 <attachment name="load-model">
 <br>
-<p style="color:#FF0000"> FOR IMJOY REVIEWERS: if you use the provided remote-engine, a pre-trained model is available at`imjoy/imjoy-paper/ANNA-PALM-MODEL`.</p>
+<p style="color:#FF0000"> FOR IMJOY REVIEWERS: if you use the provided remote-engine, a pre-trained model is available at`imjoy/imjoy-examples/ANNA-PALM-MODEL`.</p>
 <br>
 <p>
 Here we describe how to load a pre-trained model that can be used either directly for prediction or for re-training.
@@ -407,7 +407,7 @@ This model is then available either for re-training or prediction.
 <attachment name="training">
 <br>
 <p style="color:#FF0000"> FOR IMJOY REVIEWERS: for immediating testing, you can use the provided remote engine 'imjoy.pasteur.cloud' with the 'GPU' tag.
-  Further, training data for microtubules is already available at 'imjoy/imjoy-paper/ANNA-PALM-DATA'.
+  Further, training data for microtubules is already available at 'imjoy/imjoy-examples/ANNA-PALM-DATA'.
 </p>
 <br>
 <p id="training">
