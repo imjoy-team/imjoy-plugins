@@ -10,8 +10,8 @@ This plugin is ported from: [mobilenet example for Tensorflow.js](https://github
   "type": "window",
   "tags": [],
   "ui": "A pretrained MobileNet image classifier built with Tensorflow.js",
-  "version": "0.1.4",
-  "api_version": "0.1.2",
+  "version": "0.1.5",
+  "api_version": "0.1.5",
   "description": "A pretrained MobileNet image classifier built with Tensorflow.js",
   "icon": "extension",
   "inputs": null,
@@ -51,7 +51,7 @@ class ImJoyPlugin {
             canvas.height= Math.min(this.height, parseInt(512*this.height/this.width), 1024);
             // draw the img into canvas
             ctx.drawImage(this, 0, 0, canvas.width, canvas.height);
-            if(callback) callback();
+            if(callback) callback(url);
         }
         img.src = url;
     }
