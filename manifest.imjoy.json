@@ -98,7 +98,7 @@
    "type": "window",
    "tags": [],
    "ui": "",
-   "version": "0.5.70",
+   "version": "0.5.71",
    "api_version": "0.1.5",
    "description": "An image annotator made with OpenLayers",
    "icon": "extension",
@@ -458,8 +458,8 @@
    "type": "window",
    "tags": [],
    "ui": "A pretrained MobileNet image classifier built with Tensorflow.js",
-   "version": "0.1.4",
-   "api_version": "0.1.2",
+   "version": "0.1.5",
+   "api_version": "0.1.5",
    "description": "A pretrained MobileNet image classifier built with Tensorflow.js",
    "icon": "extension",
    "inputs": null,
@@ -799,6 +799,27 @@
    "dependencies": [],
    "disabled": true,
    "uri": "repository/vega.imjoy.html"
+  },
+  {
+   "name": "Welcome",
+   "type": "window",
+   "tags": [],
+   "ui": "",
+   "version": "0.1.0",
+   "cover": "",
+   "description": "A welcome dialog for ImJoy.",
+   "icon": "extension",
+   "inputs": null,
+   "outputs": null,
+   "api_version": "0.1.5",
+   "env": "",
+   "requirements": [],
+   "dependencies": [],
+   "defaults": {
+    "w": 20,
+    "h": 10
+   },
+   "uri": "repository/welcome.imjoy.html"
   }
  ],
  "collections": [
