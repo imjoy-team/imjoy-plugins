@@ -94,7 +94,7 @@ For either option, you can choose between
     "type":"window",
     "tags":[],
     "ui":"",
-    "version":"0.5.71",
+    "version":"0.5.72",
     "api_version":"0.1.5",
     "description":"An image annotator made with OpenLayers",
     "icon":"extension",
@@ -1260,18 +1260,13 @@ const app = new Vue({
                 const configs = [{type: imgObj.type, min: imgObj.min, max: imgObj.max}]
                 const ranges = [[imgObj.min, imgObj.max]]
 
-                if(this.iOS){
-                    this.image_layer.setSource(image_source)
-                }
-                else{
-                    this.raster = this.createRasterLayer([image_source], configs, ranges)
-                    this.image_layer.setSource(this.raster)
-                    //TODO: autoadjust the range
-                    const initRange = [imgObj.min, imgObj.max]
-                    this.gray_slider.set(initRange);
-                    this.raster.set('ranges', [initRange]);
-                    this.raster.changed()
-                }
+                this.raster = this.createRasterLayer([image_source], configs, ranges)
+                this.image_layer.setSource(this.raster)
+                //TODO: autoadjust the range
+                const initRange = [imgObj.min, imgObj.max]
+                this.gray_slider.set(initRange);
+                this.raster.set('ranges', [initRange]);
+                this.raster.changed()
 
                 this.map.setView( new View({
                     projection: projection,
@@ -2098,14 +2093,12 @@ api.export(new ImJoyPlugin())
                 <label class="hide-sm">Channel</label>  <i class="icon icon-caret hide-sm"></i>
             </a>
             <ul class="menu" v-if="selected_dataset && selected_dataset.channel_config">
-                <li v-if="!iOS">
-                    <div class="form-group">
-                        <label class="form-switch">
-                            <input type="checkbox" v-model="selected_dataset.color_mode" @change="switchChannelDisplay(selected_dataset.color_mode)">
-                            <i class="form-icon"></i> Color Mode
-                        </label>
-                    </div>
-                </li>
+                <div class="form-group">
+                    <label class="form-switch">
+                        <input type="checkbox" v-model="selected_dataset.color_mode" @change="switchChannelDisplay(selected_dataset.color_mode)">
+                        <i class="form-icon"></i> Color Mode
+                    </label>
+                </div>
                 <li v-for="(channel, k) in selected_dataset.channel_config" :key="k" class="menu-item cursor-pointer">
                     <label class="form-checkbox" v-if="selected_dataset.color_mode">
                         <input type="checkbox" v-model="channel.checked" @change="rgbChannelUpdated(channel)">
@@ -2207,7 +2200,7 @@ api.export(new ImJoyPlugin())
                 <div v-show="selected_rgb && selected_rgb.length>=2" ref="g_slider"></div>
                 <div v-show="selected_rgb && selected_rgb.length>=3" ref="b_slider"></div>
             </div>
-            <div class="column col-12" v-show="selected_sample && !selected_dataset.color_mode && !iOS">
+            <div class="column col-12" v-show="selected_sample && !selected_dataset.color_mode">
                 <div ref="gray_slider"></div>
             </div>
         </div>
