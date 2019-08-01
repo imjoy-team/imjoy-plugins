@@ -1,4 +1,4 @@
-﻿<docs lang="markdown">
+<docs lang="markdown">
 # Client for ImageJ-Server
 
 1. Download and install ImageJ2/FIJI, then enable the `Server` from [update site](https://imagej.net/Update_Sites) first.
@@ -18,7 +18,7 @@ This plugin is ported from: https://github.com/imagej/imagej-server/tree/master/
   "type": "window",
   "tags": [],
   "ui": "",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "cover": "",
   "description": "A client for ImageJ-Server",
   "icon": "extension",
@@ -63,12 +63,12 @@ function showInput(input) {
 	// the last segment of the type information disregarding the generic type
 	let shortType = /([^.<]+)(<.*?>)?$/.exec(genericType)[1];
 	let style = input['widgetStyle'];
-	
+
 	// the input widget is stored in this top level div
 	let div = $('<div class="input_div"></div>');
-	
+
 	div.append($(`<label class="${dtClass}">${label}</label>`));
-	
+
 	// hover over the short type to show long type
 	var timer;
 	var delay = 500;
@@ -83,7 +83,7 @@ function showInput(input) {
 		self.text(' (' + shortType + '): ');
 	});
 	div.append(typeSpan);
-	
+
 	// select appropriate widget style depending on the specified style or data type
 	if (input['choices'] !== null) {
 		switch(style) {
@@ -124,7 +124,7 @@ function showInput(input) {
 		let defaultStep = INT_TYPES.has(genericType) ? '1' : 'any';
 		let step = input['stepSize'] === null ? 'step="${defaultStep}"' : `step="${input['stepSize']}"`;
 		let value = (required || input['defaultValue'] === null) ? '' : `value="${input['defaultValue']}"`;
-		
+
 		let spinner = $(`<input type="number" name="${name}" ${min} ${max} ${step} ${value}>`);
 
 		if (style == 'slider' || style == 'scroll bar') {
@@ -190,7 +190,7 @@ function showInput(input) {
 			// clone the dragged image to this widget, and also make it draggable
 			let clone = $(`<img class="thumbnail" src="${origin.attr('src')}" draggable="true">`);
 			clone.on('dragstart', function(ev) {
-				ev.originalEvent.dataTransfer.setData('text', id);				
+				ev.originalEvent.dataTransfer.setData('text', id);
 			})
 			clone.on('dragend', function(ev) {
 				clone.remove();
@@ -200,11 +200,11 @@ function showInput(input) {
 		});
 		div.append(dropbox);
 	}
-	
+
 	// hidden input field for raw JSON input (i.e. array, dictionary, or just strings)
 	// usable when "use json" button is toggled
 	div.append($(`<br><input class="json-input" type="text" name="${name}" size="10" placeholder="Raw JSON" disabled>`));
-	
+
 	$('#inputs').append(div);
 }
 
@@ -220,9 +220,9 @@ function showOutput(output) {
 
 	// the output widget is stored in this top level div
 	let div = $('<div class="output_div"></div>');
-	
+
 	div.append($(`<label class="${dtClass}">${label}</label>`));
-	
+
 	// hover over the short type to show long type
 	var timer;
 	var delay = 500;
@@ -237,9 +237,9 @@ function showOutput(output) {
 		self.text(' (' + shortType + '): ');
 	});
 	div.append(typeSpan);
-	
+
 	div.append($(`<span class="value _output_${name}"></span>`));
-	
+
 	$('#outputs').append(div);
 }
 
@@ -490,7 +490,6 @@ api.export(new ImJoyPlugin())
 
 #modules{
 	width: 100%;
-  height: calc(100vh - 40px);
   max-height: 100%;
 	overflow: auto;
 }
