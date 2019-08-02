@@ -1,0 +1,119 @@
+﻿<docs>
+# Wrapper functions for connect to ImageJ-Server
+
+1. Download and install ImageJ2/FIJI, then enable the `Server` from [update site](https://imagej.net/Update_Sites) first.
+2. Start ImageJ2/FIJI, use Plugins › Start Server to make ImageJ start listening for remote commands.
+3. Leave FIJI imagej open and use this ImJoy plugin.
+
+
+To turn it off, use Plugins › Stop Server to shut down the server.
+
+</docs>
+
+<config lang="json">
+{
+  "name": "ImageJWrapper",
+  "type": "web-worker",
+  "tags": [],
+  "ui": "",
+  "version": "0.1.0",
+  "cover": "",
+  "description": "A wrapper for ImageJ-Server",
+  "icon": "extension",
+  "inputs": null,
+  "outputs": null,
+  "api_version": "0.1.5",
+  "env": "",
+  "permissions": [],
+  "requirements": ["https://unpkg.com/axios/dist/axios.min.js", "https://cdn.jsdelivr.net/npm/formdata-polyfill@3.0.18/formdata.min.js"],
+  "dependencies": []
+}
+</config>
+
+<script lang="javascript">
+var HOST = 'http://localhost:8080';
+
+class ImJoyPlugin {
+  async setup() {
+    this.modules = {}
+    const response = await axios.get(HOST+'/modules')
+    
+    if(response.data && Array.isArray(response.data)){
+      await api.showMessage('Loading modules...')
+      let count = 0
+      let total = response.data.length
+      for(let m of response.data){
+        if(m.startsWith('command:net.imagej.ops')){
+          try{
+            const r = await axios.get(HOST+'/modules/'+m)
+            if(r.data){
+              this.modules[m] = r.data
+            }
+          }
+          catch(e){
+            console.error(e)
+          }
+        }
+        count += 1;
+        await api.showProgress(count/total)
+        if(count>20) return;
+      }
+      console.log('---available modules-----', this.modules)
+      await api.showMessage(`${Object.keys(this.modules).length} modules loaded.`)
+    }
+  }
+
+  getModules(){
+    return this.modules
+  }
+
+  getModule(id){
+    return this.modules[id]
+  }
+
+  async run_module(module, inputs){
+    const ret = await axios.post(HOST+'/modules/'+module, inputs)
+    return ret.data
+  }
+
+  async uploadFile(file){
+    let data = new FormData();
+	  data.append('file', file);
+    const response = await axios.post(HOST+'/objects/upload', data)
+    return response.data.id
+  }
+
+  async retrieveObject(id, format){
+    format = format || 'png'
+    const response = await axios.get(HOST+'/objects/' + id + '/'+format, { responseType: 'arraybuffer' })
+    let image = btoa(
+      new Uint8Array(response.data)
+        .reduce((data, byte) => data + String.fromCharCode(byte), '')
+    );
+    return `data:${response.headers['content-type'].toLowerCase()};base64,${image}`;
+  }
+
+  async getObjects(){
+    const response = await axios.get(HOST+'/objects')
+    if(response.data && Array.isArray(response.data)){
+      return response.data
+    }
+  }
+
+  async getObject(id){
+    const response = await axios.get(HOST+'/objects/'+id)
+    return response.data
+  }
+
+  async removeObject(id){
+    const response = await axios.delete(HOST+'/objects/'+id)
+    return response.data
+  }
+  
+  async run(ctx) {
+
+  }
+}
+
+api.export(new ImJoyPlugin())
+</script>

@@ -139,7 +139,7 @@
    "type": "window",
    "tags": [],
    "ui": "",
-   "version": "0.1.0",
+   "version": "0.1.2",
    "cover": "",
    "description": "A client for ImageJ-Server",
    "icon": "extension",
@@ -158,6 +158,27 @@
     "fullscreen": true
    },
    "uri": "repository/ImageJClient.imjoy.html"
+  },
+  {
+   "name": "ImageJWrapper",
+   "type": "web-worker",
+   "tags": [],
+   "ui": "",
+   "version": "0.1.0",
+   "cover": "",
+   "description": "A wrapper for ImageJ-Server",
+   "icon": "extension",
+   "inputs": null,
+   "outputs": null,
+   "api_version": "0.1.5",
+   "env": "",
+   "permissions": [],
+   "requirements": [
+    "https://unpkg.com/axios/dist/axios.min.js",
+    "https://cdn.jsdelivr.net/npm/formdata-polyfill@3.0.18/formdata.min.js"
+   ],
+   "dependencies": [],
+   "uri": "repository/ImageJWrapper.imjoy.html"
   },
   {
    "name": "ImageSelection",
