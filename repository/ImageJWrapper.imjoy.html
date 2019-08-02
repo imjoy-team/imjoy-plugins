@@ -1,4 +1,4 @@
-﻿<docs>
+<docs>
 # Wrapper functions for connect to ImageJ-Server
 
 1. Download and install ImageJ2/FIJI, then enable the `Server` from [update site](https://imagej.net/Update_Sites) first.
@@ -56,7 +56,6 @@ class ImJoyPlugin {
         }
         count += 1;
         await api.showProgress(count/total)
-        if(count>20) return;
       }
       console.log('---available modules-----', this.modules)
       await api.showMessage(`${Object.keys(this.modules).length} modules loaded.`)
