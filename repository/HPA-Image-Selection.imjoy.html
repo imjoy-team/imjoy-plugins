@@ -538,14 +538,14 @@ class ImJoyPlugin {
     this.select_callback = async (id)=>{
       api.showStatus('Selected image id: ' + id)
       const tmp = id.split('_')
-      await api.showDialog({type: 'imjoy/image', name: id, config: {}, data: {src: "https://www.proteinatlas.org/images/"+tmp[0]+"/"+tmp[1]+"_"+tmp[2]+"_"+tmp[3]+"_blue_red_green.jpg"}})
+      await api.showDialog({type: 'imjoy/image', name: id, config: {}, data: {src: "https://images.proteinatlas.org/"+tmp[0]+"/"+tmp[1]+"_"+tmp[2]+"_"+tmp[3]+"_blue_red_green.jpg"}})
     }
     const self = this;
     for(let id of default_image_ids){
         const tmp = id.split('_')
         images.push({
-         thumbnail:"https://www.proteinatlas.org/images/"+tmp[0]+"/"+tmp[1]+"_"+tmp[2]+"_"+tmp[3]+"_blue_red_green_thumb.jpg", 
-         original: "https://www.proteinatlas.org/images/"+tmp[0]+"/"+tmp[1]+"_"+tmp[2]+"_"+tmp[3]+"_blue_red_green.jpg",
+         thumbnail:"https://images.proteinatlas.org/"+tmp[0]+"/"+tmp[1]+"_"+tmp[2]+"_"+tmp[3]+"_blue_red_green_thumb.jpg", 
+         original: "https://images.proteinatlas.org/"+tmp[0]+"/"+tmp[1]+"_"+tmp[2]+"_"+tmp[3]+"_blue_red_green.jpg",
          id: tmp[0]+"_"+tmp[1]+"_"+tmp[2]+"_"+tmp[3]
         })
     }
@@ -574,8 +574,8 @@ class ImJoyPlugin {
         for(let id of  my.data.hpa_ids){
             const tmp = id.split('_')
             images.push({
-            thumbnail:"https://www.proteinatlas.org/images/"+tmp[0]+"/"+tmp[1]+"_"+tmp[2]+"_"+tmp[3]+"_blue_red_green_thumb.jpg", 
-            original: "https://www.proteinatlas.org/images/"+tmp[0]+"/"+tmp[1]+"_"+tmp[2]+"_"+tmp[3]+"_blue_red_green.jpg",
+            thumbnail:"https://images.proteinatlas.org/"+tmp[0]+"/"+tmp[1]+"_"+tmp[2]+"_"+tmp[3]+"_blue_red_green_thumb.jpg", 
+            original: "https://images.proteinatlas.org/"+tmp[0]+"/"+tmp[1]+"_"+tmp[2]+"_"+tmp[3]+"_blue_red_green.jpg",
             id: tmp[0]+"_"+tmp[1]+"_"+tmp[2]+"_"+tmp[3]
           })
         }

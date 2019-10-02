@@ -382,9 +382,9 @@ class ImJoyPlugin {
         //const urls = ['https://static.imjoy.io/img/57639_1283_B2_10_red.jpg',
         //              'https://static.imjoy.io/img/57639_1283_B2_10_green.jpg',
         //              'https://static.imjoy.io/img/57639_1283_B2_10_blue.jpg'];
-        const urls = ['https://www.proteinatlas.org/images/'+image_id+'_red.jpg',
-                     'https://www.proteinatlas.org/images/'+image_id+'_green.jpg',
-                     'https://www.proteinatlas.org/images/'+image_id+'_blue.jpg']
+        const urls = ['https://images.proteinatlas.org/'+image_id+'_red.jpg',
+                     'https://images.proteinatlas.org/'+image_id+'_green.jpg',
+                     'https://images.proteinatlas.org/'+image_id+'_blue.jpg']
         console.time('load data');
         const img = await this.loadData(urls)
         this.currentImage = img

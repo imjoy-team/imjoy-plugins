@@ -213,7 +213,7 @@
    "type": "window",
    "tags": [],
    "ui": "",
-   "version": "0.5.73",
+   "version": "0.5.74",
    "api_version": "0.1.5",
    "description": "An image annotator made with OpenLayers",
    "icon": "extension",
@@ -234,8 +234,8 @@
     "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.2.0/jszip.min.js",
     "https://use.fontawesome.com/releases/v5.8.2/css/all.css",
     "cache:https://use.fontawesome.com/releases/v5.8.2/webfonts/fa-solid-900.woff2",
-    "cache:https://www.proteinatlas.org/images/19661/221_G2_1_blue_red_green.jpg",
-    "cache:https://www.proteinatlas.org/images/19663/395_C4_2_blue_red_green.jpg"
+    "cache:https://images.proteinatlas.org/19661/221_G2_1_blue_red_green.jpg",
+    "cache:https://images.proteinatlas.org/19663/395_C4_2_blue_red_green.jpg"
    ],
    "dependencies": [
     "oeway/ImJoy-Plugins:ImageSelection",
