@@ -1,0 +1,103 @@
+<docs lang="markdown">
+[TODO: write documentation for this plugin.]
+</docs>
+
+<config lang="json">
+{
+  "name": "ProteinSequenceUtils",
+  "type": "web-python",
+  "version": "0.1.0",
+  "description": "[TODO: describe this plugin with one sentence.]",
+  "tags": [],
+  "ui": "",
+  "cover": "",
+  "inputs": null,
+  "outputs": null,
+  "flags": [],
+  "icon": "extension",
+  "api_version": "0.1.6",
+  "env": "",
+  "permissions": [],
+  "requirements": ["numpy"],
+  "dependencies": [],
+  "runnable": false
+}
+</config>
+
+<script lang="python">
+from imjoy import api
+import numpy as np
+
+AALETTER = [
+    'A', 'R', 'N', 'D', 'C', 'Q', 'E', 'G', 'H', 'I',
+    'L', 'K', 'M', 'F', 'P', 'S', 'T', 'W', 'Y', 'V']
+AANUM = len(AALETTER)
+AAINDEX = dict()
+for i in range(len(AALETTER)):
+    AAINDEX[AALETTER[i]] = i + 1
+INVALID_ACIDS = set(['U', 'O', 'B', 'Z', 'J', 'X', '*'])
+MAXLEN = 2000
+NGRAMS = {}
+for i in range(20):
+    for j in range(20):
+        for k in range(20):
+            ngram = AALETTER[i] + AALETTER[j] + AALETTER[k]
+            index = 400 * i + 20 * j + k + 1
+            NGRAMS[ngram] = index
+
+def is_ok(seq):
+    for c in seq:
+        if c in INVALID_ACIDS:
+            return False
+    return True
+
+def to_ngrams(seq):
+    l = min(MAXLEN, len(seq) - 3)
+    ngrams = np.zeros((l,), dtype=np.int32)
+    for i in range(l):
+        ngrams[i] = NGRAMS.get(seq[i: i + 3], 0)
+    return ngrams
+
+def to_onehot(seq, start=0):
+    onehot = np.zeros((MAXLEN, 21), dtype=np.int32)
+    l = min(MAXLEN, len(seq))
+    for i in range(start, start + l):
+        onehot[i, AAINDEX.get(seq[i - start], 0)] = 1
+    onehot[0:start, 0] = 1
+    onehot[start + l:, 0] = 1
+    return onehot
+
+def get_data(sequences):
+    pred_seqs = []
+    ids = []
+    for i, seq in enumerate(sequences):
+        if len(seq) > MAXLEN:
+            st = 0
+            while st < len(seq):
+                pred_seqs.append(seq[st: st + MAXLEN])
+                ids.append(i)
+                st += MAXLEN - 128
+        else:
+            pred_seqs.append(seq)
+            ids.append(i)
+    n = len(pred_seqs)
+    data = np.zeros((n, MAXLEN, 21), dtype=bool)
+    
+    for i in range(n):
+        seq = pred_seqs[i]
+        data[i, :, :] = to_onehot(seq)
+    return ids, data
+
+class ImJoyPlugin():
+    def setup(self):
+        api.log('initialized')
+
+    def run(self, ctx):
+        api.alert('Protein sequence encoder is ready.')
+
+    def encode_sequence(self, seq):
+        _, data = get_data([seq])
+        return data
+
+api.export(ImJoyPlugin())
+</script>
