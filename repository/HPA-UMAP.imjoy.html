@@ -21,7 +21,7 @@
       "type": "window",
       "tags": [],
       "ui": "Explore protein localization patterns in HPA images.",
-      "version": "0.3.7",
+      "version": "0.3.9",
       "api_version": "0.1.2",
       "description": "Explore protein localization patterns in HPA images.",
       "icon": "photo",
@@ -36,7 +36,7 @@
         "https://unpkg.com/spectre.css/dist/spectre-icons.min.css"],
       "dependencies": [],
       "defaults": {"w": 50, "h":20, "fullscreen": true},
-      "cover": "https://kth.box.com/shared/static/epguk8lkho1i5wrukf5q138k2pi4n9kd.gif"
+      "cover": "https://imjoy-team.github.io/example-plugins/hpa-umap/hpa-umap-cover.gif"
     }
     </config>
     
@@ -180,22 +180,20 @@
         
         const layout = {
             hovermode:'closest',
-            title:'HPAv18 UMAP (model: densenet121, images: '+data[0].x.length+')', xaxis: {
-            showticklabels: false,
-            nticks: 10,
-            domain: [-10, 10],
-            range: [-10, 10],
-            
-            },
-            xaxis:{
+            title:'HPAv18 UMAP (model: densenet121, images: '+data[0].x.length+')', 
+            xaxis: {
+                showticklabels: false,
+                nticks: 10,
+                domain: [-10, 10],
+                range: [-10, 10],
                 zeroline: false
             },
             yaxis: {
-            showticklabels: false,
-            nticks: 10,
-            domain: [-10, 10],
-            range: [-10, 10],
-            zeroline: false
+                showticklabels: false,
+                nticks: 10,
+                domain: [-10, 10],
+                range: [-10, 10],
+                zeroline: false
             },
             updatemenus: updatemenus
         }
@@ -267,8 +265,15 @@
       }
       async updateUmap(table, filter){
         filter = filter && filter.trim()
+        const filters = filter.split(' ')
+        
         table = table.filter((row)=>{
-            return row.gene && (!filter || row.gene === filter || row['gene_ensembl_id'] === filter || row['cell_line'] === filter || row['id'] === filter || row['location'].includes(filter) )
+            let ret = false
+            for(let filter of filters){
+                ret = ret || (!filter || row.gene === filter || row['gene_ensembl_id'] === filter || row['cell_line'] === filter || row['id'] === filter || row['location'].includes(filter) )
+
+            }
+            return row.gene && ret
         })
         console.log('filtered: ', table)
         
