@@ -25,7 +25,7 @@
   {
    "name": "CARE",
    "type": "native-python",
-   "version": "0.1.15",
+   "version": "0.1.17",
    "api_version": "0.1.2",
    "description": "This plugin demonstrates denoising using CARE.",
    "tags": [
@@ -45,13 +45,13 @@
    },
    "requirements": {
     "CPU": [
-     "pip: tensorflow==1.8.0 Pillow csbdeep tifffile six"
+     "pip: tensorflow==1.8.0 keras==2.1.5 Pillow csbdeep==0.4.1 tifffile six"
     ],
     "GPU": [
-     "pip: tensorflow-gpu==1.8.0 Pillow csbdeep tifffile six gputil"
+     "pip: tensorflow-gpu==1.8.0 keras==2.1.5 Pillow csbdeep==0.4.1 tifffile six gputil"
     ],
     "macOS CPU": [
-     "pip: tensorflow==1.5.0 Pillow csbdeep tifffile six"
+     "pip: tensorflow==1.5.0 keras==2.1.5 Pillow csbdeep==0.4.1 tifffile six"
     ]
    },
    "dependencies": [
@@ -60,8 +60,7 @@
     "oeway/ImJoy-Plugins:Tabbed-Docs"
    ],
    "cover": [
-    "https://dl.dropbox.com/s/bo8timmql033xy1/CARE-0.1.8.gif",
-    "https://dl.dropbox.com/s/rq5ikbben3xbxge/CARE-0.1.8-2.gif"
+    "https://imjoy-team.github.io/example-plugins/care/care-cover.gif"
    ],
    "uri": "repository/CARE.imjoy.html"
   },
@@ -183,7 +182,7 @@
    "type": "window",
    "tags": [],
    "ui": "Explore protein localization patterns in HPA images.",
-   "version": "0.3.7",
+   "version": "0.3.9",
    "api_version": "0.1.2",
    "description": "Explore protein localization patterns in HPA images.",
    "icon": "photo",
@@ -203,7 +202,7 @@
     "h": 20,
     "fullscreen": true
    },
-   "cover": "https://kth.box.com/shared/static/epguk8lkho1i5wrukf5q138k2pi4n9kd.gif",
+   "cover": "https://imjoy-team.github.io/example-plugins/hpa-umap/hpa-umap-cover.gif",
    "uri": "repository/HPA-UMAP.imjoy.html"
   },
   {
@@ -373,6 +372,31 @@
     "h": 20
    },
    "uri": "repository/MNIST-CNN.imjoy.html"
+  },
+  {
+   "name": "MaskGenerator",
+   "type": "native-python",
+   "version": "0.1.0",
+   "description": "Generate segmentation masks from geojson format",
+   "tags": [],
+   "ui": "",
+   "cover": "",
+   "inputs": null,
+   "outputs": null,
+   "flags": [],
+   "icon": "extension",
+   "api_version": "0.1.6",
+   "env": [
+    "conda create -n maskgenerator python=3.6.8"
+   ],
+   "permissions": [],
+   "requirements": [
+    "pip: descartes palettable geojson read-roi gputil namedlist scipy==1.0.0",
+    "pip: lightgbm imgaug pandas imageio",
+    "repo: https://github.com/oeway/DPNUnet-Segmentation"
+   ],
+   "dependencies": [],
+   "uri": "repository/MaskGenerator.imjoy.html"
   },
   {
    "name": "Noise2Self",
