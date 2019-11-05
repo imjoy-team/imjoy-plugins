@@ -7,7 +7,7 @@
     "type":"window",
     "tags":[],
     "ui":"",
-    "version":"0.2.46",
+    "version":"0.2.47",
     "api_version":"0.1.5",
     "description":"This is a backbone plugin for using Vue.js in ImJoy",
     "icon":"extension",
@@ -393,21 +393,21 @@ class ImJoyPlugin {
                     let samples = this.dataset.samples
                     let channel_config = this.dataset.channel_config
                     let channel_keys = Object.keys(channel_config)
-                    let result = samples.filter((s) => {
-                        let flag = 0
-                        channel_keys.forEach((c) => {
-                            if (Object.keys(s.data).indexOf(c) === -1) {
-                                flag += 1
-                            }
-                        })
-                        if (flag > 0) {
-                            return false
-                        } else {
-                            return true
-                        }
-                    })
-                    this.dataset.samples = result
-                    api.showMessage(result.length + ' samples were imported. ' + ' There are ' + (samples.length - result.length) + ' samples not imported.')
+                    // let result = samples.filter((s) => {
+                    //     let flag = 0
+                    //     channel_keys.forEach((c) => {
+                    //         if (Object.keys(s.data).indexOf(c) === -1) {
+                    //             flag += 1
+                    //         }
+                    //     })
+                    //     if (flag > 0) {
+                    //         return false
+                    //     } else {
+                    //         return true
+                    //     }
+                    // })
+                    // this.dataset.samples = result
+                    // api.showMessage(result.length + ' samples were imported. ' + ' There are ' + (samples.length - result.length) + ' samples not imported.')
 
                     console.log('dataset: ')
                     console.log(this.dataset)
