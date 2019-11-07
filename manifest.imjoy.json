@@ -25,13 +25,15 @@
   {
    "name": "CARE",
    "type": "native-python",
-   "version": "0.1.18",
+   "version": "0.1.19",
    "api_version": "0.1.2",
    "description": "This plugin demonstrates denoising using CARE.",
    "tags": [
-    "CPU",
-    "GPU",
-    "macOS CPU"
+    "Linux CPU",
+    "Linux GPU",
+    "Windows CPU",
+    "Windows GPU",
+    "MacOS CPU"
    ],
    "ui": "",
    "inputs": null,
@@ -44,13 +46,19 @@
     "macOS CPU": "conda create -n care-mac-cpu python=3.6.7"
    },
    "requirements": {
-    "CPU": [
+    "Linux CPU": [
      "pip: tensorflow==1.8.0 keras==2.1.5 Pillow csbdeep==0.4.1 tifffile six"
     ],
-    "GPU": [
+    "Linux GPU": [
      "pip: tensorflow-gpu==1.8.0 keras==2.1.5 Pillow csbdeep==0.4.1 tifffile six gputil"
     ],
-    "macOS CPU": [
+    "Windows CPU": [
+     "pip: tensorflow==1.15.0 keras==2.1.5 Pillow csbdeep==0.4.1 tifffile six"
+    ],
+    "Windows GPU": [
+     "pip: tensorflow-gpu==1.15.0 keras==2.1.5 Pillow csbdeep==0.4.1 tifffile six gputil"
+    ],
+    "MacOS CPU": [
      "pip: tensorflow==1.5.0 keras==2.1.5 Pillow csbdeep==0.4.1 tifffile six"
     ]
    },
