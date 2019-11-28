@@ -1,4 +1,4 @@
-﻿
+
 <docs lang="markdown">
 # ANNA-PALM: deep learning massively accelerates super-resolution localization microscopy
 
@@ -11,7 +11,7 @@ Paper on Nature Biotechnology: https://rdcu.be/LGtc
 {
   "name": "ANNA-PALM",
   "type": "native-python",
-  "version": "0.1.18",
+  "version": "0.1.19",
   "api_version": "0.1.5",
   "description": "A plugin for training models with ANNA-PALM.",
   "tags": ["CPU", "GPU"],
@@ -19,10 +19,10 @@ Paper on Nature Biotechnology: https://rdcu.be/LGtc
   "inputs": null,
   "outputs": null,
   "icon": null,
-  "env": {"CPU": ["conda create -n annapalm-cpu python=3.6"], "GPU": ["conda create -n annapalm-gpu python=3.6"]},
+  "env": {"CPU": ["conda create -n annapalm-cpu python=3.6"], "GPU": ["conda create -n annapalm-gpu python=3.6 cudatoolkit=9.0 cudnn"]},
   "requirements": {
     "CPU": ["repo:https://github.com/imodpasteur/ANNA-PALM", "cmd:pip install -r ANNA-PALM/requirements.txt"],
-    "GPU": ["repo:https://github.com/imodpasteur/ANNA-PALM", "pip: Pillow numpy==1.15.0 scipy matplotlib scikit-image tensorflow-gpu==1.8.0 gputil==1.4.0"]
+    "GPU": ["repo:https://github.com/imodpasteur/ANNA-PALM", "pip: Pillow numpy==1.15.0 scipy matplotlib scikit-image tensorflow-gpu==1.12.0 gputil==1.4.0 imjoy"]
   },
   "dependencies": [
       "oeway/ImJoy-Plugins:Im2Im-Dashboard",
