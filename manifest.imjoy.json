@@ -75,7 +75,7 @@
   {
    "name": "DeepBindScan",
    "type": "native-python",
-   "version": "0.2.14",
+   "version": "0.2.15",
    "api_version": "0.1.3",
    "description": "Predict binding affinity of TF/RBP to a given DNA/RNA sequence.",
    "tags": [],
@@ -87,7 +87,7 @@
    "env": "conda create -n deepbindscan python=3.6.8",
    "requirements": [
     "conda: h5py bioconda::pybedtools bioconda::pyfaidx numpy pandas",
-    "pip: -U tensorflow==1.8.0 keras==2.1.6 kipoi kipoiseq"
+    "pip: -U tensorflow==1.15.0 keras==2.1.6 kipoi kipoiseq"
    ],
    "dependencies": [
     "oeway/ImJoy-Plugins:SchemaIO"
@@ -190,7 +190,7 @@
    "type": "window",
    "tags": [],
    "ui": "Explore protein localization patterns in HPA images.",
-   "version": "0.3.10",
+   "version": "0.3.11",
    "api_version": "0.1.2",
    "description": "Explore protein localization patterns in HPA images.",
    "icon": "photo",
@@ -662,7 +662,7 @@
   {
    "name": "ANNA-PALM",
    "type": "native-python",
-   "version": "0.1.18",
+   "version": "0.1.19",
    "api_version": "0.1.5",
    "description": "A plugin for training models with ANNA-PALM.",
    "tags": [
@@ -678,7 +678,7 @@
      "conda create -n annapalm-cpu python=3.6"
     ],
     "GPU": [
-     "conda create -n annapalm-gpu python=3.6"
+     "conda create -n annapalm-gpu python=3.6 cudatoolkit=9.0 cudnn"
     ]
    },
    "requirements": {
@@ -688,7 +688,7 @@
     ],
     "GPU": [
      "repo:https://github.com/imodpasteur/ANNA-PALM",
-     "pip: Pillow numpy==1.15.0 scipy matplotlib scikit-image tensorflow-gpu==1.8.0 gputil==1.4.0"
+     "pip: Pillow numpy==1.15.0 scipy matplotlib scikit-image tensorflow-gpu==1.12.0 gputil==1.4.0 imjoy"
     ]
    },
    "dependencies": [
