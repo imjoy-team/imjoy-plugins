@@ -246,7 +246,7 @@
    "type": "window",
    "tags": [],
    "ui": "",
-   "version": "0.5.76",
+   "version": "0.5.78",
    "api_version": "0.1.5",
    "description": "An image annotator made with OpenLayers",
    "icon": "extension",
@@ -443,7 +443,7 @@
   {
    "name": "Noise2Void",
    "type": "native-python",
-   "version": "0.1.5",
+   "version": "0.1.6",
    "api_version": "0.1.5",
    "description": "This plugin demonstrates denoising using Noise2Void.",
    "tags": [
@@ -463,13 +463,13 @@
    },
    "requirements": {
     "CPU": [
-     "pip: tensorflow==1.8.0 Pillow n2v tifffile six"
+     "pip: tensorflow==1.15.0 Pillow n2v tifffile six"
     ],
     "GPU": [
-     "pip: tensorflow-gpu==1.8.0 Pillow n2v tifffile six gputil"
+     "pip: tensorflow-gpu==1.15.0 Pillow n2v tifffile six gputil"
     ],
     "macOS CPU": [
-     "pip: tensorflow==1.5.0 Pillow n2v tifffile six"
+     "pip: tensorflow==1.15.0 Pillow n2v tifffile six"
     ]
    },
    "dependencies": [
