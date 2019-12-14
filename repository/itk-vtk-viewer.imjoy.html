@@ -1,0 +1,72 @@
+﻿<docs lang="markdown">
+
+  # ITK VTK Viewer
+  https://kitware.github.io/itk-vtk-viewer/index.html
+  
+  </docs>
+  
+  <config lang="json">
+  {
+    "name": "itk-vtk-viewer",
+    "type": "window",
+    "tags": [],
+    "ui": "",
+    "version": "0.1.0",
+    "cover": "",
+    "description": "A image/volume viewer powered by ITK and VTK.",
+    "icon": "extension",
+    "inputs": null,
+    "outputs": null,
+    "api_version": "0.1.6",
+    "env": "",
+    "permissions": [],
+    "requirements": ["https://oeway.github.io/itk-vtk-viewer/itkVtkViewer.js"],
+    "dependencies": [],
+    "defaults": {"w": 30, "h": 20}
+  }
+  </config>
+  
+  <script lang="javascript">
+  class ImJoyPlugin {
+    async setup() {
+      const container = document.querySelector('#viewer');
+      this.viewer = await itkVtkViewer.createViewerFromLocalFiles(container);
+      window.loadExample = ()=>{
+        const btn = document.querySelector('#load');
+        btn.style.display = "none";
+        this.showVolume('https://data.kitware.com/api/v1/file/564a65d58d777f7522dbfb61/download/data.nrrd')
+      }
+    }
+  
+    async showVolume(url){
+      const container = document.querySelector('#viewer');
+      this.viewer = await itkVtkViewer.createViewerFromUrl(container, url);
+    }
+  
+    // async capture(){
+    //   const screenshot = await this.viewer.captureImage()
+    //   console.log(screenshot)
+    // }
+  
+    async run(ctx) {
+      if(ctx.data.loadExample){
+        window.loadExample = ctx.data.loadExample;
+      }
+    }
+  }
+  
+  api.export(new ImJoyPlugin())
+  </script>
+  
+  <window lang="html">
+    <div>
+      <button id="load" onclick="loadExample()">Load Examples</button>
+      <div id="viewer">
+      </div>
+    </div>
+  </window>
+  
+  <style lang="css">
+  
+  </style>
+  

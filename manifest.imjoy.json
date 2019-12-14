@@ -838,6 +838,30 @@
    "uri": "repository/imageWindow.imjoy.html"
   },
   {
+   "name": "itk-vtk-viewer",
+   "type": "window",
+   "tags": [],
+   "ui": "",
+   "version": "0.1.0",
+   "cover": "",
+   "description": "A image/volume viewer powered by ITK and VTK.",
+   "icon": "extension",
+   "inputs": null,
+   "outputs": null,
+   "api_version": "0.1.6",
+   "env": "",
+   "permissions": [],
+   "requirements": [
+    "https://oeway.github.io/itk-vtk-viewer/itkVtkViewer.js"
+   ],
+   "dependencies": [],
+   "defaults": {
+    "w": 30,
+    "h": 20
+   },
+   "uri": "repository/itk-vtk-viewer.imjoy.html"
+  },
+  {
    "name": "launchpad",
    "type": "window",
    "tags": [],
