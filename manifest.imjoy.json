@@ -843,7 +843,7 @@
    "tags": [],
    "ui": "",
    "version": "0.1.0",
-   "cover": "",
+   "cover": "https://dl.dropbox.com/s/wujfu7l7hacl872/itk-vtk-viewer-0.1.0.gif",
    "description": "A image/volume viewer powered by ITK and VTK.",
    "icon": "extension",
    "inputs": null,
