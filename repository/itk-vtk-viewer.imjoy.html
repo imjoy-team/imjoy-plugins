@@ -1,6 +1,9 @@
 ﻿<docs lang="markdown">
 
-  # ITK VTK Viewer
+  # ITK/VTK Viewer
+
+  2D / 3D web image, mesh, and point set viewer using itk.js and vtk.js 
+
   https://kitware.github.io/itk-vtk-viewer/index.html
   
   </docs>
@@ -11,16 +14,16 @@
     "type": "window",
     "tags": [],
     "ui": "",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "cover": "",
-    "description": "A image/volume viewer powered by ITK and VTK.",
+    "description": "A image/volume, mesh, and point set viewer powered by ITK and VTK.",
     "icon": "extension",
     "inputs": null,
     "outputs": null,
     "api_version": "0.1.6",
     "env": "",
     "permissions": [],
-    "requirements": ["https://oeway.github.io/itk-vtk-viewer/itkVtkViewer.js"],
+    "requirements": ["https://unpkg.io/itk-vtk-viewer@9.10.3/dist/itkVtkViewerCDN.js"],
     "dependencies": [],
     "defaults": {"w": 30, "h": 20},
     "cover": "https://dl.dropbox.com/s/wujfu7l7hacl872/itk-vtk-viewer-0.1.0.gif"
@@ -32,7 +35,7 @@
     async setup() {
       const container = document.querySelector('#viewer');
       this.viewer = await itkVtkViewer.createViewerFromLocalFiles(container);
-      window.loadExample = ()=>{
+      window.loadExample = () => {
         const btn = document.querySelector('#load');
         btn.style.display = "none";
         this.showVolume('https://data.kitware.com/api/v1/file/564a65d58d777f7522dbfb61/download/data.nrrd')
@@ -61,7 +64,7 @@
   
   <window lang="html">
     <div>
-      <button id="load" onclick="loadExample()">Load Examples</button>
+      <button id="load" onclick="loadExample()">Load Example</button>
       <div id="viewer">
       </div>
     </div>
