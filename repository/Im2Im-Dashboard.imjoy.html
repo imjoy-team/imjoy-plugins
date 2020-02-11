@@ -8,7 +8,7 @@
   "type": "window",
   "tags": [],
   "ui": "",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "api_version": "0.1.2",
   "description": "The dashboard for deep learning based image-to-image translation",
   "icon": "extension",
@@ -31,7 +31,6 @@
 
 <script lang="javascript">
 
-const series = []
 const dataObj = {}
 
 const app = new Vue({
@@ -48,7 +47,7 @@ const app = new Vue({
       page_names: [],
       page: null,
       selected_display: null,
-      series: series,
+      series: [],
       show_chart: true,
       chartOptions: {
         chart: {
@@ -114,7 +113,8 @@ function generateCallbacks(metrics, callbacks){
   const cbs = {}
   for(let m of metrics){
     dataObj[m] = {name: m, data: []}
-    series.push(dataObj[m])
+    app.series.push(dataObj[m])
+    app.$forceUpdate()
   }
   for(let c of callbacks){
     cbs[c] = (i, values)=>{
@@ -125,6 +125,7 @@ function generateCallbacks(metrics, callbacks){
           console.log(k, ' is not registered.')
         }
       }
+      app.$refs.realtimeChart.chart.updateSeries(app.series)
       app.$forceUpdate()
     }
   }
