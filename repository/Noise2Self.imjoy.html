@@ -15,7 +15,7 @@ Authors: Joshua Batson, Loic Royer
 {
     "name": "Noise2Self",
     "type": "native-python",
-    "version": "0.1.9",
+    "version": "0.1.10",
     "tags": ["CPU", "GPU"],
     "api_version": "0.1.2",
     "description": "A demo plugin for Noise2Self (Blind Denoising by Self-Supervision)",
@@ -29,8 +29,8 @@ Authors: Joshua Batson, Loic Royer
     "GPU": "conda create -n noise2self-gpu python=3.6.2"
     },
     "requirements": {
-    "CPU": ["repo:https://github.com/czbiohub/noise2self.git", "conda: -c pytorch six pillow numpy scipy pytorch=1.0 torchvision"],
-    "GPU": ["repo:https://github.com/czbiohub/noise2self.git", "conda: -c pytorch six pillow numpy scipy cudatoolkit=9.0 pytorch=1.0 torchvision"]
+    "CPU": ["repo:https://github.com/czbiohub/noise2self.git", "conda: -c pytorch six pillow=6.1 numpy scipy pytorch=1.0 torchvision"],
+    "GPU": ["repo:https://github.com/czbiohub/noise2self.git", "conda: -c pytorch six pillow=6.1 numpy scipy cudatoolkit=9.0 pytorch=1.0 torchvision"]
     },
     "dependencies": ["oeway/ImJoy-Plugins:Im2Im-Dashboard"]
 }
@@ -144,4 +144,3 @@ class ImJoyPlugin():
                 break
 api.export(ImJoyPlugin())
 </script>
-    
