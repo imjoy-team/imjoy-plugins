@@ -93,7 +93,7 @@ For either option, you can choose between
     "type":"window",
     "tags":[],
     "ui":"",
-    "version":"0.5.79",
+    "version":"0.5.80",
     "api_version":"0.1.5",
     "description":"An image annotator made with OpenLayers",
     "icon":"extension",
@@ -275,6 +275,8 @@ async function url2base64(url) {
         img.src = url;
     });
 }
+
+
 function mkdir(dir) {
     return new Promise(async (resolve, reject) => {
         let paths = dir.split('/');
@@ -1920,6 +1922,13 @@ const app = new Vue({
 })
 class ImJoyPlugin {
     async setup() {
+        try{
+            const bfs_plugin = await api.getPlugin("BrowserFS");
+            api.fs = bfs_plugin.fs;
+        }
+        catch(e){
+            console.error('failed to use BrowserFS', e)
+        }
         app.importSampleCompleteCallback = this.importSampleComplete
         app.getData = this.getData
         app.getDataset = this.getDataset
