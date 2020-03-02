@@ -15,22 +15,22 @@ Authors: Joshua Batson, Loic Royer
 {
     "name": "Noise2Self",
     "type": "native-python",
-    "version": "0.1.10",
+    "version": "0.1.11",
     "tags": ["CPU", "GPU"],
-    "api_version": "0.1.2",
+    "api_version": "0.1.7",
     "description": "A demo plugin for Noise2Self (Blind Denoising by Self-Supervision)",
-    "ui": "training steps:{id:'steps', type:'number', min:1, placeholder:1000}",
+    "ui": "",
     "inputs": null,
     "outputs": null,
     "flags": [],
     "icon": "extension",
     "env": {
-    "CPU": "conda create -n noise2self-cpu python=3.6.2",
-    "GPU": "conda create -n noise2self-gpu python=3.6.2"
+        "CPU": ["conda create -n noise2self-cpu python=3.6.2", {"type": "binder", "spec": "oeway/noise2self/master", "skip_requirements": true}],
+        "GPU": ["conda create -n noise2self-gpu python=3.6.2", {"type": "binder", "spec": "oeway/noise2self/master", "skip_requirements": true}]
     },
     "requirements": {
-    "CPU": ["repo:https://github.com/czbiohub/noise2self.git", "conda: -c pytorch six pillow=6.1 numpy scipy pytorch=1.0 torchvision"],
-    "GPU": ["repo:https://github.com/czbiohub/noise2self.git", "conda: -c pytorch six pillow=6.1 numpy scipy cudatoolkit=9.0 pytorch=1.0 torchvision"]
+        "CPU": ["repo:https://github.com/czbiohub/noise2self.git", "conda: -c pytorch six pillow=6.1 numpy scipy pytorch=1.0 torchvision"],
+        "GPU": ["repo:https://github.com/czbiohub/noise2self.git", "conda: -c pytorch six pillow=6.1 numpy scipy cudatoolkit=9.0 pytorch=1.0 torchvision"]
     },
     "dependencies": ["oeway/ImJoy-Plugins:Im2Im-Dashboard"]
 }
@@ -38,7 +38,11 @@ Authors: Joshua Batson, Loic Royer
 
 <script lang="python">
 import sys
-sys.path.append("./noise2self")
+import os
+
+if os.path.exists('noise2self'):
+    sys.path.append("noise2self")
+
 import asyncio
 import base64
 from io import BytesIO
@@ -63,9 +67,11 @@ mnist_test = MNIST('data/MNIST', download = True,
                     transform = transforms.Compose([
                         transforms.ToTensor(),
                     ]), train = False)
+
 from torch import randn
 def add_noise(img):
     return img + randn(img.size())*0.4
+
 class SyntheticNoiseDataset(Dataset):
     def __init__(self, data, mode='train'):
         self.mode = mode
@@ -75,9 +81,11 @@ class SyntheticNoiseDataset(Dataset):
     def __getitem__(self, index):
         img = self.data[index][0]
         return add_noise(img), img
+
 noisy_mnist_train = SyntheticNoiseDataset(mnist_train, 'train')
 noisy_mnist_test = SyntheticNoiseDataset(mnist_test, 'test')
 noisy, clean = noisy_mnist_train[0]
+
 from mask import Masker
 masker = Masker(width = 4, mode='interpolate')
 net_input, mask = masker.mask(noisy.unsqueeze(0), 0)
@@ -86,11 +94,13 @@ model = BabyUnet()
 
 if api.TAG == 'GPU' and gpu_available:
     model = model.cuda()
+
 from torch.nn import MSELoss
 from torch.optim import Adam
 from torch.utils.data import DataLoader
 loss_function = MSELoss()
 optimizer = Adam(model.parameters(), lr=0.001)
+
 class ImJoyPlugin():
     def setup(self):
         print('setup in python')
@@ -111,7 +121,7 @@ class ImJoyPlugin():
         await self.dash.appendDisplay(label, displays)
 
     async def run(self, my):
-        steps =  my.config.steps
+        steps =  my.config.steps or 1000
         if api.TAG == 'GPU' and not gpu_available:
             api.alert('Running with CPU')
 
@@ -142,5 +152,6 @@ class ImJoyPlugin():
                             ["Noisy Image", "Single Pass Inference", "Ground Truth", "J-invariant Inference"])
             if i == steps:
                 break
+
 api.export(ImJoyPlugin())
 </script>
