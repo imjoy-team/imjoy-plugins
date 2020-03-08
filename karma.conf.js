@@ -1,6 +1,8 @@
 // Karma configuration
 // Generated on Sun Mar 08 2020 02:01:17 GMT+0100 (GMT+01:00)
 
+const webpackConfig = require('./webpack.config.js')
+
 module.exports = function (config) {
   config.set({
 
@@ -38,6 +40,7 @@ module.exports = function (config) {
       // (you don't need to specify the entry option)
       // webpack watches dependencies
       // webpack configuration
+      module: webpackConfig.module,
     },
 
     webpackMiddleware: {
@@ -67,7 +70,7 @@ module.exports = function (config) {
 
 
     // enable / disable watching file and executing tests whenever any file changes
-    autoWatch: true,
+    autoWatch: false,
 
 
     // start these browsers
@@ -77,7 +80,7 @@ module.exports = function (config) {
 
     // Continuous Integration mode
     // if true, Karma captures browsers, runs the tests and exits
-    singleRun: false,
+    singleRun: true,
 
     // Concurrency level
     // how many browser should be started simultaneous
