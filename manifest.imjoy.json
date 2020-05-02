@@ -55,9 +55,9 @@
     ]
    },
    "dependencies": [
-    "oeway/ImJoy-Plugins:Im2Im-Dashboard",
-    "oeway/ImJoy-Plugins:launchpad",
-    "oeway/ImJoy-Plugins:Tabbed-Docs"
+    "imjoy-team/imjoy-plugins:Im2Im-Dashboard",
+    "imjoy-team/imjoy-plugins:launchpad",
+    "imjoy-team/imjoy-plugins:Tabbed-Docs"
    ],
    "cover": [
     "https://dl.dropbox.com/s/bo8timmql033xy1/CARE-0.1.8.gif",
@@ -83,7 +83,7 @@
     "pip: -U tensorflow==1.8.0 keras==2.1.6 kipoi kipoiseq"
    ],
    "dependencies": [
-    "oeway/ImJoy-Plugins:SchemaIO"
+    "imjoy-team/imjoy-plugins:SchemaIO"
    ],
    "cmd": "KERAS_BACKEND=tensorflow python",
    "uri": "repository/DeepBindScan.imjoy.html"
@@ -238,8 +238,8 @@
     "cache:https://images.proteinatlas.org/19663/395_C4_2_blue_red_green.jpg"
    ],
    "dependencies": [
-    "oeway/ImJoy-Plugins:ImageSelection",
-    "oeway/ImJoy-Plugins:Tif File Importer"
+    "imjoy-team/imjoy-plugins:ImageSelection",
+    "imjoy-team/imjoy-plugins:Tif File Importer"
    ],
    "defaults": {
     "w": 35,
@@ -315,7 +315,7 @@
     "https://static.imjoy.io/js/UTIF.js"
    ],
    "dependencies": [
-    "oeway/ImJoy-Plugins:Tif File Importer"
+    "imjoy-team/imjoy-plugins:Tif File Importer"
    ],
    "defaults": {
     "w": 30,
@@ -378,7 +378,7 @@
     ]
    },
    "dependencies": [
-    "oeway/ImJoy-Plugins:Im2Im-Dashboard"
+    "imjoy-team/imjoy-plugins:Im2Im-Dashboard"
    ],
    "uri": "repository/Noise2Self.imjoy.html"
   },
@@ -415,9 +415,9 @@
     ]
    },
    "dependencies": [
-    "oeway/ImJoy-Plugins:Im2Im-Dashboard",
-    "oeway/ImJoy-Plugins:launchpad",
-    "oeway/ImJoy-Plugins:Tabbed-Docs"
+    "imjoy-team/imjoy-plugins:Im2Im-Dashboard",
+    "imjoy-team/imjoy-plugins:launchpad",
+    "imjoy-team/imjoy-plugins:Tabbed-Docs"
    ],
    "cover": "https://dl.dropbox.com/s/dy9zyzp6oub2sr2/noise2void-v0.1.3.jpg",
    "uri": "repository/Noise2Void.imjoy.html"
@@ -575,7 +575,7 @@
    },
    "flags": [],
    "dependencies": [
-    "oeway/ImJoy-Plugins:Im2Im-Dashboard"
+    "imjoy-team/imjoy-plugins:Im2Im-Dashboard"
    ],
    "uri": "repository/anet-lite.imjoy.html"
   },
@@ -612,9 +612,9 @@
     ]
    },
    "dependencies": [
-    "oeway/ImJoy-Plugins:Im2Im-Dashboard",
-    "oeway/ImJoy-Plugins:launchpad",
-    "oeway/ImJoy-Plugins:Tabbed-Docs"
+    "imjoy-team/imjoy-plugins:Im2Im-Dashboard",
+    "imjoy-team/imjoy-plugins:launchpad",
+    "imjoy-team/imjoy-plugins:Tabbed-Docs"
    ],
    "cover": "https://dl.dropbox.com/s/gja7uhjctell2nd/annapalm-0.1.9.gif",
    "uri": "repository/annaPalm.imjoy.html"
@@ -798,7 +798,7 @@
    "requirements": [],
    "cmd": "python",
    "dependencies": [
-    "oeway/ImJoy-Plugins:Live Stream Window"
+    "imjoy-team/imjoy-plugins:Live Stream Window"
    ],
    "uri": "repository/liveStream.imjoy.html"
   },
@@ -872,9 +872,9 @@
     "https://cdn.rawgit.com/satazor/js-spark-md5/bbd1624a/spark-md5.min.js"
    ],
    "dependencies": [
-    "oeway/ImJoy-Plugins:Image Window",
-    "oeway/ImJoy-Plugins:2D Histogram",
-    "oeway/ImJoy-Plugins:3D Histogram"
+    "imjoy-team/imjoy-plugins:Image Window",
+    "imjoy-team/imjoy-plugins:2D Histogram",
+    "imjoy-team/imjoy-plugins:3D Histogram"
    ],
    "uri": "repository/smlmFileIO.imjoy.html"
   },
@@ -951,7 +951,7 @@
     "https://static.imjoy.io/js/UTIF.js"
    ],
    "dependencies": [
-    "oeway/ImJoy-Plugins:Image Window"
+    "imjoy-team/imjoy-plugins:Image Window"
    ],
    "runnable": false,
    "uri": "repository/tifFileImporter.imjoy.html"

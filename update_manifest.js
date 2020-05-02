@@ -29,7 +29,7 @@ function runScript(scriptPath, callback) {
 
 function downloadScripts(){
   return new Promise((resolve, reject)=>{
-     https.get("https://raw.githubusercontent.com/oeway/ImJoy/master/web/src/pluginParser.js", (response)=>{
+     https.get("https://raw.githubusercontent.com/imjoy-team/ImJoy/master/web/src/pluginParser.js", (response)=>{
       if(response.statusCode == 200){
         var file = fs.createWriteStream( './pluginParser.js');
         var code = ''
@@ -41,7 +41,7 @@ function downloadScripts(){
           code = code + '\nexports.parseComponent = parseComponent;'
           file.write(code);
           file.close(()=>{
-            https.get("https://raw.githubusercontent.com/oeway/ImJoy/master/web/src/buildManifest.js", (response)=>{
+            https.get("https://raw.githubusercontent.com/imjoy-team/ImJoy/master/web/src/buildManifest.js", (response)=>{
               if(response.statusCode == 200){
                 var code2 = ''
                 response.on('data', (d) => {
