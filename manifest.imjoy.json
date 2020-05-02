@@ -90,7 +90,7 @@
     "pip: -U tensorflow==1.15.0 keras==2.1.6 kipoi kipoiseq"
    ],
    "dependencies": [
-    "imjoy-team/imjoy-plugins:SchemaIO"
+    "oeway/ImJoy-Plugins:SchemaIO"
    ],
    "cmd": "KERAS_BACKEND=tensorflow python",
    "uri": "repository/DeepBindScan.imjoy.html"
@@ -137,7 +137,7 @@
      }
     }
    ],
-   "version": "0.1.23",
+   "version": "0.1.24",
    "api_version": "0.1.2",
    "url": "",
    "description": "ShuffleNetV2 for HPA.",
@@ -218,7 +218,7 @@
    "type": "window",
    "tags": [],
    "ui": "",
-   "version": "0.1.11",
+   "version": "0.1.12",
    "api_version": "0.1.2",
    "description": "The dashboard for deep learning based image-to-image translation",
    "icon": "extension",
@@ -246,7 +246,7 @@
    "type": "window",
    "tags": [],
    "ui": "",
-   "version": "0.5.78",
+   "version": "0.5.80",
    "api_version": "0.1.5",
    "description": "An image annotator made with OpenLayers",
    "icon": "extension",
@@ -409,34 +409,48 @@
   {
    "name": "Noise2Self",
    "type": "native-python",
-   "version": "0.1.9",
+   "version": "0.1.11",
    "tags": [
     "CPU",
     "GPU"
    ],
-   "api_version": "0.1.2",
+   "api_version": "0.1.7",
    "description": "A demo plugin for Noise2Self (Blind Denoising by Self-Supervision)",
-   "ui": "training steps:{id:'steps', type:'number', min:1, placeholder:1000}",
+   "ui": "",
    "inputs": null,
    "outputs": null,
    "flags": [],
    "icon": "extension",
    "env": {
-    "CPU": "conda create -n noise2self-cpu python=3.6.2",
-    "GPU": "conda create -n noise2self-gpu python=3.6.2"
+    "CPU": [
+     "conda create -n noise2self-cpu python=3.6.2",
+     {
+      "type": "binder",
+      "spec": "oeway/noise2self/master",
+      "skip_requirements": true
+     }
+    ],
+    "GPU": [
+     "conda create -n noise2self-gpu python=3.6.2",
+     {
+      "type": "binder",
+      "spec": "oeway/noise2self/master",
+      "skip_requirements": true
+     }
+    ]
    },
    "requirements": {
     "CPU": [
      "repo:https://github.com/czbiohub/noise2self.git",
-     "conda: -c pytorch six pillow numpy scipy pytorch=1.0 torchvision"
+     "conda: -c pytorch six pillow=6.1 numpy scipy pytorch=1.0 torchvision"
     ],
     "GPU": [
      "repo:https://github.com/czbiohub/noise2self.git",
-     "conda: -c pytorch six pillow numpy scipy cudatoolkit=9.0 pytorch=1.0 torchvision"
+     "conda: -c pytorch six pillow=6.1 numpy scipy cudatoolkit=9.0 pytorch=1.0 torchvision"
     ]
    },
    "dependencies": [
-    "imjoy-team/imjoy-plugins:Im2Im-Dashboard"
+    "oeway/ImJoy-Plugins:Im2Im-Dashboard"
    ],
    "uri": "repository/Noise2Self.imjoy.html"
   },
@@ -842,9 +856,9 @@
    "type": "window",
    "tags": [],
    "ui": "",
-   "version": "0.1.0",
+   "version": "0.2.0",
    "cover": "https://dl.dropbox.com/s/wujfu7l7hacl872/itk-vtk-viewer-0.1.0.gif",
-   "description": "A image/volume viewer powered by ITK and VTK.",
+   "description": "A image/volume, mesh, and point set viewer powered by ITK and VTK.",
    "icon": "extension",
    "inputs": null,
    "outputs": null,
@@ -852,7 +866,7 @@
    "env": "",
    "permissions": [],
    "requirements": [
-    "https://oeway.github.io/itk-vtk-viewer/itkVtkViewer.js"
+    "https://unpkg.io/itk-vtk-viewer@9.10.3/dist/itkVtkViewerCDN.js"
    ],
    "dependencies": [],
    "defaults": {
