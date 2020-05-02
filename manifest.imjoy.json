@@ -68,7 +68,7 @@
     "imjoy-team/imjoy-plugins:Tabbed-Docs"
    ],
    "cover": [
-    "https://oeway.github.io/ImJoy-Plugins/care/care-cover.gif"
+    "https://imjoy-team.github.io/ImJoy-Plugins/care/care-cover.gif"
    ],
    "uri": "repository/CARE.imjoy.html"
   },
@@ -90,7 +90,7 @@
     "pip: -U tensorflow==1.15.0 keras==2.1.6 kipoi kipoiseq"
    ],
    "dependencies": [
-    "oeway/ImJoy-Plugins:SchemaIO"
+    "imjoy-team/imjoy-plugins:SchemaIO"
    ],
    "cmd": "KERAS_BACKEND=tensorflow python",
    "uri": "repository/DeepBindScan.imjoy.html"
@@ -159,7 +159,7 @@
     "h": 20,
     "standalone": true
    },
-   "cover": "https://oeway.github.io/ImJoy-Plugins/hpa-classification/hpa-classification-cover.gif",
+   "cover": "https://imjoy-team.github.io/ImJoy-Plugins/hpa-classification/hpa-classification-cover.gif",
    "uri": "repository/HPA-Classification.imjoy.html"
   },
   {
@@ -210,7 +210,7 @@
     "h": 20,
     "fullscreen": true
    },
-   "cover": "https://oeway.github.io/ImJoy-Plugins/hpa-umap/hpa-umap-cover.gif",
+   "cover": "https://imjoy-team.github.io/ImJoy-Plugins/hpa-umap/hpa-umap-cover.gif",
    "uri": "repository/HPA-UMAP.imjoy.html"
   },
   {
@@ -279,7 +279,7 @@
     "h": 25,
     "fullscreen": true
    },
-   "cover": "https://oeway.github.io/ImJoy-Plugins/image-annotator/annotator-cover.gif",
+   "cover": "https://imjoy-team.github.io/ImJoy-Plugins/image-annotator/annotator-cover.gif",
    "uri": "repository/ImageAnnotator.imjoy.html"
   },
   {
@@ -450,7 +450,7 @@
     ]
    },
    "dependencies": [
-    "oeway/ImJoy-Plugins:Im2Im-Dashboard"
+    "imjoy-team/imjoy-plugins:Im2Im-Dashboard"
    ],
    "uri": "repository/Noise2Self.imjoy.html"
   },
@@ -710,7 +710,7 @@
     "imjoy-team/imjoy-plugins:launchpad",
     "imjoy-team/imjoy-plugins:Tabbed-Docs"
    ],
-   "cover": "https://oeway.github.io/ImJoy-Plugins/annapalm/annapalm-cover.gif",
+   "cover": "https://imjoy-team.github.io/ImJoy-Plugins/annapalm/annapalm-cover.gif",
    "uri": "repository/annaPalm.imjoy.html"
   },
   {
