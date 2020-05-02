@@ -1,0 +1,66 @@
+﻿<docs lang="markdown">
+# Mask Generator
+
+This plugin generate border masks for geojson files produced by the ImageAnnotator plugin.
+
+</docs>
+
+<config lang="json">
+{
+  "name": "MaskGenerator",
+  "type": "native-python",
+  "version": "0.1.0",
+  "description": "Generate segmentation masks from geojson format",
+  "tags": [],
+  "ui": "",
+  "cover": "",
+  "inputs": null,
+  "outputs": null,
+  "flags": [],
+  "icon": "extension",
+  "api_version": "0.1.6",
+  "env": ["conda create -n maskgenerator python=3.6.8"],
+  "permissions": [],
+  "requirements": ["pip: descartes palettable geojson read-roi gputil namedlist scipy==1.0.0",
+                    "pip: lightgbm imgaug pandas imageio",
+                    "repo: https://github.com/oeway/DPNUnet-Segmentation"
+   ],
+  "dependencies": []
+}
+</config>
+
+<script lang="python">
+from imjoy import api
+import os
+os.chdir('DPNUnet-Segmentation/src')
+from geojson_utils import masks_to_annotation, gen_mask_from_geojson
+import asyncio
+
+class ImJoyPlugin():
+    def setup(self):
+        api.log('initialized')
+
+    async def run(self, ctx):
+        await self.generate_masks()
+
+    async def generate_masks(self, datasets_dir=None):
+        if not datasets_dir:
+            ret = await api.showFileDialog(type="directory")
+            datasets_dir = ret.path
+        print("datasets_dir:", datasets_dir)
+        file_ids = os.listdir(os.path.join(datasets_dir, "train"))
+        total = len(file_ids)
+        for i, file_id in enumerate(file_ids):
+            await api.showProgress(i/total*100)
+            await api.showStatus(f'Processing {i}/{total}: {file_id}')
+            file_path = os.path.join(datasets_dir, "train", file_id, "annotation.json")
+            try:
+                gen_mask_from_geojson([file_path], masks_to_create_value=["border_mask"])
+            except:
+                print("generate mask error:", os.path.join(datasets_dir, "train", file_id))
+        await api.showProgress(100)
+        await api.alert('Finished, generated masks saved to ' + datasets_dir)
+
+
+api.export(ImJoyPlugin())
+</script>

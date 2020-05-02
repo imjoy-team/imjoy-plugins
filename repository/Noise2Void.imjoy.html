@@ -13,7 +13,7 @@ This is a demo plugin ported from http://juglab.github.io/n2v_SEM_colab
 {
   "name": "Noise2Void",
   "type": "native-python",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "api_version": "0.1.5",
   "description": "This plugin demonstrates denoising using Noise2Void.",
   "tags": ["CPU", "GPU", "macOS CPU"],
@@ -28,9 +28,9 @@ This is a demo plugin ported from http://juglab.github.io/n2v_SEM_colab
       "macOS CPU": "conda create -n n2v-mac-cpu python=3.6.7"
   },
   "requirements": {
-      "CPU": ["pip: tensorflow==1.8.0 Pillow n2v tifffile six"],
-      "GPU": ["pip: tensorflow-gpu==1.8.0 Pillow n2v tifffile six gputil"],
-      "macOS CPU": ["pip: tensorflow==1.5.0 Pillow n2v tifffile six"]
+      "CPU": ["pip: tensorflow==1.15.0 Pillow n2v tifffile six"],
+      "GPU": ["pip: tensorflow-gpu==1.15.0 Pillow n2v tifffile six gputil"],
+      "macOS CPU": ["pip: tensorflow==1.15.0 Pillow n2v tifffile six"]
   },
   "dependencies": [
       "imjoy-team/imjoy-plugins:Im2Im-Dashboard",

@@ -23,7 +23,7 @@ This plugin allows to predict the subcellular protein localization pattern for a
         "placeholder": "ShuffleNet-V2"
     }
   }],
-  "version": "0.1.22",
+  "version": "0.1.24",
   "api_version": "0.1.2",
   "url": "",
   "description": "ShuffleNetV2 for HPA.",
@@ -39,7 +39,7 @@ This plugin allows to predict the subcellular protein localization pattern for a
     ],
   "dependencies": ["https://raw.githubusercontent.com/imjoy-team/example-plugins/master/imjoy-plugins/HPA-Image-Selection.imjoy.html"],
   "defaults": {"w": 60, "h": 20, "standalone": true},
-  "cover": "https://dl.dropbox.com/s/87w11rqi5qq1ftb/hpa-classification-v0.1.17.gif"
+  "cover": "https://oeway.github.io/ImJoy-Plugins/hpa-classification/hpa-classification-cover.gif"
 }
 </config>
 
@@ -461,7 +461,7 @@ class ImJoyPlugin {
         }
         this.statusElement.innerHTML = 'Prediction: ' + predictions.join(", ")
         api.showStatus(this.statusElement.innerHTML)
-        document.getElementById('bar-container').style.display = "block";
+        document.getElementById('bar-container').style.display = "inline-flex";
 
         const showCAM = (event, chartContext, config)=>{
             var label = labels[config.dataPointIndex];
@@ -753,8 +753,8 @@ api.export(new ImJoyPlugin())
     <button id="load-btn" class="big-button">Load New Image</button>
     <button id="predict-btn" class="big-button">Predict</button>
     <br>
+    <p>Click the bar to see Class Activation Map.</p>
     <div id="bar-container">
-        <p>Click the bar to see Class Activation Map.</p>
         <div id="tf-bar"></div>
     </div>
     <div id="heatmap-container"></div>
@@ -780,6 +780,7 @@ canvas {
   max-width: 50%;
   float:left;
 }
+
 #bar-container div:nth-child(2){
   max-width: 50%;
   float:left;

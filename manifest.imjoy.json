@@ -25,13 +25,15 @@
   {
    "name": "CARE",
    "type": "native-python",
-   "version": "0.1.15",
+   "version": "0.1.21",
    "api_version": "0.1.2",
    "description": "This plugin demonstrates denoising using CARE.",
    "tags": [
-    "CPU",
-    "GPU",
-    "macOS CPU"
+    "Linux CPU",
+    "Linux GPU",
+    "Windows CPU",
+    "Windows GPU",
+    "MacOS CPU"
    ],
    "ui": "",
    "inputs": null,
@@ -44,14 +46,20 @@
     "macOS CPU": "conda create -n care-mac-cpu python=3.6.7"
    },
    "requirements": {
-    "CPU": [
-     "pip: tensorflow==1.8.0 Pillow csbdeep tifffile six"
+    "Linux CPU": [
+     "pip: tensorflow==1.15.0 keras==2.1.5 Pillow csbdeep==0.4.1 tifffile six"
     ],
-    "GPU": [
-     "pip: tensorflow-gpu==1.8.0 Pillow csbdeep tifffile six gputil"
+    "Linux GPU": [
+     "pip: tensorflow-gpu==1.15.0 keras==2.1.5 Pillow csbdeep==0.4.1 tifffile six gputil"
     ],
-    "macOS CPU": [
-     "pip: tensorflow==1.5.0 Pillow csbdeep tifffile six"
+    "Windows CPU": [
+     "pip: tensorflow==1.15.0 keras==2.1.5 Pillow csbdeep==0.4.1 tifffile six"
+    ],
+    "Windows GPU": [
+     "pip: tensorflow-gpu==1.15.0 keras==2.1.5 Pillow csbdeep==0.4.1 tifffile six gputil"
+    ],
+    "MacOS CPU": [
+     "pip: tensorflow==1.5.0 keras==2.1.5 Pillow csbdeep==0.4.1 tifffile six"
     ]
    },
    "dependencies": [
@@ -60,15 +68,14 @@
     "imjoy-team/imjoy-plugins:Tabbed-Docs"
    ],
    "cover": [
-    "https://dl.dropbox.com/s/bo8timmql033xy1/CARE-0.1.8.gif",
-    "https://dl.dropbox.com/s/rq5ikbben3xbxge/CARE-0.1.8-2.gif"
+    "https://oeway.github.io/ImJoy-Plugins/care/care-cover.gif"
    ],
    "uri": "repository/CARE.imjoy.html"
   },
   {
    "name": "DeepBindScan",
    "type": "native-python",
-   "version": "0.2.14",
+   "version": "0.2.15",
    "api_version": "0.1.3",
    "description": "Predict binding affinity of TF/RBP to a given DNA/RNA sequence.",
    "tags": [],
@@ -80,13 +87,39 @@
    "env": "conda create -n deepbindscan python=3.6.8",
    "requirements": [
     "conda: h5py bioconda::pybedtools bioconda::pyfaidx numpy pandas",
-    "pip: -U tensorflow==1.8.0 keras==2.1.6 kipoi kipoiseq"
+    "pip: -U tensorflow==1.15.0 keras==2.1.6 kipoi kipoiseq"
    ],
    "dependencies": [
     "imjoy-team/imjoy-plugins:SchemaIO"
    ],
    "cmd": "KERAS_BACKEND=tensorflow python",
    "uri": "repository/DeepBindScan.imjoy.html"
+  },
+  {
+   "name": "DeepGOPlus",
+   "type": "iframe",
+   "tags": [],
+   "ui": "",
+   "version": "0.1.3",
+   "cover": "https://dl.dropbox.com/s/0b1673j5jtr4wkt/deepgoplus-v0.1.2.gif",
+   "description": "Protein function prediction with CNN running in the browser.",
+   "icon": "extension",
+   "inputs": null,
+   "outputs": null,
+   "api_version": "0.1.6",
+   "env": "",
+   "permissions": [],
+   "requirements": [
+    "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.2.11/dist/tf.min.js"
+   ],
+   "dependencies": [
+    "https://gist.githubusercontent.com/oeway/ff9b45bd65b499cb5677713c190c66ba/raw/ProteinSequenceUtils.imjoy.html"
+   ],
+   "defaults": {
+    "w": 20,
+    "h": 10
+   },
+   "uri": "repository/DeepGoPlus.imjoy.html"
   },
   {
    "name": "HPA-Classification",
@@ -104,7 +137,7 @@
      }
     }
    ],
-   "version": "0.1.22",
+   "version": "0.1.23",
    "api_version": "0.1.2",
    "url": "",
    "description": "ShuffleNetV2 for HPA.",
@@ -126,7 +159,7 @@
     "h": 20,
     "standalone": true
    },
-   "cover": "https://dl.dropbox.com/s/87w11rqi5qq1ftb/hpa-classification-v0.1.17.gif",
+   "cover": "https://oeway.github.io/ImJoy-Plugins/hpa-classification/hpa-classification-cover.gif",
    "uri": "repository/HPA-Classification.imjoy.html"
   },
   {
@@ -157,7 +190,7 @@
    "type": "window",
    "tags": [],
    "ui": "Explore protein localization patterns in HPA images.",
-   "version": "0.3.7",
+   "version": "0.3.11",
    "api_version": "0.1.2",
    "description": "Explore protein localization patterns in HPA images.",
    "icon": "photo",
@@ -177,7 +210,7 @@
     "h": 20,
     "fullscreen": true
    },
-   "cover": "https://kth.box.com/shared/static/epguk8lkho1i5wrukf5q138k2pi4n9kd.gif",
+   "cover": "https://oeway.github.io/ImJoy-Plugins/hpa-umap/hpa-umap-cover.gif",
    "uri": "repository/HPA-UMAP.imjoy.html"
   },
   {
@@ -213,7 +246,7 @@
    "type": "window",
    "tags": [],
    "ui": "",
-   "version": "0.5.74",
+   "version": "0.5.78",
    "api_version": "0.1.5",
    "description": "An image annotator made with OpenLayers",
    "icon": "extension",
@@ -246,7 +279,7 @@
     "h": 25,
     "fullscreen": true
    },
-   "cover": "https://dl.dropbox.com/s/hmoio1d62vuvito/annotator-v0.5.40.gif",
+   "cover": "https://oeway.github.io/ImJoy-Plugins/image-annotator/annotator-cover.gif",
    "uri": "repository/ImageAnnotator.imjoy.html"
   },
   {
@@ -300,7 +333,7 @@
    "type": "window",
    "tags": [],
    "ui": "",
-   "version": "0.2.46",
+   "version": "0.2.47",
    "api_version": "0.1.5",
    "description": "This is a backbone plugin for using Vue.js in ImJoy",
    "icon": "extension",
@@ -349,9 +382,34 @@
    "uri": "repository/MNIST-CNN.imjoy.html"
   },
   {
+   "name": "MaskGenerator",
+   "type": "native-python",
+   "version": "0.1.0",
+   "description": "Generate segmentation masks from geojson format",
+   "tags": [],
+   "ui": "",
+   "cover": "",
+   "inputs": null,
+   "outputs": null,
+   "flags": [],
+   "icon": "extension",
+   "api_version": "0.1.6",
+   "env": [
+    "conda create -n maskgenerator python=3.6.8"
+   ],
+   "permissions": [],
+   "requirements": [
+    "pip: descartes palettable geojson read-roi gputil namedlist scipy==1.0.0",
+    "pip: lightgbm imgaug pandas imageio",
+    "repo: https://github.com/oeway/DPNUnet-Segmentation"
+   ],
+   "dependencies": [],
+   "uri": "repository/MaskGenerator.imjoy.html"
+  },
+  {
    "name": "Noise2Self",
    "type": "native-python",
-   "version": "0.1.8",
+   "version": "0.1.9",
    "tags": [
     "CPU",
     "GPU"
@@ -385,7 +443,7 @@
   {
    "name": "Noise2Void",
    "type": "native-python",
-   "version": "0.1.5",
+   "version": "0.1.6",
    "api_version": "0.1.5",
    "description": "This plugin demonstrates denoising using Noise2Void.",
    "tags": [
@@ -405,13 +463,13 @@
    },
    "requirements": {
     "CPU": [
-     "pip: tensorflow==1.8.0 Pillow n2v tifffile six"
+     "pip: tensorflow==1.15.0 Pillow n2v tifffile six"
     ],
     "GPU": [
-     "pip: tensorflow-gpu==1.8.0 Pillow n2v tifffile six gputil"
+     "pip: tensorflow-gpu==1.15.0 Pillow n2v tifffile six gputil"
     ],
     "macOS CPU": [
-     "pip: tensorflow==1.5.0 Pillow n2v tifffile six"
+     "pip: tensorflow==1.15.0 Pillow n2v tifffile six"
     ]
    },
    "dependencies": [
@@ -421,6 +479,28 @@
    ],
    "cover": "https://dl.dropbox.com/s/dy9zyzp6oub2sr2/noise2void-v0.1.3.jpg",
    "uri": "repository/Noise2Void.imjoy.html"
+  },
+  {
+   "name": "ProteinSequenceUtils",
+   "type": "web-python",
+   "version": "0.1.1",
+   "description": "This plugin implements a function for encoding protein sequence one-hot vectors for the DeepGoPlus plugin.",
+   "tags": [],
+   "ui": "",
+   "cover": "",
+   "inputs": null,
+   "outputs": null,
+   "flags": [],
+   "icon": "extension",
+   "api_version": "0.1.6",
+   "env": "",
+   "permissions": [],
+   "requirements": [
+    "numpy"
+   ],
+   "dependencies": [],
+   "runnable": false,
+   "uri": "repository/ProteinSequenceUtils.imjoy.html"
   },
   {
    "name": "SchemaIO",
@@ -582,7 +662,7 @@
   {
    "name": "ANNA-PALM",
    "type": "native-python",
-   "version": "0.1.17",
+   "version": "0.1.19",
    "api_version": "0.1.5",
    "description": "A plugin for training models with ANNA-PALM.",
    "tags": [
@@ -598,7 +678,7 @@
      "conda create -n annapalm-cpu python=3.6"
     ],
     "GPU": [
-     "conda create -n annapalm-gpu python=3.6"
+     "conda create -n annapalm-gpu python=3.6 cudatoolkit=9.0 cudnn"
     ]
    },
    "requirements": {
@@ -608,7 +688,7 @@
     ],
     "GPU": [
      "repo:https://github.com/imodpasteur/ANNA-PALM",
-     "pip: Pillow numpy==1.15.0 scipy matplotlib scikit-image tensorflow-gpu==1.8.0 gputil==1.4.0"
+     "pip: Pillow numpy==1.15.0 scipy matplotlib scikit-image tensorflow-gpu==1.12.0 gputil==1.4.0 imjoy"
     ]
    },
    "dependencies": [
@@ -616,7 +696,7 @@
     "imjoy-team/imjoy-plugins:launchpad",
     "imjoy-team/imjoy-plugins:Tabbed-Docs"
    ],
-   "cover": "https://dl.dropbox.com/s/gja7uhjctell2nd/annapalm-0.1.9.gif",
+   "cover": "https://oeway.github.io/ImJoy-Plugins/annapalm/annapalm-cover.gif",
    "uri": "repository/annaPalm.imjoy.html"
   },
   {
@@ -756,6 +836,30 @@
    "dependencies": [],
    "runnable": false,
    "uri": "repository/imageWindow.imjoy.html"
+  },
+  {
+   "name": "itk-vtk-viewer",
+   "type": "window",
+   "tags": [],
+   "ui": "",
+   "version": "0.1.0",
+   "cover": "https://dl.dropbox.com/s/wujfu7l7hacl872/itk-vtk-viewer-0.1.0.gif",
+   "description": "A image/volume viewer powered by ITK and VTK.",
+   "icon": "extension",
+   "inputs": null,
+   "outputs": null,
+   "api_version": "0.1.6",
+   "env": "",
+   "permissions": [],
+   "requirements": [
+    "https://oeway.github.io/itk-vtk-viewer/itkVtkViewer.js"
+   ],
+   "dependencies": [],
+   "defaults": {
+    "w": 30,
+    "h": 20
+   },
+   "uri": "repository/itk-vtk-viewer.imjoy.html"
   },
   {
    "name": "launchpad",
@@ -959,7 +1063,7 @@
   {
    "name": "Unet Segmentation",
    "type": "native-python",
-   "version": "0.1.0",
+   "version": "0.2.0",
    "api_version": "0.1.2",
    "description": "A plugin for demonstrating unet segmentation with keras.",
    "tags": [
