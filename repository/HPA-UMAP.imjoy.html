@@ -20,7 +20,7 @@ a localization pattern.
     "type": "window",
     "tags": [],
     "ui": "Explore protein localization patterns in HPA images.",
-    "version": "0.4.1",
+    "version": "0.4.2",
     "api_version": "0.1.2",
     "description": "Explore protein localization patterns in HPA images.",
     "icon": "photo",
@@ -97,7 +97,7 @@ const COLORS = [
 class ImJoyPlugin {
     async setup() {
         const self = this
-        this.store = {images: [], selected_table: null, tables:  {
+        this.store = {images: [], selected_table: null, current_filter: '', tables:  {
                 "2D": "https://dl.dropbox.com/s/k9ekd4ff3fyjbfk/umap_results_fit_all_transform_all_sorted_20190422.csv",
                 "3D": "https://dl.dropbox.com/s/s4m2iysupy8gwj0/umap_results_fit_all_transform_all.csv",
             },
@@ -132,7 +132,7 @@ class ImJoyPlugin {
                         console.log('===============>', results)
                         self.umap_data = results.data
                         try{
-                            self.updateUmap(self.umap_data)
+                            self.updateUmap(self.umap_data, this.current_filter, self.umap_data[0].z?true:false)
                         }
                         finally{
                             this.loading = false
@@ -198,7 +198,7 @@ class ImJoyPlugin {
             async selectFileChanged(event) {
                 const file = event.target.files[0];
                 if(file){
-                    this.loadTable(file)
+                    this.loadTable(file, )
                 }
             }
         }
@@ -331,6 +331,7 @@ class ImJoyPlugin {
     }
     async updateUmap(table, filter, remove){
     filter = (filter || '') && filter.trim()
+    this.app.current_filter = filter;
     
     let filter_func
 
