@@ -20,7 +20,7 @@ a localization pattern.
     "type": "window",
     "tags": [],
     "ui": "Explore protein localization patterns in HPA images.",
-    "version": "0.3.12",
+    "version": "0.3.13",
     "api_version": "0.1.2",
     "description": "Explore protein localization patterns in HPA images.",
     "icon": "photo",
@@ -97,11 +97,61 @@ const COLORS = [
 class ImJoyPlugin {
     async setup() {
         const self = this
-        this.store = {images: [], current_index: 0, loading: true, thumbnail: null, search_text: ''}
+        this.store = {images: [], tables:  {
+                "2D": "https://dl.dropbox.com/s/k9ekd4ff3fyjbfk/umap_results_fit_all_transform_all_sorted_20190422.csv",
+                "3D": "https://dl.dropbox.com/s/s4m2iysupy8gwj0/umap_results_fit_all_transform_all.csv",
+            },
+            current_index: 0, loading: true, thumbnail: null, search_text: ''}
         this.app = new Vue({
         el: '#app',
         data: this.store,
         methods: {
+            loadTable(url){
+                this.loading = true;
+                Papa.parse(url, {
+                    download: true,
+                    header: true,
+                    dynamicTyping: true,
+                    skipEmptyLines: true,
+                    error: (err, file, inputElem, reason)=> {
+                        api.alert('Falied to load the table: ' + reason.toString())
+                        this.loading = false
+                        this.$forceUpdate()
+                    },
+                    complete: (results) => {
+                        for(let loc of results.data){
+                            loc.info = loc.gene + '(' + loc.cell_line + ')' + ': ' + loc.location
+                        }                        
+                        console.log('===============>', results)
+                        self.umap_data = results.data
+                        try{
+                            self.updateUmap(self.umap_data)
+                        }
+                        finally{
+                            this.loading = false
+                            this.$forceUpdate()
+                        }
+                        
+                    }
+                })
+            },
+            async exportCSV(){
+                api.showMessage("Exporting as csv. This may take some time")
+                let export_string = "ID,X,Y,Z,GENE,LOCATIONS,HPA_URL\n"
+                for (var current_index in self.filtered_table) {
+                    var current_data = self.filtered_table[current_index]
+                    export_string += current_data["id"] + ","
+                    export_string += current_data["x"] + ","
+                    export_string += current_data["y"] + ","
+                    export_string += current_data["z"] + ","
+                    export_string += current_data["gene"] + ","
+                    export_string += "\"" + current_data["location"] + "\","
+                    export_string += current_data["x"] + "," 
+                    export_string += 'https://www.proteinatlas.org/'+current_data["gene_ensembl_id"]+'-'+current_data["gene"]+'/cell/'
+                    export_string += "\n"
+                }
+                api.exportFile(export_string, 'export.csv')
+            },
             openImage(url){
                 api.utils.openUrl(url)
             },
@@ -130,6 +180,12 @@ class ImJoyPlugin {
                 url = await Plotly.toImage(self.umap_chart, {format:'svg', height:1024, width: 1024})
                 await api.exportFile(convertBase64ToFile(url), 'HPA_V18_UMAP_densenet121.svg')
                 await api.showStatus('done')
+            },
+            async selectFileChanged(event) {
+                const file = event.target.files[0];
+                if(file){
+                    this.loadTable(file)
+                }
             }
         }
     })
@@ -197,17 +253,15 @@ class ImJoyPlugin {
         updatemenus: updatemenus
     }
     this.umap_chart = await Plotly.newPlot('chart', data, layout,{responsive: true})
-    // Plotly.relayout('chart', {
-    //     width: document.getElementById('chart').clientWidth,
-    //     height: document.getElementById('chart').clientHeight
-    // })
-    
-    // let win=null;
-    document.getElementById('chart').on('plotly_click', async (data) => {
+    window.addEventListener('resize', ()=>{
         Plotly.relayout('chart', {
             width: document.getElementById('chart').clientWidth,
             height: document.getElementById('chart').clientHeight
         })
+    });
+    
+    // let win=null;
+    document.getElementById('chart').on('plotly_click', async (data) => {
         for(var i=0; i < data.points.length; i++){
             console.log('====>', data.points[i].customdata)
             const id = data.points[i].customdata.id
@@ -238,30 +292,6 @@ class ImJoyPlugin {
         }
     });
     }
-
-    async generateFakeData(){
-    const Xs = [], Ys = [], Meta=[], n = 100000;
-
-    for (let i = 0; i < n; i += 1) {
-        Xs.push(gaussianRand());
-        Ys.push(gaussianRand());
-        Meta.push('index: '+i)
-    }
-
-    const data = [{
-        type: "scattergl",
-        mode: "markers",
-        marker: {
-            line: {
-                width: 1,
-                color: '#404040'}
-        },
-        x: Xs,
-        y: Ys,
-        customdata: Meta
-    }]
-    return data
-    }
     async updateUmap(table, filter){
     filter = (filter || '') && filter.trim()
     const filters = filter.split(' ')
@@ -274,7 +304,8 @@ class ImJoyPlugin {
         }
         return row.gene && ret
     })
-    console.log('filtered: ', table)
+    this.filtered_table = table;
+    console.log('filtered: ', this.filtered_table)
     
     if(table.length<=0){
         await api.alert('No image found.')
@@ -290,10 +321,10 @@ class ImJoyPlugin {
     }
     
     const data = [{
-        type: "scattergl",
+        type: dataObj.z?"scatter3d":"scattergl",
         mode: "markers",
         marker: {
-            size: 6,
+            size: dataObj.z?3:5,
             color: dataObj.location_code.map((index)=>{
                 if(typeof index === 'string'){
                     return '#e0e0e0d5'
@@ -307,34 +338,13 @@ class ImJoyPlugin {
         text: dataObj.info,
         x: dataObj.x,
         y: dataObj.y,
+        z: dataObj.z,
         customdata: table
     }]
     this.plot(data)
     }
     async run(my) {
-    const url = "https://dl.dropbox.com/s/k9ekd4ff3fyjbfk/umap_results_fit_all_transform_all_sorted_20190422.csv"
-    Papa.parse(url, {
-        download: true,
-        header: true,
-        dynamicTyping: true,
-        skipEmptyLines: true,
-        error: (err, file, inputElem, reason)=> {
-            api.alert('Falied to load the table: ' + reason.toString())
-            this.app.loading = false
-            this.app.$forceUpdate()
-        },
-        complete: (results) => {
-            for(let loc of results.data){
-                loc.info = loc.gene + '(' + loc.cell_line + ')' + ': ' + loc.location
-            }
-            this.app.loading = false
-            this.app.$forceUpdate()
-            console.log('===============>', results)
-            this.umap_data = results.data
-            this.updateUmap(this.umap_data)
-        }
-    })
-    
+         await this.app.loadTable(this.app.tables['2D'])
     }
 }
 
@@ -344,9 +354,33 @@ api.export(new ImJoyPlugin())
 <window lang="html">
     <div id="app">
         <header class="navbar">
+        <input id="file" style="display:none;" type="file" webkitdirectory mozdirectory msdirectory odirectory
+                directory multiple @change="selectFileChanged" />
         <section class="navbar-section">
             <a class="navbar-brand mr-2">HPA UMAP Explorer</a>
-            <button @click="export_image()" class="btn btn-link">Export</button>
+            <div class="dropdown">
+                <a href="#" class="btn btn-link dropdown-toggle" tabindex="0">
+                    <i class="fas fa-folder-plus icon-size-position"></i>
+                    <label class="hide-sm">File</label>  <i class="icon icon-caret hide-sm"></i>
+                </a>
+                
+                <ul class="menu">
+                    <li v-for="url, name in tables" :key="name">
+                        <a href="#" @click="loadTable(url)"  class="btn btn-link">
+                            Load {{name}}
+                        </a>
+                    </li>
+                    <!-- <li>
+                        <a href="#" @click="exportCSV()" class="btn btn-link">Export CSV</a>
+                    </li> -->
+                    <li>
+                        <a href="#" onclick="document.getElementById('file').click()"  class="btn btn-link">
+                                Load from file
+                            </a>
+                    </li>
+                </ul>
+            </div>
+            <button @click="export_image()" class="btn btn-link">Download Plot</button>
         </section>
         <section class="navbar-section">
             <div class="input-group input-inline">
