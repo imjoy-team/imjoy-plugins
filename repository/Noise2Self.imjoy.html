@@ -15,7 +15,7 @@ Authors: Joshua Batson, Loic Royer
 {
     "name": "Noise2Self",
     "type": "native-python",
-    "version": "0.1.11",
+    "version": "0.2.0",
     "tags": ["CPU", "GPU"],
     "api_version": "0.1.7",
     "description": "A demo plugin for Noise2Self (Blind Denoising by Self-Supervision)",
@@ -37,6 +37,7 @@ Authors: Joshua Batson, Loic Royer
 </config>
 
 <script lang="python">
+from imjoy import api
 import sys
 import os
 
@@ -53,11 +54,6 @@ from torchvision import transforms
 from torch.utils.data import Dataset
 
 gpu_available = torch.cuda.is_available()
-
-if api.TAG == 'GPU' and gpu_available:
-    REPORT_INTERVAL = 5
-else:
-    REPORT_INTERVAL = 1
 
 mnist_train = MNIST('data/MNIST', download = True,
                     transform = transforms.Compose([
@@ -88,22 +84,25 @@ noisy, clean = noisy_mnist_train[0]
 
 from mask import Masker
 masker = Masker(width = 4, mode='interpolate')
-net_input, mask = masker.mask(noisy.unsqueeze(0), 0)
+
+
 from models.babyunet import BabyUnet
-model = BabyUnet()
-
-if api.TAG == 'GPU' and gpu_available:
-    model = model.cuda()
-
 from torch.nn import MSELoss
 from torch.optim import Adam
 from torch.utils.data import DataLoader
-loss_function = MSELoss()
-optimizer = Adam(model.parameters(), lr=0.001)
+
 
 class ImJoyPlugin():
     def setup(self):
-        print('setup in python')
+        self.model = BabyUnet()
+        if api.TAG == 'GPU' and gpu_available:
+            self.model = self.model.cuda()
+        self.loss_function = MSELoss()
+        self.optimizer = Adam(self.model.parameters(), lr=0.001)
+        if api.TAG == 'GPU' and gpu_available:
+            self._report_interval = 5
+        else:
+            self._report_interval = 1
 
     async def plot_tensors(self, tensor_list, label, titles=None):
         image_list = [tensor.detach().cpu().numpy().reshape(tensor.shape[-2], tensor.shape[-1]) for tensor in tensor_list]
@@ -134,20 +133,22 @@ class ImJoyPlugin():
             noisy_images, clean_images = batch
             if api.TAG == 'GPU' and gpu_available:
                 noisy_images, clean_images = noisy_images.cuda(), clean_images.cuda()
+            else:
+                noisy_images, clean_images = noisy_images.cpu(), clean_images.cpu()
             net_input, mask = masker.mask(noisy_images, i)
 
-            net_output = model(net_input)
-            loss = loss_function(net_output*mask, noisy_images*mask)
-            optimizer.zero_grad()
+            net_output = self.model(net_input)
+            loss = self.loss_function(net_output*mask, noisy_images*mask)
+            self.optimizer.zero_grad()
             loss.backward()
-            optimizer.step()
-            if i % REPORT_INTERVAL  == 0:
+            self.optimizer.step()
+            if i % self._report_interval  == 0:
                 info =  "Loss (" + str(i) + "): " + str(loss.item())
                 api.log(info)
                 api.showStatus(info)
                 await self.dash.updateCallback('onStep', i, {'loss': float(str(loss.item()))})
                 label = 'Step ' + str(i)
-                invariant_output = masker.infer_full_image(noisy_images, model)
+                invariant_output = masker.infer_full_image(noisy_images, self.model)
                 await self.plot_tensors([noisy_images[0], net_output[0], clean_images[0], invariant_output[0]], label,
                             ["Noisy Image", "Single Pass Inference", "Ground Truth", "J-invariant Inference"])
             if i == steps:
