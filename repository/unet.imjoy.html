@@ -7,7 +7,7 @@ Describe your plugin here.
 {
   "name": "Unet Segmentation",
   "type": "native-python",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "api_version": "0.1.2",
   "description": "A plugin for demonstrating unet segmentation with keras.",
   "tags": ["CPU", "GPU", "Windows-CPU", "Windows-GPU"],
@@ -15,12 +15,16 @@ Describe your plugin here.
   "inputs": null,
   "outputs": null,
   "icon": null,
-  "env": {"CPU": ["conda config --add channels conda-forge", "conda create -n tf-cpu python=3.6 tensorflow==1.5"],
-          "GPU": ["conda config --add channels conda-forge", "conda create -n tf-gpu python=3.6 tensorflow-gpu==1.5"],
-          "Windows-CPU": ["conda config --add channels conda-forge", "conda create -n tf-cpu python=3.5 tensorflow==1.2.1"],
-          "Windows-GPU": ["conda config --add channels conda-forge", "conda create -n tf-gpu python=3.5 tensorflow-gpu==1.2.1"]
+  "env": {"CPU": ["conda config --add channels conda-forge", "conda create -n tf-cpu python=3.6"],
+          "GPU": ["conda config --add channels conda-forge", "conda create -n tf-gpu python=3.6"],
+          "Windows-CPU": ["conda config --add channels conda-forge", "conda create -n tf-cpu python=3.6"],
+          "Windows-GPU": ["conda config --add channels conda-forge", "conda create -n tf-gpu python=3.6"]
           },
-  "requirements": ["repo:https://github.com/zhixuhao/unet", "pip:h5py scikit-image keras==2.1.4"],
+  "requirements": {"CPU": ["repo:https://github.com/zhixuhao/unet", "pip:h5py scikit-image keras==2.1.4 numpy==1.18.0 tensorflow==1.15.4"],
+          "GPU": ["repo:https://github.com/zhixuhao/unet", "pip:h5py scikit-image keras==2.1.4 numpy==1.18.0 tensorflow-gpu==1.15.4"],
+          "Windows-CPU": ["repo:https://github.com/zhixuhao/unet", "pip:h5py scikit-image keras==2.1.4 numpy==1.18.0 tensorflow==1.15.4"],
+          "Windows-GPU": ["repo:https://github.com/zhixuhao/unet", "pip:h5py scikit-image keras==2.1.4 numpy==1.18.0 tensorflow-gpu==1.15.4"]
+   },
   "dependencies": []
 }
 </config>
@@ -28,7 +32,7 @@ Describe your plugin here.
 <script lang="python">
 import os
 os.chdir("./unet")
-
+from imjoy import api
 import threading
 from model import *
 from data import *
@@ -102,7 +106,7 @@ class ImJoyPlugin():
         # t.start()
 
     if self.workdir is None:
-        api.showFileDialog(title="Select a directory with training images", type="directory", root=os.getcwd()).then(callback).catch(print)
+        api.showFileDialog(title="Select a directory with training images", type="directory").then(callback).catch(print)
     else:
         callback(os.path.join(self.workdir, 'train'))
 
