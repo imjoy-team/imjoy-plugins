@@ -2,7 +2,7 @@
 {
   "name": "Tif File Importer",
   "type": "web-worker",
-  "version": "0.1.3",
+  "version": "0.1.8",
   "api_version": "0.1.0",
   "description": "A plugin for loading tif images.",
   "ui": "frame number:{id:'frame_num', type:'number', min:0, placeholder:0}",
@@ -11,7 +11,7 @@
   "outputs": {"type": "object", "properties": {"type": { "type": "string", "enum": ["image/grayscale"] }}},
   "icon": null,
   "requirements": ["https://static.imjoy.io/js/UTIF.js"],
-  "dependencies": ["imjoy-team/imjoy-plugins:Image Window"],
+  "dependencies": [],
   "runnable": false
 }
 </config>
@@ -50,6 +50,58 @@ function ieee32ToFloat(intval) {
            break;
    }
    return fval;
+}
+
+async function getDataURL(canvas) {
+  const blob = await canvas[
+    canvas.convertToBlob 
+      ? 'convertToBlob' // specs
+      : 'toBlob'        // current Firefox
+   ]()
+   return new FileReaderSync().readAsDataURL(blob);
+}
+
+function array2url(imageArr, w, h, low, high, lut){
+    var canvas = new OffscreenCanvas(h, w);
+    var ctx = canvas.getContext("2d");
+    var canvas_img = ctx.getImageData(0, 0, canvas.width, canvas.height)
+    var canvas_img_data = canvas_img.data;
+    var count = w*h
+    var range = high -low
+    var min = Number.POSITIVE_INFINITY, max= Number.NEGATIVE_INFINITY;
+    var v;
+    if(range<=0){
+        for(let i=0;i<count;i++){
+            if(imageArr[i]>max) max=imageArr[i]
+            if(imageArr[i]<min) min=imageArr[i]
+        }
+        low = min
+        high = max
+        range = max-min
+    }
+    for(let i=0;i<count;i++){
+        if(imageArr[i]>max) max=imageArr[i]
+        if(imageArr[i]<min) min=imageArr[i]
+
+        v = (imageArr[i]-low)/range * 255
+        v = v>255?255:v
+        if(lut){
+            v = lut[parseInt(v)]
+            canvas_img_data[i*4] = v[0]
+            canvas_img_data[i*4+1] = v[1]
+            canvas_img_data[i*4+2] = v[2]
+            canvas_img_data[i*4+3] = 255
+        }
+        else{
+            canvas_img_data[i*4] = v
+            canvas_img_data[i*4+1] = v
+            canvas_img_data[i*4+2] = v
+            canvas_img_data[i*4+3] = 255
+        }
+
+    }
+    ctx.putImageData(canvas_img, 0, 0);
+    return getDataURL(canvas)
 }
 
 class TifFile {
@@ -137,7 +189,12 @@ class TifFile {
     }
     return ret
   }
-
+  async readAsURL(options){
+    options = options ||{}
+    const [canvas_data, w, h, max, min] =await this.read()
+    const img = await array2url(canvas_data, w, h, options.min||min, options.max||max)
+    return img
+  }
 }
 
 
@@ -153,11 +210,20 @@ class ImJoyPlugin {
     this.opened[id] = new TifFile(file)
     await this.opened[id].load()
     return {id: id,
+      _rintf: true,
       read: ()=>{
         if(this.opened[id]){
           const [canvas_data, w, h, max, min] = this.opened[id].read()
           const image = {type: 'image/grayscale', array: canvas_data, height: h, width: w, max: max, min: min}
           return image
+        }
+        else{
+          throw "file does not exisits or beining closed"
+        }
+      },
+      readAsURL: ()=>{
+        if(this.opened[id]){
+          return this.opened[id].readAsURL()
         }
         else{
           throw "file does not exisits or beining closed"
@@ -179,25 +245,6 @@ class ImJoyPlugin {
           throw "file does not exisits or beining closed already"
         }
       }}
-  }
-
-  async run(my){
-    console.log('running in the plugin', my)
-    if(!my.data.type || !my.data.size){
-        api.showStatus('Error: you need to select your tif file first.')
-        return
-    }
-    const file = my.data
-    const brightness = 0
-    const current_frame = my.config.frame_num
-    const fileObj = new TifFile(file)
-    fileObj.load().then(() => {
-      const frame_num = fileObj.frame_num
-      fileObj.seek(current_frame)
-      const [canvas_data, w, h, max, min] = fileObj.read()
-      const image = {type: 'image/grayscale', array: canvas_data, height: h, width: w, select_frame:this.run, my: my}
-      api.createWindow({name: file.name, type: 'Image Window', w:7, h:7, data: image, config: {}})
-    })
   }
 }
 
