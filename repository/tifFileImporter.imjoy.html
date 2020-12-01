@@ -5,7 +5,7 @@
   "version": "0.1.8",
   "api_version": "0.1.0",
   "description": "A plugin for loading tif images.",
-  "ui": "frame number:{id:'frame_num', type:'number', min:0, placeholder:0}",
+  "ui": "frame number:{id:'n_frames', type:'number', min:0, placeholder:0}",
   "tags": [],
   "inputs": {"type": "object", "properties": {"name": { "pattern":"(.*\\.tif|\\.tiff|\\.TIFF|\\.TIF)$" }}},
   "outputs": {"type": "object", "properties": {"type": { "type": "string", "enum": ["image/grayscale"] }}},
@@ -109,7 +109,7 @@ class TifFile {
     this.file = file
     this.buffer = null
     this.ifds = null
-    this.frame_num == 0
+    this.n_frames == 0
     this._current_frame = 0
   }
   load(){
@@ -119,7 +119,7 @@ class TifFile {
       reader.onloadend = (e)=>{
         this.buffer = e.target.result
         this.ifds = UTIF.decode(this.buffer)
-        this.frame_num = this.ifds.length
+        this.n_frames = this.ifds.length
         console.log('decoded tiff file', this.ifds)
         resolve(this)
       }
@@ -130,7 +130,7 @@ class TifFile {
       this._current_frame = num
     }
     else{
-      throw `frame {num} does not exists`
+      throw `frame ${num} does not exists`
     }
   }
   read(){
@@ -211,6 +211,7 @@ class ImJoyPlugin {
     await this.opened[id].load()
     return {id: id,
       _rintf: true,
+      n_frames: this.opened[id].n_frames,
       read: ()=>{
         if(this.opened[id]){
           const [canvas_data, w, h, max, min] = this.opened[id].read()
