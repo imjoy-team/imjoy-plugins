@@ -139,7 +139,7 @@ e.g.
 </config>
 <attachment name="app">
     <div>
-        <div class="panel panel-default" v-for="item in inputViewList" v-if="item.show">
+        <div class="panel panel-default" v-for="item in inputViewList" v-if="item.show!==false">
             <div class="panel-heading">{{item.title}}</div>
             <div class="panel-body">
             	<vue-form-generator :schema="item.schema" :model="item.model" :options="item.formOptions"></vue-form-generator>
@@ -148,7 +148,7 @@ e.g.
                 </div>
             </div>
         </div>
-        <div class="panel panel-default" v-for="item in outputViewList" v-if="item.show">
+        <div class="panel panel-default" v-for="item in outputViewList" v-if="item.show!==false">
             <div class="panel-heading">{{item.title}}</div>
             <div class="panel-body overflow-auto">
                 <div :id="'vega' + item.id"></div>
@@ -207,7 +207,7 @@ class ImJoyPlugin {
     	vueObj.inputViewList.push(args)
     }
 
-    async run(my) {
+    async run(ctx) {
         let el = document.getElementById('app')
         const sketch = document.createElement('div')
         sketch.style = 'height: 100%;'
@@ -226,7 +226,10 @@ class ImJoyPlugin {
                 };
             },
             mounted() {
-            	this.inputViewList.push(my.data)
+		if(ctx.data && ctx.schema){
+		    this.inputViewList.push(ctx.data)
+		}
+            	
             },
             methods: {
                 async onSubmit (e, callback, model) {
