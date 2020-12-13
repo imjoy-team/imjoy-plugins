@@ -1,4 +1,4 @@
-﻿<docs lang="markdown">
+<docs lang="markdown">
 # CARE
 
 Weigert et. al, Content-aware image restoration: pushing the limits of fluorescence microscopy, Nature Methods, 2018
@@ -13,7 +13,7 @@ This is a demo plugin ported from https://github.com/CSBDeep/CSBDeep/blob/master
 {
   "name": "CARE",
   "type": "native-python",
-  "version": "0.1.21",
+  "version": "0.1.30",
   "api_version": "0.1.2",
   "description": "This plugin demonstrates denoising using CARE.",
   "tags": ["Linux CPU", "Linux GPU", "Windows CPU", "Windows GPU", "MacOS CPU"],
@@ -45,28 +45,12 @@ This is a demo plugin ported from https://github.com/CSBDeep/CSBDeep/blob/master
 
 <script lang="python">
 from __future__ import print_function, unicode_literals, absolute_import, division
+from imjoy import api
 import os
 import asyncio
 import random
 import numpy as np
 from tifffile import imread
-
-if api.TAG == 'GPU':
-    import GPUtil
-    # Set CUDA_DEVICE_ORDER so the IDs assigned by CUDA match those from nvidia-smi
-    os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-
-    # Get the first available GPU
-    DEVICE_ID_LIST = GPUtil.getFirstAvailable()
-    api.log(f'Available GPUs: {DEVICE_ID_LIST}')
-    if len(DEVICE_ID_LIST)<= 0:
-        api.alert('No GPU available')
-        raise Exception('No GPU available')
-
-    DEVICE_ID = DEVICE_ID_LIST[0] # grab first element from list
-    api.log(f'Set GPU id to : {DEVICE_ID}')
-    # Set CUDA_VISIBLE_DEVICES to mask out all other GPUs than the first available device id
-    os.environ["CUDA_VISIBLE_DEVICES"] = str(DEVICE_ID)
 
 import concurrent.futures
 from imjoy import api
@@ -94,9 +78,9 @@ else:
     ROOT_DIR = ''
 
 if tf.test.gpu_device_name():
-    api.log('Default GPU Devices: {}'.format(tf.test.gpu_device_name()))
+    print('Default GPU Devices: {}'.format(tf.test.gpu_device_name()))
 else:
-    api.log("No GPU device is avilable")
+    print("No GPU device is avilable")
 
 def plot_tensors(dash, tensor_list, label, titles):
     # randomly select a Z
