@@ -138,7 +138,6 @@ class TifFile {
     UTIF.decodeImages(this.buffer, [ifd])
     const h = ifd.height
     const w = ifd.width
-    debugger
     let ret = null
     let min=Number.POSITIVE_INFINITY, max=Number.NEGATIVE_INFINITY
     //ifd.t262 --> 0: WhiteIsZero, 1: BlackIsZero, 2: RGB, 3: Palette color, 4: Transparency mask, 5: CMYK
