@@ -61,8 +61,8 @@ async function getDataURL(canvas) {
    return new FileReaderSync().readAsDataURL(blob);
 }
 
-function array2url(imageArr, h, w, low, high, lut){
-    var canvas = new OffscreenCanvas(h, w);
+function array2url(imageArr, w, h, low, high, lut){
+    var canvas = new OffscreenCanvas(w, h);
     var ctx = canvas.getContext("2d");
     var canvas_img = ctx.getImageData(0, 0, canvas.width, canvas.height)
     var canvas_img_data = canvas_img.data;
