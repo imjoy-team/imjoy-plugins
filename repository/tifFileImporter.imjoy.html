@@ -2,7 +2,7 @@
 {
   "name": "Tif File Importer",
   "type": "web-worker",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "api_version": "0.1.0",
   "description": "A plugin for loading tif images.",
   "ui": "frame number:{id:'n_frames', type:'number', min:0, placeholder:0}",
@@ -61,7 +61,7 @@ async function getDataURL(canvas) {
    return new FileReaderSync().readAsDataURL(blob);
 }
 
-function array2url(imageArr, w, h, low, high, lut){
+function array2url(imageArr, h, w, low, high, lut){
     var canvas = new OffscreenCanvas(h, w);
     var ctx = canvas.getContext("2d");
     var canvas_img = ctx.getImageData(0, 0, canvas.width, canvas.height)
@@ -138,6 +138,7 @@ class TifFile {
     UTIF.decodeImages(this.buffer, [ifd])
     const h = ifd.height
     const w = ifd.width
+    debugger
     let ret = null
     let min=Number.POSITIVE_INFINITY, max=Number.NEGATIVE_INFINITY
     //ifd.t262 --> 0: WhiteIsZero, 1: BlackIsZero, 2: RGB, 3: Palette color, 4: Transparency mask, 5: CMYK
