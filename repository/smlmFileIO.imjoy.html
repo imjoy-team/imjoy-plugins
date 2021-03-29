@@ -1,8 +1,8 @@
-﻿<config lang="json">
+<config lang="json">
 {
   "name": "SMLM File IO",
   "type": "web-worker",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "api_version": "0.1.2",
   "description": "A plugin for loading and exporting SMLM images.",
   "ui": "",
@@ -563,14 +563,15 @@ class ImJoyPlugin {
   }
   async render2d(file){
     try {
-        const ret = await api.showDialog({name: 'rendering 2d', type: 'joy', ui: "Render a 2D histogram with: <br>pixel size={id:'pixel_size', type:'number', placeholder: 20}nm<br> width={id:'width', type:'number', placeholder: 2560} <br> height={id:'height', type:'number', placeholder: 2560}"})
-
+        // const ret = await api.showDialog({name: 'rendering 2d', type: 'joy', ui: "Render a 2D histogram with: <br>pixel size={id:'pixel_size', type:'number', placeholder: 20}nm<br> width={id:'width', type:'number', placeholder: 2560} <br> height={id:'height', type:'number', placeholder: 2560}"})
         api.showStatus("rendering...")
-        var width = ret.width
-        var height = ret.height
-        var canvas_data = new Uint16Array(new ArrayBuffer(width*height*2)); //uint16
-        var pixel_size = ret.pixel_size
+        var pixel_size = 20
         var data = file.data
+        var width = parseInt(data.max.x/pixel_size + 0.5)
+        var height = parseInt(data.max.y/pixel_size + 0.5)
+        debugger
+        var canvas_data = new Uint16Array(new ArrayBuffer(width*height*2)); //uint16
+        
         var xx = data.tableDict.x
         var yy = data.tableDict.y
         var ff = data.tableDict.frame
