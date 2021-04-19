@@ -412,8 +412,7 @@ api.export(new ImJoyPlugin())
 <window lang="html">
     <div id="app">
         <header class="navbar">
-        <input id="file" style="display:none;" type="file" webkitdirectory mozdirectory msdirectory odirectory
-                directory multiple @change="selectFileChanged" />
+        <input id="file" style="display:none;" type="file" @change="selectFileChanged" />
         <section class="navbar-section">
             <a class="navbar-brand mr-2">HPA UMAP Explorer</a>
             <div class="btn-group btn-group-block">
