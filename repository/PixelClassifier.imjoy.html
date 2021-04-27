@@ -1,0 +1,120 @@
+<docs lang="markdown">
+
+# PixelClassifier
+
+A pixel classifier using random forest
+
+Adopted from: https://scikit-image.org/docs/stable/auto_examples/segmentation/plot_trainable_segmentation.html
+</docs>
+
+<config lang="json">
+{
+  "name": "PixelClassifier",
+  "type": "native-python",
+  "version": "0.1.0",
+  "description": "A pixel classifier using random forest",
+  "tags": [],
+  "ui": "",
+  "cover": "",
+  "inputs": null,
+  "outputs": null,
+  "flags": [],
+  "icon": "extension",
+  "api_version": "0.1.8",
+  "env": "",
+  "permissions": [],
+  "requirements": ["pillow", "numpy", "pooch", "scikit-image", "scikit-learn"],
+  "dependencies": []
+}
+</config>
+
+<script lang="python">
+import numpy as np
+from skimage import data, segmentation, feature, future
+from sklearn.ensemble import RandomForestClassifier
+from functools import partial
+from PIL import Image, ImageDraw
+
+from imjoy import api
+
+
+full_img = data.skin()
+
+img = full_img[:900, :900]
+
+def fit_random_forest(input_image, label_image, sigma_min=1, sigma_max=16):
+    features_func = partial(feature.multiscale_basic_features,
+                            intensity=True, edges=False, texture=True,
+                            sigma_min=sigma_min, sigma_max=sigma_max,
+                            multichannel=True)
+    features = features_func(input_image)
+    clf = RandomForestClassifier(n_estimators=50, n_jobs=-1,
+                                 max_depth=10, max_samples=0.05)
+    clf = future.fit_segmenter(label_image, features, clf)
+    result = future.predict_segmenter(features, clf)
+    return result
+
+class ImJoyPlugin():
+    def setup(self):
+        pass
+    
+    async def update_result(self, feat=None):
+        geojson = await self.annotation_layer.get_features()
+        image_shape = img.shape[:2]
+        im = Image.new('I;16', image_shape, 0) 
+        draw = ImageDraw.Draw(im) 
+        features = geojson['features']
+        for feature in features:
+            if feature['geometry']['type'] == 'LineString':
+                if feature['properties']['label'] == 'label 1':
+                    color = 1
+                elif feature['properties']['label'] == 'label 2':
+                    color = 2
+                else:
+                    continue
+                width = feature['properties']['edge_width']
+                line_coord = feature['geometry']['coordinates']
+                line_coord = list(map(tuple, line_coord))
+                draw.line(line_coord, fill=color, width=width, joint='curve')
+        label_image = np.asarray(im)
+        result = fit_random_forest(img, label_image)
+        await self.viewer.view_image(result, name="result", opacity=0.6)
+        await api.showMessage('label image rendered')
+
+    async def run(self, ctx):
+        self.viewer = await api.showDialog(src="https://kaibu.org/#/app", fullscreen=True)
+        await self.viewer.view_image(img)
+        self.annotation_layer = await self.viewer.add_shapes([], _rintf=True, name="annotation")
+        
+        async def select_label1():
+            await self.annotation_layer.update_config(draw_label="label 1",draw_edge_color='red', draw_edge_width=10, draw_shape_type="LineString", draw_enable=True,text_placement='point')
+            
+        async def select_label2():
+            await self.annotation_layer.update_config(draw_label="label 2",draw_edge_color='blue',draw_edge_width=10, draw_shape_type="LineString", draw_enable=True,text_placement='point')
+
+        await self.viewer.add_widget(
+        {
+            "_rintf": True,
+            "name": "Control",
+            "type": "control",
+            "elements": [
+                {
+                    "type": "button",
+                    "label": "label 1",
+                    "callback": select_label1,
+                },
+                {
+                    "type": "button",
+                    "label": "label 2",
+                    "callback": select_label2,
+                },
+                {
+                    "type": "button",
+                    "label": "Run",
+                    "callback": self.update_result,
+                },
+            ],
+        })
+
+api.export(ImJoyPlugin())
+</script>
