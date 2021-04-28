@@ -11,7 +11,7 @@ Adopted from: https://scikit-image.org/docs/stable/auto_examples/segmentation/pl
 {
   "name": "PixelClassifier",
   "type": "native-python",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A pixel classifier using random forest",
   "tags": [],
   "ui": "",
@@ -29,6 +29,7 @@ Adopted from: https://scikit-image.org/docs/stable/auto_examples/segmentation/pl
 </config>
 
 <script lang="python">
+import random
 import numpy as np
 from skimage import data, segmentation, feature, future
 from sklearn.ensemble import RandomForestClassifier
@@ -63,12 +64,10 @@ class ImJoyPlugin():
         features = geojson['features']
         for feature in features:
             if feature['geometry']['type'] == 'LineString':
-                if feature['properties']['label'] == 'label 1':
-                    color = 1
-                elif feature['properties']['label'] == 'label 2':
-                    color = 2
-                else:
-                    continue
+                try:
+                    color = self.labels.index(feature['properties']['label']) + 1
+                except ValueError:
+                    await api.alert("label not found: " + feature['properties']['label'])
                 width = feature['properties']['edge_width']
                 line_coord = feature['geometry']['coordinates']
                 line_coord = list(map(tuple, line_coord))
@@ -79,38 +78,54 @@ class ImJoyPlugin():
         await api.showMessage('label image rendered')
 
     async def setup(self):
+        self.labels = []
         self.viewer = await api.showDialog(src="https://kaibu.org/#/app", fullscreen=True)
         await self.viewer.view_image(img)
         self.annotation_layer = await self.viewer.add_shapes([], _rintf=True, name="annotation")
+        async def select_label(label, color):
+            await self.annotation_layer.update_config(draw_label=label, draw_edge_color=color, draw_edge_width=10, draw_shape_type="LineString", draw_enable=True,text_placement='point')
         
-        async def select_label1():
-            await self.annotation_layer.update_config(draw_label="label 1",draw_edge_color='red', draw_edge_width=10, draw_shape_type="LineString", draw_enable=True,text_placement='point')
+        async def update_labels(values):
+            self.labels = values['Classes']
+            buttons = []
             
-        async def select_label2():
-            await self.annotation_layer.update_config(draw_label="label 2",draw_edge_color='blue',draw_edge_width=10, draw_shape_type="LineString", draw_enable=True,text_placement='point')
-
+            for label in self.labels:
+                color = "#%06x" % random.randint(0, 0xFFFFFF)
+                buttons.append({
+                    "_rintf": True,
+                    "type": "button",
+                    "label": label,
+                    "callback": partial(select_label, label, color),
+                })
+            
+            buttons.append({
+                "_rintf": True,
+                "type": "button",
+                "label": "Run",
+                "callback": self.update_result
+            })
+            await self.viewer.add_widget(
+            {
+                "_rintf": True,
+                "name": "Control",
+                "type": "control",
+                "elements": buttons,
+            })
+            # await self.viewer.select_widget_tab(1)
+        
         await self.viewer.add_widget(
         {
             "_rintf": True,
-            "name": "Control",
-            "type": "control",
-            "elements": [
-                {
-                    "type": "button",
-                    "label": "label 1",
-                    "callback": select_label1,
-                },
-                {
-                    "type": "button",
-                    "label": "label 2",
-                    "callback": select_label2,
-                },
-                {
-                    "type": "button",
-                    "label": "Run",
-                    "callback": self.update_result,
-                },
-            ],
+            "name": "Configuration",
+            "type": "form",
+            "form_submit_callback": update_labels,
+            "fields": [{
+              "type": "tags",
+              "label": "Classes",
+              "placeholder": "Add a class",
+              "icon": "label",
+              "value": ['cell type 1', 'cell type 2', 'background']
+            }]
         })
 
 api.export(ImJoyPlugin())
