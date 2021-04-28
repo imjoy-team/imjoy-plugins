@@ -11,7 +11,7 @@ Adopted from: https://scikit-image.org/docs/stable/auto_examples/segmentation/pl
 {
   "name": "PixelClassifier",
   "type": "native-python",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A pixel classifier using random forest",
   "tags": [],
   "ui": "",
@@ -55,9 +55,6 @@ def fit_random_forest(input_image, label_image, sigma_min=1, sigma_max=16):
     return result
 
 class ImJoyPlugin():
-    def setup(self):
-        pass
-    
     async def update_result(self, feat=None):
         geojson = await self.annotation_layer.get_features()
         image_shape = img.shape[:2]
@@ -81,7 +78,7 @@ class ImJoyPlugin():
         await self.viewer.view_image(result, name="result", opacity=0.6)
         await api.showMessage('label image rendered')
 
-    async def run(self, ctx):
+    async def setup(self):
         self.viewer = await api.showDialog(src="https://kaibu.org/#/app", fullscreen=True)
         await self.viewer.view_image(img)
         self.annotation_layer = await self.viewer.add_shapes([], _rintf=True, name="annotation")
