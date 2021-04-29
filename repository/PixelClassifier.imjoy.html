@@ -11,7 +11,7 @@ Adopted from: https://scikit-image.org/docs/stable/auto_examples/segmentation/pl
 {
   "name": "PixelClassifier",
   "type": "native-python",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "A pixel classifier using random forest",
   "tags": [],
   "ui": "",
@@ -74,11 +74,12 @@ class ImJoyPlugin():
                 draw.line(line_coord, fill=color, width=width, joint='curve')
         label_image = np.asarray(im)
         result = fit_random_forest(img, label_image)
-        await self.viewer.view_image(result, name="result", opacity=0.6)
+        self._result_layer = await self.viewer.view_image(result, name="result", opacity=0.6)
         await api.showMessage('label image rendered')
 
     async def setup(self):
         self.labels = []
+        self._result_layer = None
         self.viewer = await api.showDialog(src="https://kaibu.org/#/app", fullscreen=True)
         await self.viewer.view_image(img)
         self.annotation_layer = await self.viewer.add_shapes([], _rintf=True, name="annotation")
@@ -104,6 +105,18 @@ class ImJoyPlugin():
                 "label": "Run",
                 "callback": self.update_result
             })
+            
+            async def remove_result():
+                if self._result_layer:
+                    await self.viewer.remove_layer(self._result_layer)
+
+            buttons.append({
+                "_rintf": True,
+                "type": "button",
+                "label": "Reset",
+                "callback": remove_result
+            })
+
             await self.viewer.add_widget(
             {
                 "_rintf": True,
@@ -119,6 +132,7 @@ class ImJoyPlugin():
             "name": "Configuration",
             "type": "form",
             "form_submit_callback": update_labels,
+            "submit_text": "Start Annotation",
             "fields": [{
               "type": "tags",
               "label": "Classes",
