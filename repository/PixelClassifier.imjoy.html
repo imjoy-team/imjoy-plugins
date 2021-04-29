@@ -78,15 +78,18 @@ class ImJoyPlugin():
         await api.showMessage('label image rendered')
 
     async def setup(self):
+        self.annotation_layer = None
         self.labels = []
         self._result_layer = None
         self.viewer = await api.showDialog(src="https://kaibu.org/#/app", fullscreen=True)
         await self.viewer.view_image(img)
-        self.annotation_layer = await self.viewer.add_shapes([], _rintf=True, name="annotation")
         async def select_label(label, color):
             await self.annotation_layer.update_config(draw_label=label, draw_edge_color=color, draw_edge_width=10, draw_shape_type="LineString", draw_enable=True,text_placement='point')
         
-        async def update_labels(values):
+        async def start_annotation(values):
+            if self.annotation_layer:
+                await self.viewer.remove_layer(self.annotation_layer)
+            self.annotation_layer = await self.viewer.add_shapes([], _rintf=True, name="annotation")
             self.labels = values['Classes']
             buttons = []
             
@@ -131,7 +134,7 @@ class ImJoyPlugin():
             "_rintf": True,
             "name": "Configuration",
             "type": "form",
-            "form_submit_callback": update_labels,
+            "form_submit_callback": start_annotation,
             "submit_text": "Start Annotation",
             "fields": [{
               "type": "tags",
