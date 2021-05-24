@@ -20,7 +20,7 @@ a localization pattern.
     "type": "window",
     "tags": [],
     "ui": "Explore protein localization patterns in HPA images.",
-    "version": "0.4.2",
+    "version": "0.4.3",
     "api_version": "0.1.2",
     "description": "Explore protein localization patterns in HPA images.",
     "icon": "photo",
@@ -400,6 +400,9 @@ class ImJoyPlugin {
         customdata: table
     }]
     this.plot(data)
+    }
+    async loadTable(url){
+        await this.app.loadTable(url)
     }
     async run(my) {
          await this.app.loadTable('2D')
