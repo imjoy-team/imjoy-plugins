@@ -23,7 +23,7 @@ This plugin allows to predict the subcellular protein localization pattern for a
         "placeholder": "ShuffleNet-V2"
     }
   }],
-  "version": "0.1.24",
+  "version": "0.2.0",
   "api_version": "0.1.2",
   "url": "",
   "description": "ShuffleNetV2 for HPA.",
@@ -82,6 +82,28 @@ const LABLES = {
 }
 class ImJoyPlugin {
   async setup() {
+    const fileElem = document.getElementById('file');
+    const self = this;
+    
+    
+    window.loadLocalFile = ()=>{
+        const file = fileElem.files[0];
+        const fr = new FileReader();
+        fr.onload =  () => {
+            const img = document.createElement('img');
+            img.setAttribute('crossorigin', 'anonymous');
+            img.onload = async () =>
+            {
+                const rgbImage = tf.browser.fromPixels(img, 3)
+                const image = await self.loadData(rgbImage)
+                self.currentImage = image
+                console.timeEnd('load data', image);
+            };
+            img.src = fr.result
+        }
+        fr.readAsDataURL(file);
+    }
+      
     this.statusElement = document.getElementById("tf-label");
     document.getElementById('bar-container').style.display = "none";
     // api.register({name:'train', ui: 'train A net', run: this.train})
@@ -176,9 +198,7 @@ class ImJoyPlugin {
         // for data initialization
         heatmapInstance.setData(data);
     }
-    async loadData(urls) {
-        const tensors = await Promise.all(urls.map(url => this._url2tensor(url)))
-        const rgbImage = tf.stack(tensors, 2)
+    async loadData(rgbImage) {
         const loadedImage = tf.image.resizeBilinear(rgbImage, [512, 512]) //cropImage(rgbImage, [512, 512])
         this.loadedImage = loadedImage
         var canvas = document.createElement('canvas')
@@ -386,12 +406,13 @@ class ImJoyPlugin {
                      'https://images.proteinatlas.org/'+image_id+'_green.jpg',
                      'https://images.proteinatlas.org/'+image_id+'_blue.jpg']
         console.time('load data');
-        const img = await this.loadData(urls)
+        const tensors = await Promise.all(urls.map(url => this._url2tensor(url)))
+        const rgbImage = tf.stack(tensors, 2)
+        const img = await this.loadData(rgbImage)
         this.currentImage = img
         console.timeEnd('load data');
     }
     async predict(image_id){
-
         this.loadImage(image_id)
         console.time('predict');
         const [predictions, labels, values] = await this.predictImg(this.currentImage)
@@ -408,7 +429,8 @@ class ImJoyPlugin {
         else{
             this.loadImage('19661/221_G2_1')
         }
-
+        
+        const load_local_btn = document.getElementById('load-local-btn');
         const load_btn = document.getElementById('load-btn');
         load_btn.onclick = async ()=>{
             const w = await api.showDialog({type: 'HPA-Image-Selection', title: 'Select an image from HPA', data: {select_callback: (id)=>{
@@ -417,6 +439,7 @@ class ImJoyPlugin {
             }}})
         }
         load_btn.style.display = "none";
+        load_local_btn.style.display = "none";
 
         const btn = document.getElementById('predict-btn');
         btn.onclick = async ()=>{
@@ -433,6 +456,7 @@ class ImJoyPlugin {
         await this.loadModel(model_name)
         load_btn.style.display = "inline-block";
         btn.style.display = "inline-block";
+        load_local_btn.style.display = "inline-block";
 
         const inputLayer = this._model.getLayer('shufflenet').getLayer("input_2")
         const convLayer = this._model.getLayer('shufflenet').getLayer("onv5_out_1x1")
@@ -750,7 +774,9 @@ api.export(new ImJoyPlugin())
 <window lang="html">
   <div style="width:100%;height:100%;text-align: center;">
     <h1 id="tf-label"></h1>
-    <button id="load-btn" class="big-button">Load New Image</button>
+    <input type="file" style="display: none;" onchange="loadLocalFile()" id="file"></input>
+    <button id="load-local-btn" onclick="document.getElementById('file').click()" class="big-button">Load from file</button>
+    <button id="load-btn" class="big-button">Load From HPA</button>
     <button id="predict-btn" class="big-button">Predict</button>
     <br>
     <p>Click the bar to see Class Activation Map.</p>
